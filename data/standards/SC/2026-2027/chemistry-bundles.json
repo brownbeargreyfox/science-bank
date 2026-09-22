@@ -1,0 +1,64 @@
+{
+  "course": "Chemistry",
+  "source_document": "Bundling Guide for Chemistry",
+  "source_authority": "South Carolina Department of Education, Office of Assessment and Standards",
+  "notes": "Bundles are example groupings of Performance Expectations (PEs) around an anchoring phenomenon, not a curriculum or instructional order. A PE marked partial (asterisk in source) shares an authentic connection with the bundle's narrative but is not fully met by it. 'connected_pes' are cross-content-area PEs listed by SCDE to support sensemaking; most are not yet in this app's standards data.",
+  "bundles": [
+    {
+      "name": "Structure and Properties of Matter",
+      "narrative": "All matter is composed of atoms, which have three subatomic particles -- proton, neutron, electron. Positively charged protons and neutral neutrons sit in a densely packed nucleus, surrounded by negatively charged electrons. The periodic table arranges elements by number of protons, grouping similar elements into columns, reflecting patterns in outermost electron arrangement. At a larger scale, the structure and behavior of matter are determined by forces within and between atoms; attraction and repulsion between electric charges explains how matter is structured, its properties, and how it changes.",
+      "aligned_pes": [
+        {"code": "C-PS1-1", "partial": false},
+        {"code": "C-PS1-3", "partial": false},
+        {"code": "C-PS2-6", "partial": false}
+      ],
+      "connected_pes": ["B-LS1-6", "P-PS2-6", "P-PS3-2", "E-ESS2-5"],
+      "example_anchoring_phenomena": ["How do geckos stick to glass?", "Garlic smell on hands and stainless steel \"soap\"", "Brinicles"]
+    },
+    {
+      "name": "Chemical Reactions & Thermodynamics",
+      "narrative": "Chemical processes, their rates, and whether energy is stored or released can be understood in terms of collisions between molecules and rearrangement of atoms into new molecules, with changes in total bond energy matched by changes in kinetic energy. A stable molecule has less energy than its separated atoms; breaking it apart requires at least that much energy input. Energy cannot be created or destroyed but can be transferred between systems or transported from place to place. Uncontrolled systems tend to move toward more stable states, where energy is distributed more uniformly.",
+      "aligned_pes": [
+        {"code": "C-PS1-4", "partial": false},
+        {"code": "C-PS3-4", "partial": false},
+        {"code": "C-PS1-1", "partial": true},
+        {"code": "C-PS1-6", "partial": true}
+      ],
+      "connected_pes": ["B-LS1-5", "B-LS1-7", "E-ESS2-6", "E-ESS3-2", "E-ESS3-3"],
+      "example_anchoring_phenomena": ["Dry ice", "Reusable hot packs"]
+    },
+    {
+      "name": "Stability & Change in Chemical Systems",
+      "narrative": "During a chemical reaction, total mass -- and therefore the total number of each atom -- is conserved. This conservation, together with knowledge of the chemical properties of elements, allows us to describe and predict chemical reactions, which occur when molecules collide and atoms rearrange to form new molecules. These processes involve changes in the total energy stored in molecular bonds, matched by changes in kinetic energy. In many cases there is a dynamic balance between a reaction and its reverse reaction, determining the numbers of different types of molecules present.",
+      "aligned_pes": [
+        {"code": "C-PS1-2", "partial": false},
+        {"code": "C-PS1-5", "partial": false},
+        {"code": "C-PS1-6", "partial": false},
+        {"code": "C-PS1-7", "partial": false},
+        {"code": "C-PS1-1", "partial": true}
+      ],
+      "connected_pes": ["B-LS1-5", "B-LS1-7", "P-PS3-1", "E-ESS2-6", "E-ESS2-7", "E-ESS3-2", "E-ESS3-3"],
+      "example_anchoring_phenomena": ["Color change equilibrium (chromate/dichromate, NO2/N2O4)", "Polyurea", "Ocean Acidification"]
+    },
+    {
+      "name": "Nuclear Chemistry",
+      "narrative": "Nuclear processes -- fusion (two nuclei combine into a heavier nucleus), fission (a heavy nucleus splits into lighter nuclei), and radioactive decay (unstable nuclei emit radiation) -- involve release or absorption of energy. While the total number of neutrons and protons does not change during a nuclear reaction, a small amount of matter converts to energy in many nuclear reactions, producing energy according to Einstein's equation (E=mc^2).",
+      "aligned_pes": [
+        {"code": "C-PS1-8", "partial": false},
+        {"code": "C-PS1-1", "partial": true}
+      ],
+      "connected_pes": ["E-ESS1-1", "E-ESS1-3"],
+      "example_anchoring_phenomena": ["Star life cycle", "Band of Stability", "Special relativity"]
+    },
+    {
+      "name": "Applications of the Electromagnetic Spectrum",
+      "narrative": "When matter absorbs light or other electromagnetic radiation, it often transforms into thermal energy (heat). More energetic radiation -- ultraviolet, X-rays, gamma rays -- can damage living cells by ionizing atoms. Each element emits and absorbs light at specific frequencies, like a unique signature; nuclear transitions similarly emit gamma rays at specific wavelengths, helping identify elements. Photoelectric materials release electrons when they absorb light with enough energy. Understanding these energy-matter interactions underlies everyday technologies -- medical imaging, communication devices, scanners -- that transmit, capture, and interpret signals.",
+      "aligned_pes": [
+        {"code": "C-PS4-4", "partial": false},
+        {"code": "C-PS4-5", "partial": false}
+      ],
+      "connected_pes": ["P-PS4-1", "P-PS4-3", "P-PS4-4", "P-PS4-5", "E-ESS1-2"],
+      "example_anchoring_phenomena": ["Photoelectron spectroscopy", "Redshift in the Universe", "Solar car"]
+    }
+  ]
+}

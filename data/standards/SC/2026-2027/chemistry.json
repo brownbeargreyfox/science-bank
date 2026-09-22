@@ -1,0 +1,264 @@
+{
+  "course": "Chemistry",
+  "standards_base": "South Carolina College- and Career-Ready Science Standards 2021",
+  "use_year": "2026-2027",
+  "source_document": "Chemistry Performance Targets for use 2026-2027",
+  "source_published": "2026-07-13",
+  "source_authority": "South Carolina Department of Education",
+  "source_url": "https://ed.sc.gov/instruction/standards-learning/science/standards/south-carolina-college-and-career-ready-science-standards-2021-approved/",
+  "notes": "Students will need to understand and apply the conventions of scientific notation when working with extremely large or small quantities of measurement and their calculations (stated globally in Purpose and Use, not per-PE).",
+  "domains": [
+    {
+      "domain_code": "PS1",
+      "domain_name": "Matter and Its Interactions",
+      "standards": [
+        {
+          "code": "C-PS1-1",
+          "performance_expectation": "Use the periodic table as a model to predict the relative properties of elements based on the patterns of electrons in the outermost energy level of atoms.",
+          "clarification_statement": "Examples of properties that could be predicted from patterns could include reactivity of metals, types of bonds formed, numbers of bonds formed, and reactions with oxygen.",
+          "state_assessment_boundary": "Assessment is limited to main group elements. Assessment does not include quantitative understanding of ionization energy beyond relative trends.",
+          "sep": {"name": "Developing and Using Models", "description": "Use a model to predict the relationships between systems or between components of a system."},
+          "dci": [{"code": "PS1.A", "name": "Structure and Properties of Matter", "text": "Each atom has a charged substructure consisting of a nucleus, which is made of protons and neutrons, surrounded by electrons. The periodic table orders elements horizontally by the number of protons in the atom's nucleus and places those with similar chemical properties in columns. The repeating patterns of this table reflect patterns of outer electron states."}],
+          "ccc": {"name": "Patterns", "description": "Different patterns may be observed at which a system is studied and can provide evidence for causality in explanations of phenomena."},
+          "observable_performances": {
+            "model_components": ["elements and arrangement in periodic table", "positively charged nucleus (protons, neutrons), surrounded by negatively charged electrons", "valence electrons", "number of protons", "number of neutrons", "shielding of core electrons"],
+            "relationships": ["arrangement of main groups reflects valence electron pattern", "elements arranged by number of protons"],
+            "connections": ["predict patterns/elemental behavior based on attraction/repulsion between charged particles and reactivity (valence electron pattern)", "predict number/types of bonds, charges of stable ions, reactivity/electronegativity trends in groups and periods, relative atomic sizes"]
+          },
+          "topics": ["periodic table", "atomic structure", "periodic trends", "valence electrons"],
+          "terminology": ["anion", "atom", "atomic number", "atomic radius", "atomic symbol", "atomic weight", "boiling point", "cation", "chemical formula", "chemical property", "core electrons", "covalent bond", "electron", "electron affinity", "electron configuration", "electronegativity", "element", "family", "filled shell", "gas", "group", "ion", "ionic bond", "isotope", "liquid", "matter", "melting point", "metal", "metalloid", "molar mass", "molecule", "neutron", "nonmetal", "nucleus", "period", "periodic table", "periodic trends", "physical property", "proton", "pure substance", "s, p, d, f orbitals", "shielding", "single, double, triple bond(s)", "solid", "transition metal", "valence electrons", "valence shell"]
+        },
+        {
+          "code": "C-PS1-2",
+          "performance_expectation": "Construct and revise an explanation for the outcome of a simple chemical reaction based on the outermost electron states of atoms, trends in the periodic table, and knowledge of the patterns of chemical properties.",
+          "clarification_statement": "Examples of chemical reactions could include the reaction of sodium and chlorine, carbon and oxygen, carbon and hydrogen, or biochemical reactions.",
+          "state_assessment_boundary": "Assessment is limited to chemical reactions involving main group elements and combustion reactions.",
+          "sep": {"name": "Constructing Explanations and Designing Solutions", "description": "Construct and revise an explanation based on valid and reliable evidence obtained from a variety of sources and the assumption that theories and laws that describe the natural world operate today as they did in the past and will continue to do so in the future."},
+          "dci": [
+            {"code": "PS1.A", "name": "Structure and Properties of Matter", "text": "The periodic table orders elements horizontally by the number of protons in the atom's nucleus and places those with similar chemical properties in columns. The repeating patterns reflect patterns of outer electron states."},
+            {"code": "PS1.B", "name": "Chemical Reactions", "text": "The fact that atoms are conserved, together with knowledge of the chemical properties of the elements involved, can be used to describe and predict chemical reactions."}
+          ],
+          "ccc": {"name": "Patterns", "description": "Different patterns may be observed at which a system is studied and can provide evidence for causality in explanations of phenomena."},
+          "observable_performances": {
+            "articulating_explanation": ["total number of atoms of each element is same in reactants and products", "numbers/types of bonds (covalent, ionic) determined by valence electron states and electronegativity", "use patterns of attraction to predict reaction type"],
+            "evidence": ["identification of products/reactants including chemical formulae and valence electron arrangement", "conservation of atom/ion counts before and after reaction", "patterns of reactivity (e.g. high reactivity of alkali metals) via periodic table"],
+            "reasoning": ["patterns of valence electrons and electronegativity predict number/types of bonds each element forms", "revise/expand explanation given new evidence or context"]
+          },
+          "topics": ["chemical reactions", "bonding prediction", "periodic reactivity trends"],
+          "terminology": ["alkali metal", "atom", "atomic mass", "chemical bond", "chemical properties", "chemical reaction", "combustion", "compound", "concentration", "covalent bond", "decomposition", "double replacement reaction", "electron", "electron affinity", "electron sharing", "electron transfer", "electronegativity", "element", "endothermic reaction", "energy level", "equilibrium", "exothermic reaction", "flame test", "flammability", "gas", "halogen", "ion", "ionic bond", "Law of Conservation of Mass", "Lewis dot structures", "liquid", "mass", "molecule", "neutron", "noble gas", "octet", "outer electron state", "oxidation-reduction reaction", "periodic trends", "precipitate", "product", "proton", "reactant", "reactivity", "rearrangement", "reversible", "shielding", "single replacement reaction", "solid", "stable", "synthesis reaction", "valence electrons", "yield(s)"]
+        },
+        {
+          "code": "C-PS1-3",
+          "performance_expectation": "Plan and conduct an investigation to gather evidence to compare the structure of substances at a bulk scale to infer the strength of various forces between particles.",
+          "clarification_statement": "Emphasis is on understanding the strengths of forces between particles, NOT on naming specific intermolecular forces (such as dipole-dipole). Examples of particles could include ions, atoms, molecules, and networked materials (such as graphite). Macroscopic properties could include melting point and boiling point, vapor pressure, and surface tension.",
+          "state_assessment_boundary": "Assessment does not include Raoult's law calculations of vapor pressure.",
+          "sep": {"name": "Planning and Carrying Out Investigations", "description": "Plan and conduct an investigation individually and collaboratively to produce data to serve as the basis for evidence, deciding on types, amount, and accuracy of data needed, and considering limitations on precision, refining the design accordingly."},
+          "dci": [
+            {"code": "PS1.A", "name": "Structure and Properties of Matter", "text": "The structure and interactions of matter at the broader level are determined by various forces within and between atoms."},
+            {"code": "PS2.B", "name": "Types of Interactions", "text": "Attraction and repulsion between electric charges at the atomic scale explain the structure, properties, and transformations of matter, as well as the contact forces between material objects."}
+          ],
+          "ccc": {"name": "Patterns", "description": "Different patterns may be observed at which a system is studied and can provide evidence for causality in explanations of phenomena."},
+          "observable_performances": {
+            "phenomenon": ["relationship between measurable properties of a substance and magnitude of attractive forces between particles"],
+            "evidence": ["spacing of particles can change without identity changing", "kinetic energy affects magnitude of attraction between particles", "patterns of interactions at molecular scale reflected in patterns of observable behavior"],
+            "planning": ["rationale for choice of substances", "variables and controls, procedure, trial number, equipment"],
+            "refining": ["assess accuracy/precision", "limitations", "refine for more accurate/precise/useful data"]
+          },
+          "topics": ["intermolecular forces", "bulk properties", "phase behavior"],
+          "terminology": ["accuracy", "atomic mass", "atomic radius", "atomic weight", "boiling point", "composite", "Coulomb's law", "covalent bond", "dipole", "dipole-dipole", "dissolve", "electrical conductivity", "electron", "electron cloud", "electron distribution", "electronegativity", "electrostatic force", "gas", "hydrogen bond", "intermolecular force", "intramolecular force", "ionic bond", "lattice energy", "liquid", "London dispersion forces", "melting point", "metallic bonding", "neutron", "nucleus", "permanent polarity", "phase change", "polarity", "polarize", "polymer", "precision", "proton", "solid", "soluble", "solute", "solvent", "state of matter", "surface area", "surface tension", "temporary polarity", "van der Waals forces", "vapor pressure"],
+          "question_family_candidate": true
+        },
+        {
+          "code": "C-PS1-4",
+          "performance_expectation": "Develop a model to illustrate that the release or absorption of energy from a chemical reaction system depends upon the changes in total bond energy.",
+          "clarification_statement": "Emphasis is on the idea that a chemical reaction is a system that affects the energy change and is due to the absorption of energy when bonds are broken and the release of energy when new bonds are formed. Examples of models could include molecular-level drawings, diagrams of reactions, graphs showing relative energies, and representations showing energy is conserved. Examples could include photosynthesis and cell respiration.",
+          "state_assessment_boundary": "Assessment does not include calculating the total bond energy changes during a chemical reaction from the bond energies of reactants and products.",
+          "sep": {"name": "Developing and Using Models", "description": "Develop a model based on evidence to illustrate the relationships between systems or between components of a system."},
+          "dci": [
+            {"code": "PS1.A", "name": "Structure and Properties of Matter", "text": "A stable molecule has less energy than the same set of atoms separated; one must provide at least this energy in order to take the molecule apart."},
+            {"code": "PS1.B", "name": "Chemical Reactions", "text": "Chemical processes, their rates, and whether or not energy is stored or released can be understood in terms of the collisions of molecules and the rearrangements of atoms into new molecules, with consequent changes in the sum of all bond energies matched by changes in kinetic energy."}
+          ],
+          "ccc": {"name": "Energy and Matter", "description": "Changes of energy and matter in a system can be described in terms of energy and matter flows into, out of, and within that system."},
+          "observable_performances": {
+            "model_components": ["the reaction system and surroundings", "bonds broken/formed during reaction", "energy transfer between system/components and system/surroundings", "relative potential energies of reactants and products"],
+            "relationships": ["net energy change of system results from bonds broken/formed", "total energy change matched by equal but opposite change in surroundings"],
+            "connections": ["breaking bonds requires energy input; forming bonds releases energy", "total energy of system and surroundings is conserved", "energy transfer occurs during molecular collisions"]
+          },
+          "topics": ["bond energy", "exothermic/endothermic reactions", "energy conservation"],
+          "terminology": ["activation energy", "atom", "atomic arrangement", "bond energy", "calorimetry", "chemical reaction rate", "chemical system", "combustion", "conversion", "endothermic", "enthalpy", "exothermic", "heat energy", "ion", "kinetic energy", "Law of Conservation of Energy", "molecule", "oxidation", "photosynthesis", "potential energy", "product", "reactant", "recombination", "reduction", "release of energy", "respiration", "stable", "transfer", "unstable"]
+        },
+        {
+          "code": "C-PS1-5",
+          "performance_expectation": "Apply scientific principles and evidence to provide an explanation about the effects of changing the temperature or concentration of the reacting particles on the rate at which a reaction occurs.",
+          "clarification_statement": "Emphasis is on student reasoning that focuses on the number and energy of collisions between molecules. Examples could include enzymes or biocatalytic reactions.",
+          "state_assessment_boundary": "Assessment is limited to simple reactions in which there are only two reactants; evidence from temperature, concentration, and rate data; and qualitative relationships between rate and temperature.",
+          "sep": {"name": "Constructing Explanations and Designing Solutions", "description": "Apply scientific principles and evidence to provide an explanation of phenomena and solve design problems, taking into account possible unanticipated effects."},
+          "dci": [{"code": "PS1.B", "name": "Chemical Reactions", "text": "Chemical processes, their rates, and whether or not energy is stored or released can be understood in terms of the collisions of molecules and the rearrangements of atoms into new molecules, with consequent changes in the sum of all bond energies matched by changes in kinetic energy."}],
+          "ccc": {"name": "Patterns", "description": "Different patterns may be observed at which a system is studied and can provide evidence for causality in explanations of phenomena."},
+          "observable_performances": {
+            "articulating_explanation": ["as kinetic energy of colliding particles increases, reaction rate increases", "as number of collisions increases, reaction rate increases", "not all collisions result in reaction due to insufficient kinetic energy"],
+            "evidence": ["increases in concentration increase reaction rate", "increases in temperature usually increase reaction rate"],
+            "reasoning": ["collision theory chain: bond breaking requires energy, higher temperature means more energetic/frequent collisions, higher concentration means more collisions per unit time"]
+          },
+          "topics": ["reaction rate", "collision theory", "concentration and temperature effects"],
+          "terminology": ["acid-base reaction", "activation energy", "atomic energy", "atomic mass", "atomic motion", "average reaction rate", "biocatalytic factors", "boiling point", "catalyst", "closed system", "collision theory", "concentration", "covalent bond", "dilute", "endothermic", "enzyme", "exothermic", "ion", "ionic bond", "kinetic energy", "Law of Conservation of Mass", "Le Chatelier's Principle", "melting point", "molecule", "oxidation", "oxidation-reduction reaction", "particle size", "pH", "production", "reactant", "solute", "solution", "solvent", "surface area", "temperature", "thermal energy"],
+          "question_family_candidate": true
+        },
+        {
+          "code": "C-PS1-6",
+          "performance_expectation": "Refine the design of a chemical system by specifying a change in conditions that would produce increased amounts of products at equilibrium.",
+          "clarification_statement": "Emphasis is on the application of Le Chatelier's Principle and on refining designs of chemical reaction systems, including descriptions of the connection between changes made at the macroscopic level and what happens at the molecular level. Examples of designs could include different ways to increase product formation including adding reactants, removing products, or chemical kinetics.",
+          "state_assessment_boundary": "Assessment is limited to specifying the change in only one variable at a time. Assessment does not include calculating equilibrium constants and concentrations.",
+          "sep": {"name": "Constructing Explanations and Designing Solutions", "description": "Refine a solution to a complex real-world problem, based on scientific knowledge, student-generated sources of evidence, prioritized criteria, and trade off considerations."},
+          "dci": [
+            {"code": "PS1.B", "name": "Chemical Reactions", "text": "In many situations, a dynamic and condition-dependent balance between a reaction and the reverse reaction determines the numbers of all types of molecules present."},
+            {"code": "ETS1.C", "name": "Optimizing the Design Solution", "text": "Criteria may need to be broken down into simpler ones that can be approached systematically, and decisions about the priority of certain criteria over others (trade-offs) may be needed. (secondary)"}
+          ],
+          "ccc": {"name": "Stability and Change", "description": "Much of science deals with constructing explanations of how things change and how they remain stable."},
+          "observable_performances": {
+            "design_solutions": ["identify/describe changeable components of a chemical reaction system that increase products at equilibrium using Le Chatelier's principle"],
+            "criteria_constraints": ["cost", "energy inputs", "hazardous nature of reactants/products", "chemical properties of reactants/products", "resource availability"],
+            "evaluate_refine": ["prioritize criteria and make tradeoffs to increase amount of product obtained"]
+          },
+          "topics": ["chemical equilibrium", "Le Chatelier's Principle"],
+          "terminology": ["arrangement", "bond energy", "catalyst", "chemical bond", "chemical process", "chemical reaction rate", "closed system", "compound", "concentration", "concentration change", "conservation of matter", "dynamic", "dynamic equilibrium", "element", "endothermic", "equilibrium", "equilibrium constant (K)", "exothermic", "heat energy", "inert gas", "Le Chatelier's principle", "mole", "molecular level", "open system", "pressure change", "product", "reactant", "recombination of chemical elements", "reversible reaction", "stable", "stressors", "surface area of reactants", "temperature", "temperature change", "thermal energy", "transfer"]
+        },
+        {
+          "code": "C-PS1-7",
+          "performance_expectation": "Use mathematical representations to support the claim that atoms, and therefore mass, are conserved during a chemical reaction.",
+          "clarification_statement": "Emphasis is on using mathematical ideas to communicate the proportional relationships between masses of atoms in the reactants and the products, and the translation of these relationships to the macroscopic scale using the mole as the conversion from the atomic to the macroscopic scale (stoichiometry). Emphasis is on assessing students' use of mathematical thinking and not on memorization and rote application of problem-solving techniques.",
+          "state_assessment_boundary": "Assessment does not include complex chemical reactions.",
+          "sep": {"name": "Using Mathematics and Computational Thinking", "description": "Use mathematical representations of phenomena to support claims."},
+          "dci": [{"code": "PS1.B", "name": "Chemical Reactions", "text": "The fact that atoms are conserved, together with knowledge of the chemical properties of the elements involved, can be used to describe and predict chemical reactions."}],
+          "ccc": {"name": "Energy and Matter", "description": "The total amount of energy and matter in closed systems is conserved."},
+          "observable_performances": {
+            "representation": ["quantities of reactants/products in atoms, moles, mass", "molar mass of components", "balanced chemical equations", "claim that atoms/mass are conserved"],
+            "mathematical_modeling": ["use the mole to convert between atomic and macroscopic scales", "predict relative number of atoms in reactants vs products", "calculate mass of any reaction component given another"],
+            "analysis": ["stoichiometric calculations supporting the conservation claim"]
+          },
+          "topics": ["stoichiometry", "conservation of mass", "mole conversions"],
+          "terminology": ["acid", "atomic mass", "balanced chemical reaction", "base", "chemical equations", "chemical formulae", "coefficient", "compounds", "conserved", "conversion factor", "dimensional analysis", "Law of Conservation of Mass", "matter", "molar mass", "molarity", "mole", "pH", "product", "reactant", "solution", "solution concentration", "solution pH", "stoichiometry", "subscripts", "unbalanced chemical reaction"],
+          "question_family_candidate": true
+        },
+        {
+          "code": "C-PS1-8",
+          "performance_expectation": "Develop models to illustrate the changes in the composition of the nucleus of the atom and the energy released during the processes of fission, fusion, and radioactive decay.",
+          "clarification_statement": "Emphasis is on simple qualitative models, such as pictures or diagrams, and on the scale of energy released in nuclear processes relative to other kinds of transformations.",
+          "state_assessment_boundary": "Assessment does not include quantitative calculation of energy released. Assessment is limited to alpha, beta, and gamma radioactive decays.",
+          "sep": {"name": "Developing and Using Models", "description": "Develop a model based on evidence to illustrate the relationships between systems or between components of a system."},
+          "dci": [{"code": "PS1.C", "name": "Nuclear Processes", "text": "Nuclear processes, including fusion, fission, and radioactive decays of unstable nuclei, involve release or absorption of energy. The total number of neutrons plus protons does not change in any nuclear process."}],
+          "ccc": {"name": "Energy and Matter", "description": "In nuclear processes, atoms are not conserved, but the total number of protons plus neutrons is conserved."},
+          "observable_performances": {
+            "model_components": ["identification of an element by number of protons", "protons/neutrons before and after decay", "identity of emitted particle (alpha, beta -- electrons and positrons, gamma)", "scale of nuclear vs chemical energy changes"],
+            "relationships": ["develop at least 5 distinct models: fission, fusion, alpha decay, beta decay, gamma decay", "total neutrons+protons unchanged before/after, though individual counts may differ", "nuclear energy changes are hundreds of thousands to millions of times larger than chemical energy changes"],
+            "connections": ["fusion merges nuclei into a larger nucleus with more protons", "fission splits a nucleus into fragments with fewer protons each", "alpha particle emission is a type of fission reaction; beta and gamma are not"]
+          },
+          "topics": ["nuclear chemistry", "radioactive decay", "fission and fusion"],
+          "terminology": ["absorption", "alpha decay", "alpha particle", "atomic mass", "atomic number", "beta emission", "beta particle", "daughter nuclei", "decay rate", "electromagnetic radiation", "fission", "fusion", "gamma radiation", "Geiger counter", "half-life", "heat", "heavy nucleus", "ionizing radiation", "island of stability", "kinetic energy", "light nuclei", "neutron", "nonionizing radiation", "nuclear mass", "nuclear process", "nuclear reaction", "nuclear reactor", "nuclear stability", "nucleus", "particle emission", "positron", "positron emission", "proton", "radiation", "radioactive", "radioactive decay", "solar energy", "spontaneous nuclear reaction", "stable", "transformation", "unstable"]
+        }
+      ]
+    },
+    {
+      "domain_code": "PS2",
+      "domain_name": "Motion and Stability: Forces and Interactions",
+      "standards": [
+        {
+          "code": "C-PS2-6",
+          "performance_expectation": "Communicate scientific and technical information about why the molecular structure determines the functioning of designed materials.",
+          "clarification_statement": "Emphasis is on the attractive and repulsive forces that determine the functioning of the material. Examples could include why electrically conductive materials are often made of metal, flexible but durable materials are made up of long chained molecules, and pharmaceuticals are designed to interact with specific receptors.",
+          "state_assessment_boundary": "Assessment is limited to provided molecular structures of specific designed materials.",
+          "sep": {"name": "Obtaining, Evaluating, and Communicating Information", "description": "Communicate scientific and technical information (e.g., about the process of development and the design and performance of a proposed process or system) in multiple formats (including orally, graphically, textually, and mathematically)."},
+          "dci": [
+            {"code": "PS1.A", "name": "Structure and Properties of Matter", "text": "The structure and interactions of matter at the broader level are determined by various forces within and between atoms."},
+            {"code": "PS2.B", "name": "Types of Interactions", "text": "Attraction and repulsion between electric charges at the atomic scale explain the structure, properties, and transformations of matter, as well as the contact forces between material objects."},
+            {"code": "ETS1.C", "name": "Optimizing the Design Solution", "text": "Determining what constitutes 'best,' however, requires value judgments, given that one person's view of the optimal solution may differ from another's. (secondary)"}
+          ],
+          "ccc": {"name": "Structure and Function", "description": "Investigating or designing new systems or structures requires a detailed examination of the properties of different materials, the structures of different components, and connections of components to reveal its function and/or solve a problem."},
+          "observable_performances": {
+            "communication": ["use/cite at least two formats to communicate scientific/technical information about a chosen material's design, properties, and structure"],
+            "connections": [
+              "how structure/properties/molecular interactions at atomic scale determine function of a designed material",
+              "relationship between function and macroscopic properties (strength, conductivity, reactivity, state, durability) and molecular structure, intermolecular forces/polarity, electron mobility in metals, bond types",
+              "role of electrical forces in molecular arrangement (state, network solid, polymer)"
+            ]
+          },
+          "topics": ["designed materials", "structure-property relationships", "polymers", "conductive materials"],
+          "terminology": ["chemical property", "conductor", "covalent bond", "dipole", "dipole-dipole", "electronegativity", "electrostatic attraction", "heat conductivity", "hydrogen bond", "immiscible", "induced dipole", "insoluble", "insulator", "intermolecular attraction", "ionic bond", "magnetic property", "mechanical property", "metallic bond", "miscible", "monomer", "net charge", "nonpolar", "physical property", "polar", "polymer", "salts", "soluble", "valence electrons", "van der Waals forces"]
+        }
+      ]
+    },
+    {
+      "domain_code": "PS3",
+      "domain_name": "Energy",
+      "standards": [
+        {
+          "code": "C-PS3-4",
+          "performance_expectation": "Plan and conduct an investigation to provide evidence that the transfer of thermal energy when two components of different temperatures are combined within a closed system results in a more uniform energy distribution among the components in the system (second law of thermodynamics).",
+          "clarification_statement": "Emphasis is on analyzing data from student investigations and using mathematical thinking to describe the energy changes both quantitatively and conceptually. Examples of investigations could include mixing liquids at different initial temperatures or adding objects at different temperatures to water.",
+          "state_assessment_boundary": "Assessment is limited to investigations based on materials and tools provided to students.",
+          "sep": {"name": "Planning and Carrying Out Investigations", "description": "Plan and conduct an investigation individually and collaboratively to produce data to serve as the basis for evidence, deciding on types, amount, and accuracy of data needed, and considering limitations on precision, refining the design accordingly."},
+          "dci": [
+            {"code": "PS3.B", "name": "Conservation of Energy and Energy Transfer", "text": "Energy cannot be created or destroyed, but it can be transported from one place to another and transferred between systems. Uncontrolled systems always evolve toward more stable states -- that is, toward more uniform energy distribution."},
+            {"code": "PS3.D", "name": "Energy in Chemical Processes and Everyday Life", "text": "Although energy cannot be destroyed, it can be converted to less useful forms -- for example, to thermal energy in the surrounding environment."}
+          ],
+          "ccc": {"name": "Systems and System Models", "description": "When investigating or describing a system, the boundaries and initial conditions of the system need to be defined and their inputs and outputs analyzed and described using models."},
+          "observable_performances": {
+            "phenomenon": ["the transfer of thermal energy between components at different temperatures within a closed system results in a more uniform energy distribution (second law of thermodynamics)"],
+            "evidence": ["thermal energy lost by hot object equals thermal energy gained by cold object", "heat capacity of objects under investigation"],
+            "planning": ["how a nearly closed system will be constructed", "masses, initial temperatures, final temperatures", "number of trials, equipment"],
+            "refining": ["assess accuracy/precision, potential causes for apparent energy loss", "refine for more accurate/precise/useful data"]
+          },
+          "topics": ["second law of thermodynamics", "calorimetry", "thermal equilibrium"],
+          "terminology": ["calorimetry", "closed system", "conservation of energy", "entropy", "First Law of Thermodynamics", "Gibbs free energy", "heat conduction", "heat convection", "heat radiation", "irreversible process", "isolated system", "Joules", "Kelvin", "kinetic energy", "Law of Conservation of Energy", "macroscopic scale", "melting", "microscopic scale", "molecular energy", "open system", "reversible process", "Second Law of Thermodynamics", "specific heat", "specific heat capacity", "spontaneous reaction", "system surroundings", "temperature", "thermal energy", "vaporization"],
+          "question_family_candidate": true
+        }
+      ]
+    },
+    {
+      "domain_code": "PS4",
+      "domain_name": "Waves and Their Applications in Technologies for Information Transfer",
+      "standards": [
+        {
+          "code": "C-PS4-4",
+          "performance_expectation": "Evaluate the validity and reliability of claims in published materials of the effects that different frequencies of electromagnetic radiation have when absorbed by matter.",
+          "clarification_statement": "Emphasis is on the idea that particles associated with different frequencies of light have different energies, and the damage to living tissue from electromagnetic radiation depends on the energy of the radiation. Examples of published materials could include trade books, magazines, web resources, videos, and other passages that may reflect bias.",
+          "state_assessment_boundary": "Assessment is limited to qualitative descriptions.",
+          "sep": {"name": "Obtaining, Evaluating, and Communicating Information", "description": "Evaluate the validity and reliability of multiple claims that appear in scientific and technical texts or media reports, verifying the data when possible."},
+          "dci": [{"code": "PS4.B", "name": "Electromagnetic Radiation", "text": "When light or longer wavelength electromagnetic radiation is absorbed in matter, it is generally converted into thermal energy (heat). Shorter wavelength electromagnetic radiation (ultraviolet, X-rays, gamma rays) can ionize atoms and cause damage to living cells. Atoms of each element emit and absorb characteristic frequencies of light and nuclear transitions have distinctive gamma ray wavelengths, allowing identification of elements."}],
+          "ccc": {"name": "Cause and Effect", "description": "Cause-and-effect relationships can be suggested and predicted for complex natural and human designed systems by examining what is known about smaller scale mechanisms within the system."},
+          "observable_performances": {
+            "obtaining_information": ["research at least two claims (citing at least two sources per claim) about impact of absorbed EM radiation on matter, including at least one claim on living tissue"],
+            "evaluating_information": ["reason about photon energy (relative wavelengths) and ionization probability", "evaluate credibility/accuracy/bias of publications", "evaluate cause-and-effect reasoning including extrapolations to larger scales"]
+          },
+          "topics": ["electromagnetic radiation", "ionizing vs non-ionizing radiation", "media literacy/source evaluation"],
+          "terminology": ["absorption", "brightness", "cells", "denaturation", "diffraction", "electric potential", "emission", "frequency", "gamma ray", "infrared radiation", "interference", "ionize", "light scattering", "light transmission", "magnetic resonance imaging (MRI)", "media", "microwave", "mutagen", "mutation", "ohm", "organism", "phase", "photoelectric", "photoelectric effect", "photon", "photon energy", "radio wave", "refraction", "resonance", "semiconductor", "solar cell", "speed of light", "thermal imaging", "tissues", "transparent", "transverse wave", "ultraviolet", "ultraviolet (UV) radiation", "visible light", "vision", "wavelength", "x-ray"]
+        },
+        {
+          "code": "C-PS4-5",
+          "performance_expectation": "Communicate technical information about how some technological devices use the principles of the electromagnetic spectrum to cause matter to transmit and capture information and energy.",
+          "clarification_statement": "Examples could include medical imaging and communications technology.",
+          "state_assessment_boundary": "Assessments are limited to qualitative information. Assessments do not include band theory.",
+          "sep": {"name": "Obtaining, Evaluating, and Communicating Information", "description": "Communicate technical information or ideas (e.g. about phenomena and/or the process of development and the design and performance of a proposed process or system) in multiple formats (including orally, graphically, textually, and mathematically)."},
+          "dci": [
+            {"code": "PS4.B", "name": "Electromagnetic Radiation", "text": "Photoelectric materials emit electrons when they absorb light of a high-enough frequency."},
+            {"code": "PS4.C", "name": "Information Technologies and Instrumentation", "text": "Multiple technologies based on the understanding of energy and their interactions with matter are part of everyday experiences in the modern world (e.g., medical imaging, communications, scanners) and in scientific research. They are essential tools for producing, transmitting, and capturing signals and for storing and interpreting the information contained in them."},
+            {"code": "ETS2.A", "name": "Interdependence of Science, Engineering, and Technology", "text": "Science and engineering complement each other in the cycle known as research and development (R&D). (secondary)"},
+            {"code": "ETS2.B", "name": "Influence of Engineering, Technology, and Science on Society and the Natural World", "text": "Modern civilization depends on major technological systems. (secondary)"}
+          ],
+          "ccc": {"name": "Cause and Effect", "description": "Systems can be designed to cause a desired effect of energy interactions of matter."},
+          "observable_performances": {
+            "communication": ["use/cite at least two formats to communicate scientific information about at least two devices; at least one must depend on the electromagnetic spectrum"],
+            "connections": [
+              "how each device operates and the wave behavior it utilizes",
+              "qualitatively describe how basic physical principles were used through R&D to produce device functionality",
+              "real-world problem/need each device addresses and how civilization depends on it",
+              "cause-and-effect relationships used to produce device functionality"
+            ]
+          },
+          "topics": ["EM spectrum technology", "medical imaging", "communications technology"],
+          "terminology": ["angle of incidence", "antenna", "constructive wave", "demodulation", "destructive wave", "diffraction", "dispersion", "electromagnetic spectrum", "frequency", "gamma ray", "infrared", "intensity", "interference", "light emitting diode (LED)", "longitudinal wave", "magnetic resonance imaging (MRI)", "mechanical wave", "medium", "microwaves", "navigation", "nodes", "optical fiber", "oscillating electron", "periodic motion", "photon", "photon energy", "prism", "radar", "radio", "rarefaction", "real image", "receiver", "reflection", "refraction", "resonance", "restoring", "sonar", "sonography", "standing wave", "superposition", "transmitter", "transverse wave", "ultrasound", "ultraviolet (UV) ray", "velocity", "virtual image", "visible light", "wavelength", "weather monitoring", "Wi-Fi", "x-ray"]
+        }
+      ]
+    }
+  ]
+}

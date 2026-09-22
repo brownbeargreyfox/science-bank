@@ -1,0 +1,55 @@
+{
+  "course": "Biology 2",
+  "source_document": "Bundling Guide for Biology 2",
+  "source_authority": "South Carolina Department of Education, Office of Assessment and Standards",
+  "notes": "Bundles are example groupings of Performance Expectations (PEs) around an anchoring phenomenon, not a curriculum or instructional order. A PE marked partial (asterisk in source) shares an authentic connection with the bundle's narrative but is not fully met by it. 'connected_pes' are cross-content-area PEs listed by SCDE to support sensemaking; most are not yet in this app's standards data. Source document names bundles B2.1-B2.4 (first bundle 'Ecosystem Dynamics' is unlabeled/untitled B2.1 in the source numbering scheme, inferred here from context).",
+  "bundles": [
+    {
+      "name": "Ecosystem Dynamics",
+      "narrative": "Ecosystems have carrying capacities that limit the number of organisms and populations they can support, based on resource availability and challenges like predation, competition, and disease. Because resources are finite, this limits the number of individuals in any ecosystem. Interactions within an ecosystem can keep numbers and types of organisms relatively constant over long periods when conditions are stable; a small disturbance may let the ecosystem return to its original state (resilience), while large changes can disrupt the ecosystem's balance.",
+      "aligned_pes": [
+        {"code": "B-LS2-2", "partial": false},
+        {"code": "B-LS2-6", "partial": false},
+        {"code": "B-LS1-1", "partial": true}
+      ],
+      "connected_pes": ["B-LS2-1", "B-LS2-7", "E-ESS3-3"],
+      "example_anchoring_phenomena": ["Impacts of urbanization", "Megafauna extinction"]
+    },
+    {
+      "name": "Biogeochemical Cycles",
+      "narrative": "Photosynthesis and cellular respiration provide most of the energy for life processes. Plants and algae sit at the base of the food web; as you move up each level, only a small fraction of energy from the lower level transfers upward, so there are usually fewer organisms at higher trophic levels. Some matter reacts to release energy for life functions, some is stored in new structures, and much is discarded. The elements that make up organisms pass through food webs, moving in and out of the atmosphere and soil, combined and recombined in different ways -- matter and energy are conserved at each level.",
+      "aligned_pes": [
+        {"code": "B-LS2-3", "partial": false},
+        {"code": "B-LS2-4", "partial": false},
+        {"code": "B-LS1-1", "partial": true}
+      ],
+      "connected_pes": ["B-LS1-5", "B-LS1-6", "B-LS1-7", "B-LS2-5", "E-ESS2-6"],
+      "example_anchoring_phenomena": ["Cordyceps fungi", "Aquaponics", "Nutrient cycling and agriculture"]
+    },
+    {
+      "name": "Complex Inheritance",
+      "narrative": "All cells contain genetic information in DNA. Each chromosome is a single, very long DNA molecule, and each gene is a specific segment of that DNA providing instructions for making proteins via transcription into mRNA and translation. All cells in an organism have the same genetic content, but expressed genes vary; not all DNA codes for proteins -- some segments are regulatory or structural, some have no known function. During meiosis, chromosomes exchange sections, creating new genetic combinations; replication errors and environmental factors add further mutation-driven variation, which can be inherited if viable. Environmental factors also influence trait expression, so trait variation and distribution depend on both genetic and environmental factors.",
+      "aligned_pes": [
+        {"code": "B-LS3-1", "partial": false},
+        {"code": "B-LS3-2", "partial": false},
+        {"code": "B-LS3-3", "partial": false},
+        {"code": "B-LS1-1", "partial": true}
+      ],
+      "connected_pes": ["B-LS1-2", "B-LS1-4"],
+      "example_anchoring_phenomena": ["Sickle Cell Trait", "CRISPR"]
+    },
+    {
+      "name": "Biological Evolution",
+      "narrative": "Traits that positively affect survival are more likely to be reproduced and become more common in a population. Genetic information, like the fossil record, provides evidence of evolution; DNA sequences vary among species but overlap, letting scientists infer branching lines of descent, further supported by amino acid sequence and anatomical/embryological evidence. Natural selection happens only if there is variation in genetic information and its expression, leading to differences in performance among individuals. Group behavior has evolved because group membership can increase survival chances for individuals and their genetic relatives. Natural selection leads to adaptation -- populations well-suited anatomically, behaviorally, and physiologically to their environment -- and the distribution of traits can change when conditions change. Environmental change, natural or human-induced, contributes to species expansion, emergence of new species, and decline or extinction of others. Humans depend on biodiversity, yet human activity (overpopulation, overexploitation, habitat destruction, pollution, invasive species, climate change) is negatively impacting it; sustaining biodiversity is essential for ecosystem functioning and productivity.",
+      "aligned_pes": [
+        {"code": "B-LS2-8", "partial": false},
+        {"code": "B-LS4-1", "partial": false},
+        {"code": "B-LS4-3", "partial": false},
+        {"code": "B-LS4-6", "partial": false},
+        {"code": "B-LS1-1", "partial": true}
+      ],
+      "connected_pes": ["B-LS4-2", "B-LS4-4", "B-LS4-5"],
+      "example_anchoring_phenomena": ["Peacock tail", "Ant cooperation", "Hox genes"]
+    }
+  ]
+}

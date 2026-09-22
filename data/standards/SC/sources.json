@@ -1,0 +1,99 @@
+{
+  "authority": "South Carolina Department of Education",
+  "standards_base": "South Carolina College- and Career-Ready Science Standards 2021",
+  "standards_base_url": "https://ed.sc.gov/instruction/standards-learning/science/standards/south-carolina-college-and-career-ready-science-standards-2021-approved/",
+  "documents": [
+    {
+      "id": "biology-1-performance-targets-2026-2027",
+      "course": "Biology 1",
+      "resource_type": "Performance Targets",
+      "use_year": "2026-2027",
+      "published": "2026-07-13",
+      "active": true,
+      "ingested_into": "biology-1.json",
+      "notes": "Primary content authority: PE text, SEP/DCI/CCC, state assessment boundaries, clarification statements, observable performances, academic language/terminology. Includes Appendix A vertical articulation (not yet ingested)."
+    },
+    {
+      "id": "biology-2-performance-targets-2026-2027",
+      "course": "Biology 2",
+      "resource_type": "Performance Targets",
+      "use_year": "2026-2027",
+      "published": "2026-07-13",
+      "active": true,
+      "ingested_into": "biology-2.json",
+      "notes": "Not EOCEP-assessed. 4 of 12 PEs repeat from Biology 1 (B-LS1-1, B-LS3-2, B-LS3-3, B-LS4-1); Biology 2 instruction extends beyond the Biology 1 state assessment boundary on those (flagged per-PE via repeat_of_biology_1 and boundary notes). Appendix A vertical articulation not yet ingested."
+    },
+    {
+      "id": "chemistry-performance-targets-2026-2027",
+      "course": "Chemistry",
+      "resource_type": "Performance Targets",
+      "use_year": "2026-2027",
+      "published": "2026-07-13",
+      "active": true,
+      "ingested_into": "chemistry.json",
+      "notes": "12 PEs across PS1 (Matter and Its Interactions, 8 PEs), PS2 (1 PE), PS3 (1 PE), PS4 (2 PEs). Appendix A vertical articulation not yet ingested."
+    },
+    {
+      "id": "bundling-guide-biology-1",
+      "course": "Biology 1",
+      "resource_type": "Bundling Guide",
+      "active": true,
+      "ingested_into": "biology-1-bundles.json",
+      "notes": "6 bundles, each an anchoring-phenomenon narrative plus aligned/partial/connected PEs and example phenomena. Not a curriculum or instructional order."
+    },
+    {
+      "id": "bundling-guide-biology-2",
+      "course": "Biology 2",
+      "resource_type": "Bundling Guide",
+      "active": true,
+      "ingested_into": "biology-2-bundles.json",
+      "notes": "4 bundles (source labels them B2.1-B2.4)."
+    },
+    {
+      "id": "bundling-guide-chemistry",
+      "course": "Chemistry",
+      "resource_type": "Bundling Guide",
+      "active": true,
+      "ingested_into": "chemistry-bundles.json",
+      "notes": "5 bundles."
+    },
+    {
+      "id": "eocep-biology-1-plds-users-guide-v2",
+      "course": "Biology 1",
+      "resource_type": "EOCEP Performance Level Descriptors User's Guide",
+      "active": true,
+      "ingested_into": null,
+      "notes": "State-test-mode reference, distinct from classroom Performance Targets. Should inform an 'EOCEP mode' constraint layer, not classroom-mode defaults."
+    },
+    {
+      "id": "eocep-biology-1-state-assessment-specifications-2025-2026",
+      "course": "Biology 1",
+      "resource_type": "State Assessment Specifications (EOCEP)",
+      "use_year": "2025-2026",
+      "active": true,
+      "ingested_into": null,
+      "notes": "Item-writer guidance, vocabulary, and state-assessment limits for EOCEP items. Source for the app's 'EOCEP Practice' generation mode."
+    },
+    {
+      "id": "sep-guide-secondary",
+      "resource_type": "Using Science and Engineering Practices in Secondary Science Classrooms",
+      "active": true,
+      "ingested_into": null,
+      "notes": "Reference library of legitimate SEP-aligned task types per practice. Candidate for sep.json (practice name, description, example task verbs/prompts)."
+    },
+    {
+      "id": "ccc-guide-secondary",
+      "resource_type": "Using Crosscutting Concepts in Secondary Science Classrooms",
+      "active": true,
+      "ingested_into": null,
+      "notes": "Reference library of CCC reasoning patterns and elicitation prompts. Candidate for ccc.json."
+    },
+    {
+      "id": "esc633-grhs-biol-is-samp",
+      "resource_type": "Sample instructional/assessment item set",
+      "active": true,
+      "ingested_into": null,
+      "notes": "Not yet reviewed in this extraction pass; large PDF, needs page-range read."
+    }
+  ]
+}

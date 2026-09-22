@@ -1,0 +1,82 @@
+{
+  "course": "Biology 1",
+  "source_document": "Bundling Guide for Biology 1",
+  "source_authority": "South Carolina Department of Education, Office of Assessment and Standards",
+  "notes": "Bundles are example groupings of Performance Expectations (PEs) around an anchoring phenomenon, not a curriculum or instructional order. A PE marked partial (asterisk in source) shares an authentic connection with the bundle's narrative but is not fully met by it. 'connected_pes' are cross-content-area PEs (other courses/disciplines) listed by SCDE to support sensemaking; they are NOT Biology 1 PEs and most are not yet in this app's standards data (only same-course cross-references resolve against biology-1.json/biology-2.json/chemistry.json). Use bundles to suggest a shared stimulus/phenomenon when a teacher requests a question set spanning multiple standards.",
+  "bundles": [
+    {
+      "name": "Structure and Function of Life",
+      "narrative": "Photosynthesis is a process where plants convert light energy into chemical energy stored in sugars, while releasing oxygen as a byproduct. These sugars contain carbon, hydrogen, and oxygen, which are essential for building other molecules needed for life, such as amino acids and DNA. Living systems continuously rearrange chemical elements as matter and energy flow through them. Cellular respiration is a chemical process where food molecules and oxygen are broken down to produce new compounds, releasing energy that cells use for work. Proteins are vital because they provide structure, act as messengers for cell communication, regulate cell processes, and facilitate chemical reactions as enzymes.",
+      "aligned_pes": [
+        {"code": "B-LS1-1", "partial": true},
+        {"code": "B-LS1-5", "partial": true},
+        {"code": "B-LS1-6", "partial": true},
+        {"code": "B-LS1-7", "partial": true}
+      ],
+      "connected_pes": ["C-PS1-3", "C-PS1-4", "C-PS2-6", "P-PS3-3", "P-PS2-6", "E-ESS2-5"],
+      "example_anchoring_phenomena": ["How do we know what the \"paleo diet\" is?", "How to build an artificial leaf?", "Macromolecule synthesis"]
+    },
+    {
+      "name": "Matter and Energy in Ecosystems",
+      "narrative": "Photosynthesis and cellular respiration are important parts of the carbon cycle, which involves the movement of carbon among living organisms, the atmosphere, oceans, and the Earth's crust. During photosynthesis, plants use light energy to convert carbon dioxide and water into sugars, releasing oxygen. These sugars store energy for growth and other life processes. Cellular respiration breaks down sugars and oxygen to release energy as ATP, releasing carbon dioxide and water as byproducts. Anaerobic cellular respiration is a less efficient process occurring without oxygen, providing energy but producing less ATP.",
+      "aligned_pes": [
+        {"code": "B-LS2-5", "partial": false},
+        {"code": "B-LS1-5", "partial": true},
+        {"code": "B-LS1-6", "partial": true},
+        {"code": "B-LS1-7", "partial": true}
+      ],
+      "connected_pes": ["C-PS1-3", "C-PS1-4", "C-PS2-6", "P-PS2-6", "P-PS3-3", "E-ESS2-6"],
+      "example_anchoring_phenomena": ["Sustainable forestry", "Air plants", "Algae for food and fuel?"]
+    },
+    {
+      "name": "Ecosystem Interactions and Dynamics",
+      "narrative": "Ecosystems have limits to the number of organisms and populations they can support, known as carrying capacities, influenced by resource availability and challenges like predation, competition, and disease. The finite nature of environments creates a balance determining species abundance. Human activities -- habitat destruction, pollution, over-harvesting, invasive species, climate change -- disrupt ecosystems and threaten species survival, which matters because humans rely on biodiversity for food, medicine, and ecosystem services. Maintaining biodiversity is crucial for ecosystem functioning, productivity, and resilience.",
+      "aligned_pes": [
+        {"code": "B-LS2-1", "partial": false},
+        {"code": "B-LS2-7", "partial": false}
+      ],
+      "connected_pes": ["B-LS2-2", "B-LS2-6", "E-ESS2-7", "E-ESS3-3"],
+      "example_anchoring_phenomena": ["Pika mammals and climate change", "Isle Royale populations", "Beach nourishment"]
+    },
+    {
+      "name": "Inheritance and Variation of Traits",
+      "narrative": "In multicellular organisms, cells grow and divide through the cell cycle, starting from a single fertilized egg cell that undergoes repeated divisions, each parent cell passing identical genetic material to daughter cells. Genes contain instructions for building proteins via transcription into mRNA and translation. Cell division and specialization produce and maintain complex organisms of tissues and organs. During sexual reproduction, chromosomes exchange sections during meiosis, creating new genetic combinations; mutations from replication errors or environmental factors add further variation. Environmental factors also influence trait expression, so observed trait variation and distribution result from both genetic and environmental influences.",
+      "aligned_pes": [
+        {"code": "B-LS1-4", "partial": false},
+        {"code": "B-LS3-2", "partial": false},
+        {"code": "B-LS3-3", "partial": false},
+        {"code": "B-LS1-1", "partial": true}
+      ],
+      "connected_pes": ["B-LS3-1"],
+      "example_anchoring_phenomena": ["CRISPR", "Chimerism", "Double-muscled cattle"]
+    },
+    {
+      "name": "Changes in Populations Over Time",
+      "narrative": "Evolution is shaped by four factors: species' potential to increase in number, genetic variation from mutation and sexual reproduction, competition for limited resources driving natural selection, and the proliferation of individuals with beneficial traits. Natural selection occurs when there is genetic and trait variation, leading over time to adaptation -- populations better suited to their environment anatomically, behaviorally, and physiologically. Environmental change, natural or human-caused, can drive species to thrive, decline, or face extinction if they cannot adapt quickly enough.",
+      "aligned_pes": [
+        {"code": "B-LS4-2", "partial": true},
+        {"code": "B-LS4-4", "partial": true},
+        {"code": "B-LS4-5", "partial": true},
+        {"code": "B-LS1-1", "partial": true},
+        {"code": "B-LS2-1", "partial": true},
+        {"code": "B-LS3-3", "partial": true}
+      ],
+      "connected_pes": ["B-LS4-3", "E-ESS2-7", "E-ESS2-4"],
+      "example_anchoring_phenomena": ["Prevalence of tusklessness in African elephants", "Antibiotic resistance", "Preserved dental plaque DNA sequencing for starch processing genes"]
+    },
+    {
+      "name": "Common Ancestry and Speciation",
+      "narrative": "Genetic information, like the fossil record, offers evidence of evolution. DNA sequences differ among species but also show similarities that let scientists infer branching evolutionary lines; amino acid sequence and anatomical/embryological evidence further support relatedness. The same four evolutionary factors (population growth potential, genetic variation, competition-driven selection, proliferation of beneficial traits) drive adaptation. Over time, environmental change -- natural or human-induced -- can lead to expansion of some species, emergence of new species, and decline or extinction of others.",
+      "aligned_pes": [
+        {"code": "B-LS4-1", "partial": false},
+        {"code": "B-LS4-2", "partial": true},
+        {"code": "B-LS4-4", "partial": true},
+        {"code": "B-LS4-5", "partial": true},
+        {"code": "B-LS1-1", "partial": true},
+        {"code": "B-LS3-3", "partial": true}
+      ],
+      "connected_pes": ["B-LS4-3", "E-ESS2-7", "E-ESS2-4"],
+      "example_anchoring_phenomena": ["Are guinea pigs and rabbits rodents?", "Hox genes", "Snapping shrimp mutation rates and the Isthmus of Panama"]
+    }
+  ]
+}

@@ -1,0 +1,304 @@
+{
+  "course": "Biology 2",
+  "standards_base": "South Carolina College- and Career-Ready Science Standards 2021",
+  "use_year": "2026-2027",
+  "source_document": "Biology 2 Performance Targets for use 2026-2027",
+  "source_published": "2026-07-13",
+  "source_authority": "South Carolina Department of Education",
+  "source_url": "https://ed.sc.gov/instruction/standards-learning/science/standards/south-carolina-college-and-career-ready-science-standards-2021-approved/",
+  "notes": "Biology 2 is NOT assessed by the EOCEP (South Carolina's End of Course Examination Program). Four PEs (B-LS1-1, B-LS3-2, B-LS3-3, B-LS4-1) repeat from Biology 1; students build beyond the Biology 1 state assessment boundary on these, so Performance Target descriptions may extend past the boundary text carried over from Biology 1. Treat 'classroom mode' as the only mode for this course -- there is no EOCEP constraint layer to apply.",
+  "domains": [
+    {
+      "domain_code": "LS1",
+      "domain_name": "From Molecules to Organisms: Structures and Processes",
+      "standards": [
+        {
+          "code": "B-LS1-1",
+          "repeat_of_biology_1": true,
+          "performance_expectation": "Construct an explanation based on evidence for how the structure of DNA determines the structure of proteins, which carry out the essential functions of life through systems of specialized cells.",
+          "clarification_statement": null,
+          "state_assessment_boundary": "Assessment does not include identification of specific cell or tissue types, whole body systems, specific protein structures and functions, or the biochemistry of protein synthesis. (Note: Biology 2 is not EOCEP-assessed; this boundary is carried over from Biology 1 and Biology 2 instruction is expected to extend beyond it -- e.g. functional RNA molecules, biochemical detail of transcription/translation initiation-elongation-termination.)",
+          "sep": {
+            "name": "Constructing Explanations and Designing Solutions",
+            "description": "Construct an explanation based on valid and reliable evidence obtained from a variety of sources and the assumption that theories and laws that describe the natural world operate today as they did in the past and will continue to do so in the future."
+          },
+          "dci": [
+            {"code": "LS1.A", "name": "Structure and Function", "text": "Systems of specialized cells within organisms help them perform the essential functions of life. All cells contain genetic information, in the form of DNA. Genes are specific regions within the extremely large DNA molecules that form the chromosomes. Genes contain the instructions that code for the formation of molecules called proteins, which carry out most of the work of cells to perform the essential functions of life."},
+            {"code": "LS3.A", "name": "Inheritance of Traits", "text": "The sequence of nucleotides spells out the information in a gene. DNA controls the expression of proteins by being transcribed into a \"messenger\" RNA, which is translated in turn by the cellular machinery into a protein."}
+          ],
+          "ccc": {"name": "Structure and Function", "description": "Investigating or designing new systems or structures requires a detailed examination of the properties of different materials, the structures of different components, and connections of components to reveal its function."},
+          "observable_performances": {
+            "articulating_explanation": ["regions of DNA determine the structure of proteins or functional RNA molecules", "proteins carry out the essential functions of life"],
+            "evidence": [
+              "a single gene codes for a protein or functional RNA molecules",
+              "through the biochemical process of transcription (initiation, elongation, termination), a DNA sequence is transcribed into a mRNA sequence",
+              "through the biochemical process of translation (initiation, elongation, termination), a mRNA sequence is translated into an amino acid sequence at the ribosome",
+              "in complex organisms, groups of specialized cells use proteins to carry out functions essential to the organism"
+            ],
+            "reasoning": [
+              "gene sequence, including mutations, affects product function",
+              "proper functioning of many gene products is necessary for the proper functioning of cells",
+              "systems of specialized cells share similar structures and functions, carried out by proteins and functional RNA molecules"
+            ]
+          },
+          "topics": ["DNA structure", "protein synthesis (biochemical detail)", "functional RNA", "transcription/translation mechanism"],
+          "terminology": ["adenine", "amino acid", "anticodon", "base", "cell", "chromosome", "codon", "cytoplasm", "cytosine", "deoxyribose", "differentiation", "DNA", "double helix", "elongation", "endoplasmic reticulum", "enzyme", "functional RNA", "gene", "Golgi apparatus", "guanine", "hydrogen bond", "initiation", "messenger RNA (mRNA)", "mutagen", "mutation", "nuclear membrane", "nucleic acid", "nucleotide", "nucleus", "peptide", "peptide bond", "phosphate", "polypeptide", "protein synthesis", "ribose", "ribosome", "RNA", "ribosomal RNA (rRNA)", "start codon", "stop codon", "termination", "thymine", "transcription", "translation", "transfer RNA (tRNA)", "uracil", "vesicle"]
+        }
+      ]
+    },
+    {
+      "domain_code": "LS2",
+      "domain_name": "Ecosystems: Interactions, Energy, and Dynamics",
+      "standards": [
+        {
+          "code": "B-LS2-2",
+          "performance_expectation": "Use mathematical representations to support and revise explanations based on evidence about factors affecting biodiversity and populations in ecosystems of different scales.",
+          "clarification_statement": "Examples of mathematical representations include finding the average, determining trends, and using graphical comparisons of multiple sets of data.",
+          "state_assessment_boundary": "Assessment is limited to provided data. (Biology 2 is not EOCEP-assessed; boundary informs scope, not a state test constraint.)",
+          "sep": {"name": "Using Mathematics and Computational Thinking", "description": "Use mathematical representations of phenomena or design solutions to support and revise explanations."},
+          "dci": [
+            {"code": "LS2.A", "name": "Interdependent Relationships in Ecosystems", "text": "Ecosystems have carrying capacities, which are limits to the numbers of organisms and populations they can support. These limits result from the availability of living and nonliving resources and from challenges such as predation, competition, and disease."},
+            {"code": "LS2.C", "name": "Ecosystem Dynamics, Functioning, and Resilience", "text": "A complex set of interactions within an ecosystem can keep its numbers and types of organisms relatively constant over long periods of time under stable conditions. If a modest biological or physical disturbance occurs, it may return to its more or less original status (resilient), as opposed to becoming a very different ecosystem. Extreme fluctuations can challenge the functioning of ecosystems in terms of resources and habitat availability."}
+          ],
+          "ccc": {"name": "Scale, Proportion, and Quantity", "description": "Using the concept of orders of magnitude allows one to understand how a model at one scale relates to a model at another scale."},
+          "observable_performances": {
+            "representation": [
+              "mathematical models (trends, averages, graphs of organisms per unit area) to identify components relevant to supporting/revising/refuting an explanation about biodiversity factors",
+              "data on numbers/types of organisms, interactions between ecosystems at different scales (micro, mesocosm, biome)"
+            ],
+            "analysis": [
+              "identify the most important factors determining biodiversity and population numbers",
+              "use as evidence for effects of modest to extreme disturbances on an ecosystem's capacity to return to original status or become different",
+              "revise explanation based on new evidence"
+            ]
+          },
+          "topics": ["carrying capacity at different scales", "ecosystem resilience", "biodiversity factors"],
+          "terminology": ["abiotic", "abundance", "biodiversity", "biotic", "carrying capacity", "climate change", "commensalism", "competition", "deforestation", "density", "disturbance", "equilibrium", "extinction", "feedback", "fluctuation", "generation", "limiting factor", "limiting resource", "mutualism", "parasitism", "pollution", "population", "population control", "predation", "stability", "sustainable", "symbiosis", "trend"],
+          "question_family_candidate": true
+        },
+        {
+          "code": "B-LS2-3",
+          "performance_expectation": "Construct and revise an explanation based on evidence for the cycling of matter and flow of energy in aerobic and anaerobic conditions.",
+          "clarification_statement": "Emphasis is on conceptual understanding of the role of aerobic and anaerobic respiration in the conservation of matter and flow of energy into, out of, and within various ecosystems.",
+          "state_assessment_boundary": "Assessment focuses on conceptual understanding and does not include the specific chemical processes of either aerobic or anaerobic respiration.",
+          "sep": {"name": "Constructing Explanations and Designing Solutions", "description": "Construct and revise an explanation based on valid and reliable evidence obtained from a variety of sources and the assumption that theories and laws that describe the natural world operate today as they did in the past and will continue to do so in the future."},
+          "dci": [{"code": "LS2.B", "name": "Cycles of Matter and Energy Transfer in Ecosystems", "text": "Photosynthesis and cellular respiration (including anaerobic processes) provide most of the energy for life processes."}],
+          "ccc": {"name": "Energy and Matter", "description": "Energy drives the cycling of matter within and between systems."},
+          "observable_performances": {
+            "articulating_explanation": ["life depends on biogeochemical cycles (carbon, nitrogen, water)", "biogeochemical cycling is driven by aerobic and anaerobic cellular processes"],
+            "evidence": [
+              "photosynthesis captures light energy to create chemical products (limited to glucose) used in cellular respiration",
+              "cellular respiration rearranges matter to release stored chemical energy",
+              "key processes of carbon cycle (photosynthesis, cellular respiration, burning fossil fuels), water cycle (condensation, evaporation, precipitation, transpiration), nitrogen cycle (nitrogen fixation, lightning, volcanic activity, agricultural production)"
+            ],
+            "reasoning": [
+              "energy inputs into cells occur either by photosynthesis or taking in matter",
+              "all cells engage in cellular respiration (aerobic or anaerobic) and produce products of respiration",
+              "cycling of matter and transfer of energy must occur whether respiration is aerobic or anaerobic",
+              "revise explanation given new data (e.g. deep sea vent ecosystems showing photosynthesis is not the only driver)"
+            ]
+          },
+          "topics": ["carbon cycle", "nitrogen cycle", "water cycle", "aerobic vs anaerobic respiration"],
+          "terminology": ["aerobic", "agricultural production", "anaerobic", "autotroph", "biomass", "carbon", "condensation", "consumer", "cycling of matter", "decomposer", "energy flow", "energy pyramid", "evaporation", "fermentation", "food chain", "food web", "fossil fuel", "glucose", "heterotroph", "lightning", "microbe", "nitrogen", "nitrogen fixation", "photosynthesis", "precipitation", "predator-prey relationship", "producer", "pyramid of biomass", "reservoir", "respiration", "sink", "solar energy", "transpiration", "trophic level", "volcanic activity", "water"]
+        },
+        {
+          "code": "B-LS2-4",
+          "performance_expectation": "Use mathematical representations to support claims for the cycling of matter and flow of energy among organisms in an ecosystem.",
+          "clarification_statement": "Emphasis is on using a mathematical model of stored energy in biomass to describe the transfer of energy from one trophic level to another and that matter and energy are conserved as matter cycles and energy flows through ecosystems. Emphasis is on conservation of carbon, oxygen, hydrogen, and nitrogen as they move through an ecosystem.",
+          "state_assessment_boundary": "Assessment is limited to proportional reasoning to describe the cycling of matter and flow of energy.",
+          "sep": {"name": "Using Mathematics and Computational Thinking", "description": "Use mathematical representations of phenomena or design solutions to support claims."},
+          "dci": [{"code": "LS2.B", "name": "Cycles of Matter and Energy Transfer in Ecosystems", "text": "Plants or algae form the lowest level of the food web. At each link upward, only a small fraction of matter consumed is transferred, producing growth and releasing energy in cellular respiration. Given this inefficiency, there are generally fewer organisms at higher levels of a food web. Matter and energy are conserved at each link."}],
+          "ccc": {"name": "Energy and Matter", "description": "Energy cannot be created or destroyed -- it only moves between one place and another, between objects and/or fields, or between systems."},
+          "observable_performances": {
+            "representation": ["relative quantities related to organisms, matter, energy, food webs in an ecosystem"],
+            "mathematical_modeling": [
+              "explain transfer of matter (atoms/molecules) and energy upward between organisms and environment",
+              "identify producers as lowest trophic level with greatest biomass/energy; consumers decreasing in numbers at higher trophic levels"
+            ],
+            "analysis": ["support/revise/refute claims that matter cycles between organisms and environment and energy transfers from one trophic level to another", "account for energy not transferred to higher trophic levels (used for growth/maintenance/repair or transferred to environment) and inefficiencies in transfer"]
+          },
+          "topics": ["trophic levels", "energy pyramid", "biomass transfer efficiency"],
+          "terminology": ["aerobic", "anaerobic", "autotroph", "biomass", "carbon", "consumer", "cycling of matter", "decomposer", "energy flow", "energy pyramid", "food chain", "food web", "fossil fuel", "glucose", "heterotroph", "microbe", "photosynthesis", "predator-prey relationship", "producer", "pyramid of biomass", "reservoir/sink", "respiration", "solar energy", "sugar", "trophic level", "water"],
+          "question_family_candidate": true
+        },
+        {
+          "code": "B-LS2-6",
+          "performance_expectation": "Evaluate claims, evidence, and reasoning that the complex interactions in ecosystems maintain relatively consistent numbers and types of organisms in stable conditions but changing conditions may result in a new ecosystem.",
+          "clarification_statement": "Examples of changes in ecosystem conditions could include modest biological or physical changes, such as moderate hunting or a seasonal flood; and extreme changes, such as volcanic eruption or sea level rise.",
+          "state_assessment_boundary": null,
+          "sep": {"name": "Engaging in Argument from Evidence", "description": "Evaluate the claims, evidence, and reasoning behind currently accepted explanations or solutions to determine the merits of arguments."},
+          "dci": [{"code": "LS2.C", "name": "Ecosystem Dynamics, Functioning, and Resilience", "text": "A complex set of interactions within an ecosystem can keep its numbers and types of organisms relatively constant over long periods of time under stable conditions. If a modest biological or physical disturbance occurs, it may return to its more or less original status (resilient). Extreme fluctuations can challenge ecosystem functioning in terms of resources and habitat availability."}],
+          "ccc": {"name": "Stability and Change", "description": "Much of science deals with constructing explanations of how things change and how they remain stable."},
+          "observable_performances": {
+            "identify_claims_evidence_reasoning": ["the claims, evidence, and reasoning to be evaluated regarding stable vs. changing ecosystem conditions"],
+            "additional_evidence": ["factors that affect biodiversity", "relationships between species and physical environment", "changes in numbers of species/organisms after modest or extreme change"],
+            "evaluate_critique": [
+              "assess validity/reliability of evidence and its ability to support the argument that ecosystem resiliency is subject to the degree of change",
+              "assess logic of reasoning relating degree of change to stability"
+            ]
+          },
+          "topics": ["ecosystem resilience", "disturbance magnitude", "biodiversity stability"],
+          "terminology": ["anthropogenic", "biodiversity", "biosphere", "carbon cycle", "climate change", "climax community", "consumer", "decomposer", "disturbance", "ecosystem", "environment", "equilibrium", "extinction", "fluctuation", "habitat", "human impact", "intermediate species", "niche", "nitrogen cycle", "organism", "pioneer species", "primary succession", "producer", "resources", "secondary succession", "species", "stability", "succession", "water cycle"]
+        },
+        {
+          "code": "B-LS2-8",
+          "performance_expectation": "Evaluate evidence for the role of group behavior on individual and species' chances to survive and reproduce.",
+          "clarification_statement": "Emphasis is on: (1) distinguishing between group and individual behavior, (2) identifying evidence supporting the outcomes of group behavior, and (3) developing logical and reasonable arguments based on evidence. Examples of group behaviors could include flocking, schooling, or herding, and cooperative behaviors such as hunting, migrating, or swarming.",
+          "state_assessment_boundary": null,
+          "sep": {"name": "Engaging in Argument from Evidence", "description": "Evaluate the evidence behind currently accepted explanations to determine the merits of arguments."},
+          "dci": [{"code": "LS2.D", "name": "Social Interactions and Group Behavior", "text": "Group behavior has evolved because membership can increase the chances of survival for individuals and their genetic relatives."}],
+          "ccc": {"name": "Cause and Effect", "description": "Empirical evidence is required to differentiate between cause and correlation and make claims about specific causes and effects."},
+          "observable_performances": {
+            "identify_explanation": ["group behavior can increase chances for an individual and species to survive and reproduce"],
+            "additional_evidence": ["relationships between specific group behaviors (flocking, schooling, herding, cooperative hunting, migrating, swarming) and individual fitness"],
+            "evaluate_critique": ["assess validity/reliability/strengths/weaknesses of evidence", "evaluate cause-and-effect relationships between group behavior types and individual survival rates"]
+          },
+          "topics": ["group behavior", "social interactions", "kin selection", "cooperative behavior"],
+          "terminology": ["altruism", "behavior", "beneficial", "competition", "cooperative hunting", "evolution", "fitness", "flocking", "herding", "limited resource", "migration", "natural selection", "predator", "prey", "proliferation", "schooling", "selective pressure", "sexual reproduction", "social interaction", "species", "swarming"]
+        }
+      ]
+    },
+    {
+      "domain_code": "LS3",
+      "domain_name": "Heredity: Inheritance and Variation of Traits",
+      "standards": [
+        {
+          "code": "B-LS3-1",
+          "performance_expectation": "Ask questions to clarify relationships about the role of DNA and chromosomes in coding the instructions for characteristic traits passed from parents to offspring.",
+          "clarification_statement": null,
+          "state_assessment_boundary": "Assessment does not include the phases of meiosis or the biochemical mechanism of specific steps in the process (including gene regulation).",
+          "sep": {"name": "Asking Questions and Defining Problems", "description": "Ask questions that arise from examining models or a theory to clarify relationships."},
+          "dci": [
+            {"code": "LS1.A", "name": "Structure and Function", "text": "All cells contain genetic information in the form of DNA molecules. Genes are regions in the DNA that contain the instructions that code for the formation of proteins. (secondary)"},
+            {"code": "LS3.A", "name": "Inheritance of Traits", "text": "Each chromosome consists of a single very long DNA molecule, and each gene on the chromosome is a particular segment of that DNA. The instructions for forming species' characteristics are carried in DNA. All cells in an organism have the same genetic content, but the genes used (expressed) by the cell may be regulated in different ways. Not all DNA codes for a protein; some segments are involved in regulatory or structural functions, and some have no as-yet known function."}
+          ],
+          "ccc": {"name": "Cause and Effect", "description": "Empirical evidence is required to differentiate between cause and correlation and make claims about specific causes and effects."},
+          "observable_performances": {
+            "phenomena": [
+              "formulate questions to clarify cause-and-effect relationships between DNA, the proteins it codes for, and phenotypic expression",
+              "formulate questions about how DNA and chromosomes can be regulated in multiple ways (e.g. differentiation)",
+              "formulate questions about the relationship between non-protein-coding DNA sections and their functions (e.g. regulatory)"
+            ],
+            "empirical_testability": ["student questions must be empirically testable"]
+          },
+          "topics": ["DNA/chromosome structure", "gene regulation", "non-coding DNA", "epigenetics"],
+          "terminology": ["allele", "chromosomes", "codominant", "dominant", "epigenetics", "exon", "gene expression", "genes", "genotype", "heredity", "heterozygous", "homozygous", "incomplete dominance", "inheritance", "intron", "karyotype", "methylation", "offspring", "parent", "pattern", "pedigree", "phenotype", "probability", "Punnett square", "recessive", "sex-linked", "trait"]
+        },
+        {
+          "code": "B-LS3-2",
+          "repeat_of_biology_1": true,
+          "performance_expectation": "Make and defend a claim based on evidence that inheritable genetic variations may result from (1) new genetic combinations through meiosis, (2) viable errors occurring during replication, and/or (3) mutations caused by environmental factors.",
+          "clarification_statement": "Emphasis is on using data to support arguments for the way genetic variation occurs.",
+          "state_assessment_boundary": "Assessment does not include the phases of meiosis or the biochemical mechanism of specific steps in the process. (Biology 2 is not EOCEP-assessed; boundary carried over from Biology 1.)",
+          "sep": {"name": "Engaging in Argument from Evidence", "description": "Make and defend a claim based on evidence about the natural world that reflects scientific knowledge, and student-generated evidence."},
+          "dci": [{"code": "LS3.B", "name": "Variation of Traits", "text": "In sexual reproduction, chromosomes can sometimes swap sections during meiosis, creating new genetic combinations and more genetic variation. DNA replication errors result in mutations, a source of genetic variation. Environmental factors can also cause mutations, and viable mutations are inherited."}],
+          "ccc": {"name": "Cause and Effect", "description": "Empirical evidence is required to differentiate between cause and correlation and make claims about specific causes and effects."},
+          "observable_performances": {
+            "claim": ["new genetic combinations through meiosis", "viable errors occurring during replication", "mutation caused by environmental factors (mutagen)"],
+            "evidence": ["variation naturally results during meiosis from crossing over and independent assortment", "genetic mutations occur due to replication errors and environmental factors", "genetic material is inheritable"],
+            "reasoning": ["genetic mutations produce genetic variation between cells or organisms", "defend a claim against counterclaims"]
+          },
+          "topics": ["meiosis", "genetic variation", "mutation"],
+          "terminology": ["allele", "cellular division", "centromere", "chromatid", "chromosome", "codon", "crossing over", "daughter cell", "deletion", "diploid", "DNA", "egg cell", "epigenetic", "fertilization", "frameshift", "gamete", "gene", "gene expression", "gene mutation", "genetic code", "genetic variation", "genome", "haploid", "homologous chromosome", "independent assortment", "inherited", "insertion", "meiosis", "meiosis I", "meiosis II", "monosomy", "multicellular", "mutagen", "mutation", "nondisjunction", "offspring", "parent cell", "point mutation", "replication", "sexual reproduction", "somatic cell", "sperm cell", "substitution", "trait", "trisomy"]
+        },
+        {
+          "code": "B-LS3-3",
+          "repeat_of_biology_1": true,
+          "performance_expectation": "Apply concepts of statistics and probability to explain the variation and distribution of expressed traits in a population.",
+          "clarification_statement": "Emphasis is on the use of mathematics to describe the probability of traits as it relates to genetic and environmental factors in the expression of traits.",
+          "state_assessment_boundary": "Assessment does not include Hardy-Weinberg or Chi-square analysis. (Biology 2 is not EOCEP-assessed; Biology 2 instruction explicitly extends into Hardy-Weinberg Conditions/Equilibrium beyond this carried-over boundary.)",
+          "sep": {"name": "Analyzing and Interpreting Data", "description": "Apply concepts of statistics and probability (including determining function fits to data, slope, intercept, and correlation coefficient for linear fits) to scientific and engineering questions and problems, using digital tools when feasible."},
+          "dci": [{"code": "LS3.B", "name": "Variation of Traits", "text": "Environmental factors also affect expression of traits, and hence affect the probability of occurrences of traits in a population. The variation and distribution of traits observed depends on both genetic and environmental factors."}],
+          "ccc": {"name": "Scale, Proportion, and Quantity", "description": "Algebraic thinking is used to examine scientific data and predict the effect of a change in one variable on another (e.g., linear growth vs. exponential growth)."},
+          "observable_performances": {
+            "organizing_data": ["distribution", "frequency", "variation"],
+            "identifying_relationships": ["analyze data (probability measures, Hardy-Weinberg Conditions) to determine relationship between trait occurrence and environmental factors"],
+            "interpreting_data": ["use patterns to predict changes in trait distribution if environmental variables change"]
+          },
+          "topics": ["Hardy-Weinberg Conditions", "Hardy-Weinberg Equilibrium", "trait distribution", "population genetics"],
+          "terminology": ["allele", "autosomal", "codominance", "complete dominance", "dihybrid cross", "distribution", "dominant", "environmental", "F1", "F2", "gamete", "gene expression", "genetic variability", "genotype", "genotypic ratio", "Hardy-Weinberg Conditions", "Hardy-Weinberg Equilibrium", "heredity", "heterozygous", "homozygous", "incomplete dominance", "karyotype", "monohybrid cross", "P (parental)", "pedigree", "phenotype", "phenotypic ratio", "polygenic inheritance", "population", "probability", "Punnett square", "ratio", "recessive", "sex linked", "trait", "variation"],
+          "question_family_candidate": true
+        }
+      ]
+    },
+    {
+      "domain_code": "LS4",
+      "domain_name": "Biological Evolution: Unity and Diversity",
+      "standards": [
+        {
+          "code": "B-LS4-1",
+          "repeat_of_biology_1": true,
+          "performance_expectation": "Communicate scientific information that common ancestry and biological evolution are supported by multiple lines of empirical evidence.",
+          "clarification_statement": "Emphasis is on students' conceptual understanding of the role each line of evidence has relating to common ancestry and biological evolution.",
+          "state_assessment_boundary": "Assessment is limited to conceptual explanations of the evidence for biological evolution and is not extended to the lines of evidence for specific species. Assessment does not include classification of organisms. (Biology 2 is not EOCEP-assessed; boundary carried over from Biology 1.)",
+          "sep": {"name": "Obtaining, Evaluating, and Communicating Information", "description": "Communicate scientific information (e.g., about phenomena and/or the process of development and the design and performance of a proposed process or system) in multiple formats (including orally, graphically, textually, and mathematically)."},
+          "dci": [
+            {"code": "LS4.A", "name": "Evidence of Common Ancestry and Diversity", "text": "Genetic information, like the fossil record, provides evidence of evolution. DNA sequences vary among species, but there are many overlaps; the ongoing branching that produces multiple lines of descent can be inferred by comparing DNA sequences. Such information is also derivable from amino acid sequences and anatomical/embryological evidence."},
+            {"code": "ETS2.B", "name": "Influence of Engineering, Technology, and Science on Society and the Natural World", "text": "The understanding of evolutionary relationships has recently been greatly accelerated by using new molecular tools to study biology."}
+          ],
+          "ccc": {"name": "Patterns", "description": "Different patterns may be observed at each of the scales at which a system is studied and can provide evidence for causality in explanations of phenomena."},
+          "observable_performances": {
+            "communication": ["use and cite at least two formats (oral, graphical, textual, mathematical)"],
+            "connections": [
+              "DNA sequences vary among species but have many similarities",
+              "triplet codon pattern used to decode mRNA is universal amongst known species",
+              "patterns in fossil record, including biogeography",
+              "patterns of anatomical and embryological similarities"
+            ]
+          },
+          "topics": ["evidence for evolution", "molecular biology tools", "biogeography"],
+          "terminology": ["adaptation", "amino acid sequencing", "analogous structure", "anatomy", "biochemical evidence", "biogeography", "cladogram", "common ancestry", "comparative anatomy", "descent with modification", "DNA sequencing", "electrophoresis", "embryo", "embryology", "evolution", "evolutionary tree", "fossil record", "heritable trait", "homologous structure", "homology", "natural selection", "paleontology", "phenotypic similarity", "phylogenetic tree", "phylogeny", "sedimentary layers", "species", "vestigial structure"]
+        },
+        {
+          "code": "B-LS4-3",
+          "performance_expectation": "Apply concepts of statistics and probability to support explanations that organisms with an advantageous heritable trait tend to increase in proportion to organisms lacking this trait.",
+          "clarification_statement": "Emphasis is on analyzing shifts in numerical distribution of traits and using these shifts as evidence to support explanations.",
+          "state_assessment_boundary": "Assessment is limited to basic statistical and graphical analysis. Assessment does not include allele frequency calculations.",
+          "sep": {"name": "Analyzing and Interpreting Data", "description": "Apply concepts of statistics and probability (including determining function fits to data, slope, intercept, and correlation coefficient for linear fits) to scientific and engineering questions and problems, using digital tools when feasible."},
+          "dci": [
+            {"code": "LS4.B", "name": "Natural Selection", "text": "Natural selection occurs only if there is both (1) variation in genetic information between organisms in a population and (2) variation in the expression of that genetic information (trait variation) that leads to differences in performance among individuals. Traits that positively affect survival are more likely to be reproduced, and thus more common in the population."},
+            {"code": "LS4.C", "name": "Adaptation", "text": "Natural selection leads to adaptation -- a population dominated by organisms well suited to survive and reproduce in a specific environment. The differential survival and reproduction of organisms with an advantageous heritable trait leads to an increase in the proportion of individuals with the trait and a decrease in the proportion without it. Adaptation also means the distribution of traits in a population can change when conditions change."}
+          ],
+          "ccc": {"name": "Patterns", "description": "Different patterns may be observed at each of the scales at which a system is studied and can provide evidence for causality in explanations of phenomena."},
+          "observable_performances": {
+            "organizing_data": ["organize data (tables, charts, graphs) by distribution of genetic traits over time"],
+            "identifying_relationships": ["analyze data (probability measures) to determine patterns of change in numerical distributions of traits over time/population scales"],
+            "interpreting_data": [
+              "positive or negative effects on fitness relating to expression of a variable trait",
+              "natural selection as the cause of increases/decreases in heritable traits over time, but only if affecting reproductive success",
+              "changes in distribution of anatomical, behavioral, and physiological adaptations"
+            ]
+          },
+          "topics": ["natural selection", "trait distribution shifts", "fitness"],
+          "terminology": ["adaptation", "advantageous", "allele", "distribution", "fitness", "gene", "heritable trait", "increase", "natural selection", "proportion", "significance", "variation"],
+          "question_family_candidate": true
+        },
+        {
+          "code": "B-LS4-6",
+          "performance_expectation": "Create or revise a simulation to test a solution to mitigate adverse impacts of human activity on biodiversity.",
+          "clarification_statement": "Emphasis is on testing solutions for a proposed problem related to threatened or endangered species, or to genetic variation of organisms for multiple species.",
+          "state_assessment_boundary": null,
+          "sep": {"name": "Using Mathematics and Computational Thinking", "description": "Create or revise a simulation of a phenomenon, designed device, process, or system."},
+          "dci": [
+            {"code": "LS4.C", "name": "Adaptation", "text": "Changes in the physical environment, whether naturally occurring or human induced, have contributed to the expansion of some species, the emergence of new distinct species as populations diverge under different conditions, and the decline -- and sometimes extinction -- of some species."},
+            {"code": "LS4.D", "name": "Biodiversity and Humans", "text": "Humans depend on the living world for resources and other benefits provided by biodiversity. Human activity is having adverse impacts on biodiversity through overpopulation, overexploitation, habitat destruction, pollution, invasive species, and climate change. Sustaining biodiversity is essential to supporting and enhancing life on Earth."},
+            {"code": "ETS1.B", "name": "Developing Possible Solutions", "text": "When evaluating solutions, it is important to take into account a range of constraints including cost, safety, reliability and aesthetics and to consider social, cultural and environmental impacts. (secondary)"}
+          ],
+          "ccc": {"name": "Cause and Effect", "description": "Empirical evidence is required to differentiate between cause and correlation and make claims about specific causes and effects."},
+          "observable_performances": {
+            "representation": [
+              "model effects of human activity (habitat alteration, climate change, invasive species, overexploitation, overpopulation, pollution) on threatened/endangered species or genetic variation within a species",
+              "provide quantitative information about the effect of a solution",
+              "describe variables that can be changed by the user to evaluate proposed solutions, tradeoffs, or decisions"
+            ],
+            "computational_modeling": ["use logical/realistic inputs considering cost, cultural/environmental impacts, reliability, safety", "identify possible negative consequences that would outweigh benefits"],
+            "analysis": ["compare simulation results to expected results", "identify limits of the simulation", "predict effects of design solutions on biodiversity"],
+            "revision": ["revise the simulation to provide sufficient information to evaluate the solution"]
+          },
+          "topics": ["conservation simulation", "endangered species", "biodiversity mitigation"],
+          "terminology": ["abiotic", "anthropogenic", "biodiversity", "biotic", "captive breeding", "carrying capacity", "climate", "climate change", "conservation", "constraints", "criteria", "deforestation", "ecological restoration", "ecosystem", "ecosystem diversity", "ecotourism", "endangered species", "environment", "extinction", "genetic diversity", "habitat", "habitat destruction", "habitat fragmentation", "habitat restoration", "human impact", "human population growth", "invasive species", "iterative", "mitigation", "optimize", "overharvesting", "pollution", "solution", "species diversity", "sustainable development"]
+        }
+      ]
+    }
+  ]
+}
