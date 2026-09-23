@@ -88,3 +88,14 @@ When SCDE publishes new Performance Targets (they update ~yearly, most recently 
 year folder rather than overwriting — old questions stay linked to the standard version they were built
 against. Update `sources.json` with the new document's `use_year`/`published` and set `active: true` /
 `false` accordingly.
+
+## Loading into the app
+
+`backend/app/standards/importer.py` (run automatically at container start, or manually with
+`python -m app.cli import-standards`) reads every `<STATE>/<use_year>/*.json` file read-only:
+course files become `courses` + `standards` (+ `topics`), `*-bundles.json` files become `bundles`
+aligned to PEs of the same course and year, and `sources.json` supplies document metadata. Rows are
+matched on natural keys with a per-record sha256, so re-running changes nothing unless a file
+changed, and standards are never deleted because saved questions reference them. A file that is
+missing required fields, or a bundle that aligns to a PE not in its course file, stops the import
+with an error naming the file.

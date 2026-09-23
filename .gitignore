@@ -13,3 +13,7 @@ frontend/dist/
 
 # editors / OS
 .DS_Store
+
+# tool caches
+**/.pytest_cache/
+**/.ruff_cache/

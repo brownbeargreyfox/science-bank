@@ -1,50 +1,37 @@
+# Production-style deployment: Postgres + one app container (API + built SPA).
+# The app listens on ${APP_BIND}:${APP_PORT} only (loopback by default); put the existing Caddy
+# reverse proxy in front of it. For development with hot reload, see docker-compose.dev.yml.
+
 services:
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-science_bank}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-science_bank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-science_bank}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-science_bank}"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
-      retries: 10
+      retries: 12
 
-  backend:
-    build: ./backend
+  app:
+    build: .
     restart: unless-stopped
     environment:
-      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-science_bank}:${POSTGRES_PASSWORD:-science_bank}@postgres:5432/${POSTGRES_DB:-science_bank}
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-science_bank}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-science_bank}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       TEACHER_USERNAME: ${TEACHER_USERNAME:-nina}
       TEACHER_PASSWORD_HASH: ${TEACHER_PASSWORD_HASH:-}
-      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-me}
-      CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:5173"]}
-      ENVIRONMENT: ${ENVIRONMENT:-development}
     depends_on:
       postgres:
         condition: service_healthy
-    volumes:
-      - ./backend:/app
-      - ./data:/app/data:ro
     ports:
-      - "8000:8000"
-
-  frontend:
-    build: ./frontend
-    restart: unless-stopped
-    environment:
-      VITE_API_BASE_URL: /api
-    depends_on:
-      - backend
-    volumes:
-      - ./frontend:/app
-      - /app/node_modules
-    ports:
-      - "5173:5173"
+      - "${APP_BIND:-127.0.0.1}:${APP_PORT:-8420}:8000"
 
 volumes:
   postgres_data:

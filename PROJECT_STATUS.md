@@ -1,6 +1,6 @@
 # Science Bank — Project Status & Handoff
 
-Last updated: 2026-09-22. Written so a fresh Claude session (or Nina, or Codex) can pick this up
+Last updated: 2026-09-22 (MVP vertical slice). Written so a fresh Claude session (or Nina, or Codex) can pick this up
 cold with zero prior context.
 
 ## 1. What this project is
@@ -129,124 +129,91 @@ Also present but out of current course scope (Nina/the user only asked for Biolo
 Chemistry): Anatomy and Physiology, Earth and Space Science, and Physics Performance Targets +
 Bundling Guides. Leave these alone unless the user asks to add those courses.
 
-None of the above blocks starting the app skeleton. They can be ingested incrementally later,
+None of the above blocks the app. They can be ingested incrementally later,
 same pattern as the files already done (read PDF → structure into JSON → validate → update
 `sources.json` + README).
 
-## 4. What's next: the app skeleton (not yet started)
+## 4. What's built: the MVP vertical slice
 
-This is genuinely unstarted — no `frontend/`, `backend/`, `docker-compose.yml`, or any code
-exists yet. Everything below is a plan, not a status report.
+Everything below exists, is tested, and runs as one Docker image + Postgres. See README.md for
+deploy/dev commands.
 
-### 4.1 Target repo layout
-```
-science-bank/
-├── frontend/
-│   ├── src/
-│   └── Dockerfile
-├── backend/
-│   ├── app/
-│   │   ├── api/            <- FastAPI routers
-│   │   ├── models/         <- SQLAlchemy models
-│   │   ├── schemas/        <- Pydantic schemas
-│   │   ├── services/       <- question-family engine, business logic
-│   │   ├── standards/      <- importer that loads data/standards/**/*.json into Postgres
-│   │   └── main.py
-│   └── Dockerfile
-├── data/
-│   └── standards/          <- DONE, see section 3 above
-├── postgres/
-├── docker-compose.yml
-├── .env.example
-└── README.md
-```
+### 4.1 Data model (Alembic migration `0001`)
+- `source_documents`, `courses`, `standards`, `topics`/`standard_topics`, `bundles`/`bundle_standards`
+  — loaded by `backend/app/standards/importer.py`.
+  - **Standards are keyed per course and year**: a course is unique on (state, use_year, slug) and a
+    standard on (course, code). B-LS1-1, B-LS3-2, B-LS3-3, B-LS4-1 exist in both Biology 1 and 2 with
+    different boundaries, so *never look a standard up by code alone* — use its id, or course + code.
+  - The importer only reads the JSON, upserts on natural keys with per-record sha256, reports
+    created/updated/unchanged, never deletes (questions reference standards), and resolves each
+    bundle's `aligned_pes` inside that bundle's own course. Re-running is a no-op (tested).
+- `users` (single teacher; bcrypt hash set via `python -m app.cli set-password`).
+- `question_families` (catalog mirror of code-defined families, synced at start-up after checking
+  every template's observable-performance citation exists), `question_family_runs` (seed + options +
+  parameters of each saved generation), `stimuli`, `questions` (status + provenance snapshot),
+  `question_versions` (append-only; `origin` = engine | teacher_edit), `question_status_events`,
+  `assessments`, `assessment_items` (pin a specific question version).
+- The planned `question_choices` table was folded into `question_versions.choices` (JSONB) so a
+  version is one immutable snapshot of stem + choices + key.
 
-### 4.2 Database schema (core tables, from the original brief — not yet built)
-```
-courses
-standards            <- populated from data/standards/**/*.json via an importer script
-standard_topics
-bundles              <- populated from *-bundles.json
+### 4.2 Deterministic question-family engine (`backend/app/services/engine/`, `.../families/`)
+Invariants (all covered by `backend/tests/test_engine.py`):
+- Sub-seeds are sha256(seed, family, version, group, template, attempt) — never Python `hash()`.
+  Randomness goes only through `Rng`, built on `random.Random.random()` (the one stream CPython
+  guarantees across versions). Same seed + options ⇒ byte-identical output, also across processes
+  with different PYTHONHASHSEED. Golden digests are pinned per family: **if a change alters output,
+  bump the family `version`** rather than editing the digest, so saved seeds stay reproducible.
+- Keys and distractors are computed from exactly the values rendered to students (rounded/noised
+  table values), and ambiguous draws (ties, near-duplicate distractors) are rejected and redrawn
+  deterministically. Every MC item has exactly one key and four distinct choices, each with a rationale.
+- Each family binds to exact (state, course slug, PE code) pairs; each template cites the
+  `observable_performances` category/index it elicits. Saving snapshots provenance onto each question
+  (PE text, boundary, source document + published date + file hash, family version, template, cited
+  observable performance, seed, group, attempt).
+- Save re-generates server-side from the seed; client-edited payloads are never trusted.
 
-stimuli
-questions
-question_choices
-question_versions     <- version history; editing a question creates a new version, never
-                          destroys the original
+Families (version 1.0.0):
+| Key | Standard | Notes on alignment |
+|---|---|---|
+| `population-carrying-capacity` | Biology 1 B-LS2-1 | Logistic survey data with one limiting-factor change (drought, predators, forage, dissolved O₂, food supply, salinity) and a constant control factor; items on fastest growth, estimating K, identifying/classifying the factor, predicting reversal, scale (PE mentions scale). No equation derivation (boundary). |
+| `trait-probability` | Biology 1 B-LS3-3 | Punnett enumeration for complete/incomplete/codominance; observed-vs-expected compared qualitatively (boundary excludes chi-square and Hardy-Weinberg); genotype × environment data (hydrangea soil pH, Himalayan rabbit temperature) for the LS3.B environmental emphasis. Not bound to the Biology 2 copy of B-LS3-3 (different boundary). |
+| `reaction-rate` | Chemistry C-PS1-5 | Two-reactant reactions only (thiosulfate + HCl, Mg + HCl, marble + HCl); concentration varies only for a dissolved reactant; temperature items are qualitative (boundary); time-to-endpoint data are handled as inverse rate. No enzymes (would need an optimum model). |
 
-assessments
-assessment_items
+### 4.3 API (`backend/app/api/`)
+All `/api/*` routes except login/logout require the session cookie (enforced at router level; a
+test walks every route). Unknown `/api/*` paths return JSON 404s. The student print endpoint is
+built without any key fields (tested), so the answer key cannot leak through the UI.
 
-question_families      <- NEW concept vs. original brief: defines a deterministic generator
-                          (e.g. "population-growth-graph") and which standard(s)/topics it can
-                          satisfy
-question_family_runs   <- NEW: records of a specific generation (parameters used, seed) so a
-                          teacher can regenerate/vary a set deterministically
-```
+### 4.4 Frontend (`frontend/`)
+React + Vite + TS + Tailwind; API types generated from the backend OpenAPI schema
+(`npm run gen:api`). Pages: login, dashboard, standards browser/detail/bundles, generate
+(preview → save), question bank, question detail (edit/versions/status/provenance), assessments
+(builder + student/teacher print views with SVG charts and table alternatives).
 
-No `generation_jobs` / `ai_reviews` tables from the original AI-centric brief — those belonged to
-the rejected LLM-writer design. Only add them back if the AI-generation decision is explicitly
-reversed later.
+### 4.5 Deployment
+Root `Dockerfile` builds the SPA and serves it from FastAPI; the entrypoint runs
+`alembic upgrade head` → `app.cli bootstrap` (import + family sync + optional first-account
+bootstrap) → uvicorn. `docker-compose.yml` publishes only `${APP_BIND:-127.0.0.1}:${APP_PORT:-8420}`;
+Caddy (host network) proxies to it — see README. `ENVIRONMENT=production` makes cookies Secure,
+hides `/docs`, and refuses to start with a weak `JWT_SECRET`.
 
-### 4.3 The question-family engine (the actual hard/interesting part)
-This is a deterministic content generator, not a template-filler with random numbers only — it
-needs to produce **scientifically valid** variations. Concretely, for each `question_family`:
-- A parameter space (e.g. for a carrying-capacity dataset: species name, starting population,
-  growth pattern shape, units) that stays within realistic/plausible bounds
-- A dataset/stimulus renderer (table or graph)
-- A question template bank tied to the dataset (e.g. "what relationship is shown between X and
-  Y", "predict the value at time Z") with DOK-appropriate phrasing pulled from the standard's own
-  `observable_performances` language, not an invented DOK label
-- An answer-key generator computed from the same parameters (not a second guess)
+## 5. What's next (suggested order)
+1. Nina uses it for a unit; collect edits she makes to generated items — they show which templates'
+   wording to improve (bump the family version when output changes).
+2. More families from the `question_family_candidate: true` PEs: C-PS1-7 (stoichiometry),
+   C-PS3-4 (thermal equilibrium), B-LS4-4 (natural selection data), Biology 2 B-LS2-2/B-LS2-4.
+   Each new family: bind to exact (course, code), cite observable performances, add invariant tests.
+3. Bundle-driven sets: one shared stimulus serving several aligned PEs of a bundle.
+4. Ingest the EOCEP documents (section 3) for an "EOCEP practice" constraint mode.
+5. Polish: export (DOCX/PDF) beyond browser print, question tagging, backups on a schedule.
 
-Suggested first families to build (from `question_family_candidate: true` flags already set in
-the data):
-- **B-LS2-1** (Biology 1) — carrying capacity / population growth data table + graph interpretation
-- **B-LS3-3** (Biology 1) — Punnett square / trait distribution and probability
-- One Chemistry family, e.g. **C-PS1-5** (reaction rate vs. temperature/concentration) or
-  **C-PS1-7** (stoichiometry/mole conversion)
-
-Pick 2-3 for the true "small set first" MVP per the scope decision in section 2.
-
-### 4.4 Phased build order (adapted from original brief, Phase numbering kept for continuity)
-- **Phase 1 — Foundation**: Docker Compose skeleton, React+Vite+TS+Tailwind shell, FastAPI shell,
-  Postgres, Alembic migrations, health endpoints, local auth (single-teacher account is fine for
-  MVP — Nina is the only user).
-- **Phase 2 — Standards**: DB schema for courses/standards/bundles, the importer script that
-  loads `data/standards/**/*.json` into Postgres, a standards browser/search UI.
-- **Phase 3 — Question Bank**: CRUD for questions/choices/stimuli, question editor UI,
-  `question_versions` history, filtering by course/standard/DOK/type.
-- **Phase 4 — Question-family engine**: build the 2-3 MVP families from 4.3, wire them to a
-  "Generate Question Set" UI flow (course → standard → DOK → format → stimulus → quantity →
-  generate), save generated output into the question bank as `status: generated`.
-- **Phase 5 — Review workflow**: question status states (Generated → Reviewed → Approved →
-  Rejected → Archived), a review queue UI. No AI quality-check pass — that was part of the
-  rejected AI-writer design.
-- **Phase 6 — Assessments**: Assessment Builder (assemble questions/stimulus sets into a named
-  assessment), DOK distribution + standards coverage display, print-friendly Teacher (with
-  answers) and Student (without) views.
-- **Phase 7 — Polish**: responsive UI, backups, import/export, settings.
-
-### 4.5 Immediate next action recommendation
-Start Phase 1: scaffold the repo layout in 4.1, get a `docker-compose.yml` with `frontend`,
-`backend`, `postgres` services running with health checks, then build the Phase 2 standards
-importer against the JSON already sitting in `data/standards/` — that's the fastest path to
-something visibly real (a standards browser) built on top of the finished data layer.
-
-## 5. Useful facts for whoever resumes this
-
-- Repo root: `C:\Users\howellbj\OneDrive - charlestoncpw.com\Documents\science-bank\` (not a git
-  repo yet as of this writing — check before assuming `git status` works).
-- Source PDFs: `C:\Users\howellbj\OneDrive - charlestoncpw.com\Documents\Nina's question thing\`
-- This machine's PDF tooling: `pdftoppm`/poppler is **not installed**, so the Read tool's `pages`
-  parameter (page-range rendering) fails on large PDFs. Reading a whole PDF without `pages` still
-  works and is what was used throughout — just expect large token usage for big source PDFs
-  (some of the untouched ones, like ESC633_GRHS_BIOL_IS_SAMP.pdf, are 1.8MB+ and may need
-  chunked/careful reading).
-- SC standards versioning: SCDE republishes Performance Targets ~yearly (most recent: July 2026,
-  "for use 2026-2027"). The data layer is already structured to add a new year folder under
-  `data/standards/SC/` without touching the current one — see the "Updating" section of
-  `data/standards/README.md`.
-- The user's standing preference from this session: work incrementally, validate each JSON file
-  after writing it, keep `sources.json` and the README in sync with what's actually been
-  ingested — don't let the manifest drift from reality.
+## 6. Useful facts for whoever resumes this
+- Repo: `/home/brandon/apps/science-bank` on the homelab (git; branch `claude/amazing-cray-apalq2`).
+  Other services on this host already use ports 80/443/3000/8000/8123/…; the app defaults to 8420.
+- Source PDFs (original authoring machine): `C:\Users\howellbj\OneDrive - charlestoncpw.com\Documents\Nina's question thing\`
+- SC standards versioning: SCDE republishes Performance Targets ~yearly. Add a new
+  `data/standards/SC/<year>/` folder rather than editing the old one; the importer creates new course
+  and standard rows for the new year and old questions keep pointing at the version they were built
+  against.
+- The user's standing preferences: work incrementally, validate each JSON file after writing it,
+  keep `sources.json` and the README in sync with what has actually been ingested.
