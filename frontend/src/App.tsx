@@ -1,34 +1,29 @@
 import { useEffect, useState } from "react";
+import { apiFetch } from "./lib/api";
 
-type BackendStatus = "checking" | "ok" | "error";
+type Data = Record<string, any>;
+const api = async (path: string, init?: RequestInit) => {
+  const res = await apiFetch(path, init);
+  if (!res.ok) throw new Error((await res.text()) || `Request failed (${res.status})`);
+  return res.json();
+};
 
-function App() {
-  const [status, setStatus] = useState<BackendStatus>("checking");
-
-  useEffect(() => {
-    fetch("/healthz")
-      .then((res) => setStatus(res.ok ? "ok" : "error"))
-      .catch(() => setStatus("error"));
-  }, []);
-
-  return (
-    <div className="mx-auto flex min-h-screen max-w-2xl flex-col justify-center gap-4 px-6 text-slate-900 dark:text-slate-100">
-      <h1 className="text-3xl font-semibold">Science Bank</h1>
-      <p className="text-slate-600 dark:text-slate-400">
-        Question bank &amp; assessment builder for SC Biology 1, Biology 2, and Chemistry.
-      </p>
-      <div className="flex items-center gap-2 text-sm">
-        <span
-          className={`h-2.5 w-2.5 rounded-full ${
-            status === "ok" ? "bg-green-500" : status === "error" ? "bg-red-500" : "bg-amber-400"
-          }`}
-        />
-        <span>
-          Backend: {status === "checking" ? "checking…" : status === "ok" ? "connected" : "unreachable"}
-        </span>
-      </div>
-    </div>
-  );
+export default function App() {
+  const [page, setPage] = useState("Standards");
+  const [standards, setStandards] = useState<Data[]>([]);
+  const [families, setFamilies] = useState<Data[]>([]), [questions, setQuestions] = useState<Data[]>([]), [assessments, setAssessments] = useState<Data[]>([]);
+  const [family, setFamily] = useState(""), [filter, setFilter] = useState(""), [preview, setPreview] = useState<Data | null>(null), [notice, setNotice] = useState("");
+  const load = async () => { try { const [,s,f,q,a] = await Promise.all([api("/courses"),api("/standards"),api("/families"),api("/questions"),api("/assessments")]); setStandards(s); setFamilies(f); setQuestions(q.items ?? q); setAssessments(a); setFamily(old => old || f[0]?.key || ""); } catch (e:any) { setNotice(e.message); } };
+  useEffect(() => { load(); }, []);
+  const previewSet = async () => { try { const p = await api("/generate/preview", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({family_key:family,quantity:3,doks:[],question_types:[]})}); setPreview(p); setNotice("Preview is reproducible from its displayed seed."); } catch(e:any) { setNotice(e.message); } };
+  const saveSet = async () => { if (!preview) return; try { await api("/generate/save", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({family_key:preview.family_key,seed:preview.seed,quantity:preview.options.quantity,doks:preview.options.doks,question_types:preview.options.question_types})}); setNotice("Saved to the question bank."); await load(); } catch(e:any) { setNotice(e.message); } };
+  const newAssessment = async () => { const title = prompt("Assessment title"); if (!title) return; try { await api("/assessments", {method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({title})}); await load(); } catch(e:any) { setNotice(e.message); } };
+  const tabs = ["Standards", "Generate", "Question bank", "Assessments"];
+  const matching = standards.filter(s => JSON.stringify(s).toLowerCase().includes(filter.toLowerCase()));
+  return <main className="min-h-screen bg-slate-50 text-slate-900"><header className="bg-slate-900 px-6 py-5 text-white"><div className="mx-auto max-w-6xl"><h1 className="text-2xl font-bold">Science Bank</h1><p className="text-slate-300">Standards-aligned science questions built from valid data—not an AI writer.</p></div></header><nav className="border-b bg-white"><div className="mx-auto flex max-w-6xl gap-1 px-4">{tabs.map(t=><button key={t} onClick={()=>setPage(t)} className={`px-4 py-3 text-sm font-semibold ${page===t ? "border-b-2 border-teal-600 text-teal-700" : "text-slate-600"}`}>{t}</button>)}</div></nav><section className="mx-auto max-w-6xl p-6">{notice&&<p className="mb-5 rounded border border-amber-200 bg-amber-50 p-3 text-sm">{notice}</p>}
+    {page==="Standards" && <><h2 className="mb-4 text-xl font-bold">Standards browser</h2><input className="mb-5 w-full rounded border p-2" value={filter} onChange={e=>setFilter(e.target.value)} placeholder="Search performance expectations, topics, or terminology"/><div className="grid gap-3">{matching.map(s=><article key={s.id} className="rounded-lg border bg-white p-4"><b className="text-teal-800">{s.code}</b><span className="ml-2 text-sm text-slate-500">{s.course_name}</span><p className="mt-2">{s.performance_expectation}</p></article>)}</div></>}
+    {page==="Generate" && <><h2 className="mb-4 text-xl font-bold">Generate a question set</h2><div className="flex gap-3 rounded-lg border bg-white p-5"><select className="flex-1 rounded border p-2" value={family} onChange={e=>setFamily(e.target.value)}>{families.map(f=><option key={f.key} value={f.key}>{f.title}</option>)}</select><button className="rounded bg-teal-700 px-4 py-2 font-semibold text-white" onClick={previewSet}>Preview 3 questions</button></div>{preview&&<div className="mt-5"><button className="mb-4 rounded bg-slate-900 px-4 py-2 font-semibold text-white" onClick={saveSet}>Save this set to the bank</button>{preview.groups.flatMap((g:Data)=>g.questions).map((q:Data,i:number)=><article key={i} className="mb-3 rounded-lg border bg-white p-4"><p className="font-semibold">{i+1}. {q.stem}</p>{q.choices?.map((c:Data)=><p key={c.label} className="mt-1">{c.label}. {c.text}</p>)}<details className="mt-3"><summary>Teacher key</summary><p className="mt-2">{q.answer} — {q.explanation}</p></details></article>)}</div>}</>}
+    {page==="Question bank" && <><h2 className="mb-4 text-xl font-bold">Question bank</h2>{questions.length ? <div className="grid gap-3">{questions.map(q=><article key={q.id} className="rounded-lg border bg-white p-4"><small>{q.standard_code} · {q.status} · DOK {q.dok}</small><p className="mt-2">{q.stem}</p></article>)}</div> : <p>No questions saved yet.</p>}</>}
+    {page==="Assessments" && <><div className="mb-4 flex justify-between"><h2 className="text-xl font-bold">Assessments</h2><button onClick={newAssessment} className="rounded bg-teal-700 px-4 py-2 text-white">New assessment</button></div>{assessments.map(a=><article key={a.id} className="mb-3 rounded-lg border bg-white p-4"><b>{a.title}</b><div className="mt-2 flex gap-4 text-sm"><a className="text-teal-700 underline" target="_blank" href={`/api/assessments/${a.id}/print?variant=student`}>Student print view</a><a className="text-teal-700 underline" target="_blank" href={`/api/assessments/${a.id}/print?variant=teacher`}>Teacher key</a></div></article>)}</>}
+  </section></main>;
 }
-
-export default App;
