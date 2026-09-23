@@ -24,7 +24,7 @@ SEEDS = [f"inv-{i}" for i in range(150)]
 # would no longer regenerate identically: bump the family version instead of editing these.
 GOLDEN = {
     "population-carrying-capacity": "0c8ee45939b20ce51b7dca113cea1742cf4ca9aaad92086d30df1e8e685860db",
-    "trait-probability": "9ba87b23733c2415194fc4e64a5844587c568874f18de9f2949f5a3979ab1830",
+    "trait-probability": "ff980b3df37a613d7f891355941547eb80306d08e2be9dde702114c2b114571a",
     "reaction-rate": "5693b0d4e23823f2e880e2d017eafbeedef5f25fe869982a63eea3cfca75acea",
 }
 

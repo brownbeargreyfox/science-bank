@@ -200,7 +200,8 @@ def _ratio_text(trait: dict, genos: dict[str, Fraction]) -> str:
 
 
 def _var(env: dict) -> str:
-    return env["variable"].split(" (")[0].lower()
+    """Variable name for mid-sentence use; keeps case-sensitive units such as "pH"."""
+    return " ".join(w if any(c.isupper() for c in w[1:]) else w.lower() for w in env["variable"].split(" (")[0].split())
 
 
 def _level(env: dict, level: float) -> str:
@@ -234,7 +235,7 @@ PART_C = {"environment_relationship", "environment_prediction", "explain_variati
 
 class TraitProbability(QuestionFamily):
     key = "trait-probability"
-    version = "1.0.0"
+    version = "1.1.0"
     title = "Trait probability and distribution"
     description = (
         "Monohybrid crosses (complete dominance, incomplete dominance, codominance) with Punnett-square "
@@ -456,16 +457,16 @@ class TraitProbability(QuestionFamily):
             stem=f"In Cross 1, what is the probability that an offspring will have {target}?",
             answer=_frac_text(p),
             explanation=(
-                f"{self._punnett_text(trait, p1, p2)} {boxes} of the 4 boxes give {target}, so the probability is "
+                f"{self._punnett_text(trait, p1, p2)} {boxes} of the 4 boxes show {target}, so the probability is "
                 f"{_frac_text(p)}."
             ),
             choices=[
-                DraftChoice(_frac_text(p), True, f"Correct: {boxes} of the 4 Punnett square boxes give {target}."),
+                DraftChoice(_frac_text(p), True, f"Correct: {boxes} of the 4 Punnett square boxes show {target}."),
                 *[
                     DraftChoice(
                         _frac_text(f),
                         False,
-                        f"This would mean {int(f * 4)} of 4 boxes give {target}; the square for {p1} × {p2} has {boxes}.",
+                        f"This would mean {int(f * 4)} of 4 boxes show {target}; the square for {p1} × {p2} has {boxes}.",
                     )
                     for f in distractors
                 ],
@@ -536,7 +537,7 @@ class TraitProbability(QuestionFamily):
 
         def expected_text(c):
             vec = _pheno_vector(trait, c)
-            return ", ".join(f"{int(f * 4)}/4 {ph}" for f, ph in zip(vec, order) if f) or "none"
+            return ", ".join(f"all {ph}" if f == 1 else f"{f} {ph}" for f, ph in zip(vec, order) if f)
 
         observed_text = ", ".join(f"{c} {ph}" for c, ph in zip(obs["counts"], order) if c)
         obs_pct = ", ".join(f"about {round(100 * c / obs['total'])}% {ph}" for c, ph in zip(obs["counts"], order) if c)
