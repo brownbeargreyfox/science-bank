@@ -22,11 +22,27 @@ directly from official South Carolina Department of Education documents — see
 Biology 1, Biology 2, and Chemistry (2026-2027) are extracted and structured. See
 [`data/standards/README.md`](data/standards/README.md) for the schema.
 
-**App: not started.** No frontend, backend, or database code exists yet.
+**App: Phase 1 skeleton.** Docker Compose brings up Postgres, a FastAPI backend (health checks,
+single-teacher cookie auth, Alembic wired up), and a React+Vite+Tailwind frontend shell. No
+domain features (standards browser, question bank, generators) yet — that's Phases 2+.
 
 👉 **For full context — what's decided, what's next, and where to pick up — read
 [`PROJECT_STATUS.md`](PROJECT_STATUS.md).** It's written as a complete handoff document for
 anyone (or any AI session) resuming this project cold.
+
+## Running locally
+
+```
+cp .env.example .env   # fill in TEACHER_PASSWORD_HASH and JWT_SECRET
+docker compose up --build
+```
+
+- Frontend (dev server): http://localhost:5173
+- Backend: http://localhost:8000 — health checks at `/healthz` (liveness) and `/readyz`
+  (DB connectivity)
+
+In the homelab deployment, the existing Caddy reverse proxy fronts the `frontend`/`backend`
+services — this repo's `docker-compose.yml` doesn't include Caddy itself.
 
 ## Planned stack
 
@@ -43,8 +59,10 @@ Deploy:    Docker Compose, behind an existing Caddy reverse proxy
 science-bank/
 ├── data/
 │   └── standards/       <- SC standards reference data (done — see its own README)
-├── frontend/             <- not started
-├── backend/               <- not started
+├── frontend/             <- React + Vite + TS + Tailwind shell (Phase 1)
+├── backend/               <- FastAPI + SQLAlchemy + Alembic shell (Phase 1)
+├── docker-compose.yml    <- postgres + backend + frontend
+├── .env.example          <- copy to .env before running
 ├── PROJECT_STATUS.md    <- full project handoff / decision log
 └── README.md              <- this file
 ```
