@@ -92,6 +92,7 @@ export default function GeneratePage() {
   const [quantity, setQuantity] = useState<string>(params.get("quantity") ?? "5");
   const [seed, setSeed] = useState<string>(params.get("seed") ?? "");
   const [showKey, setShowKey] = useState(true);
+  const [generationMode, setGenerationMode] = useState<"classroom" | "eocep">("classroom");
   const [preview, setPreview] = useState<{ request: GenerateRequest; result: GeneratePreview } | null>(null);
   const [saved, setSaved] = useState<GenerateSaveOut | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null);
@@ -125,6 +126,7 @@ export default function GeneratePage() {
     template_keys: templates.filter((k) => family?.templates.some((t) => t.key === k)),
     quantity: qty,
     seed: seedValue && seedValue.trim() ? seedValue.trim() : null,
+    generation_mode: generationMode,
   });
 
   const runPreview = useMutation({
@@ -183,6 +185,11 @@ export default function GeneratePage() {
           <h2 className="mb-3 text-lg font-bold">
             <span className="mr-2 text-muted">1.</span>Course and standard
           </h2>
+          <label htmlFor="g-mode" className="field-label">Generation mode</label>
+          <select id="g-mode" className="input mb-4" value={generationMode} onChange={(e) => setGenerationMode(e.target.value as "classroom" | "eocep")}>
+            <option value="classroom">Classroom</option>
+            <option value="eocep">EOCEP practice (Biology 1)</option>
+          </select>
           <label htmlFor="g-course" className="field-label">
             Course
           </label>

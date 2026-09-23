@@ -4,19 +4,73 @@
  */
 
 export interface paths {
-    "/healthz": {
+    "/api/assessments": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /**
-         * Healthz
-         * @description Liveness check — does not touch the database.
-         */
-        get: operations["healthz_healthz_get"];
+        /** List Assessments */
+        get: operations["list_assessments_api_assessments_get"];
         put?: never;
+        /** Create Assessment */
+        post: operations["create_assessment_api_assessments_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/{assessment_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Assessment */
+        get: operations["get_assessment_api_assessments__assessment_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Assessment */
+        delete: operations["delete_assessment_api_assessments__assessment_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Assessment */
+        patch: operations["update_assessment_api_assessments__assessment_id__patch"];
+        trace?: never;
+    };
+    "/api/assessments/{assessment_id}/items": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Add Items
+         * @description Pin each question's current version. Items sharing a stimulus are kept next to each other.
+         */
+        post: operations["add_items_api_assessments__assessment_id__items_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/{assessment_id}/items/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Reorder Items */
+        put: operations["reorder_items_api_assessments__assessment_id__items_order_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -24,7 +78,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/readyz": {
+    "/api/assessments/{assessment_id}/items/{item_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Remove Item */
+        delete: operations["remove_item_api_assessments__assessment_id__items__item_id__delete"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/{assessment_id}/items/{item_id}/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Refresh Item
+         * @description Re-pin an item to its question's latest version.
+         */
+        post: operations["refresh_item_api_assessments__assessment_id__items__item_id__refresh_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/assessments/{assessment_id}/print": {
         parameters: {
             query?: never;
             header?: never;
@@ -32,10 +123,10 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Readyz
-         * @description Readiness check — confirms the database connection works.
+         * Print View
+         * @description Printable content. The student variant is built without any key data at all.
          */
-        get: operations["readyz_readyz_get"];
+        get: operations["print_view_api_assessments__assessment_id__print_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -55,46 +146,6 @@ export interface paths {
         put?: never;
         /** Login */
         post: operations["login_api_auth_login_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/registration-status": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Registration Status
-         * @description Only expose registration while the single-teacher database has no account.
-         */
-        get: operations["registration_status_api_auth_registration_status_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/auth/register": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Register
-         * @description One-time bootstrap registration; permanently closes once an account exists.
-         */
-        post: operations["register_api_auth_register_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -135,66 +186,38 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/courses": {
+    "/api/auth/register": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List Courses */
-        get: operations["list_courses_api_courses_get"];
+        get?: never;
         put?: never;
-        post?: never;
+        /**
+         * Register
+         * @description Create another teacher account for this private installation.
+         */
+        post: operations["register_api_auth_register_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/standards": {
+    "/api/auth/registration-status": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List Standards */
-        get: operations["list_standards_api_standards_get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/standards/{standard_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Standard Detail */
-        get: operations["get_standard_detail_api_standards__standard_id__get"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/topics": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** List Topics */
-        get: operations["list_topics_api_topics_get"];
+        /**
+         * Registration Status
+         * @description Report whether this private installation currently accepts new teacher accounts.
+         */
+        get: operations["registration_status_api_auth_registration_status_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -220,15 +243,15 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/sources": {
+    "/api/courses": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List Sources */
-        get: operations["list_sources_api_sources_get"];
+        /** List Courses */
+        get: operations["list_courses_api_courses_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -311,6 +334,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/questions/bulk-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Bulk Status */
+        post: operations["bulk_status_api_questions_bulk_status_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/questions/{question_id}": {
         parameters: {
             query?: never;
@@ -322,23 +362,6 @@ export interface paths {
         get: operations["get_question_api_questions__question_id__get"];
         put?: never;
         post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/questions/{question_id}/versions": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /** Edit Question */
-        post: operations["edit_question_api_questions__question_id__versions_post"];
         delete?: never;
         options?: never;
         head?: never;
@@ -382,7 +405,7 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/questions/bulk-status": {
+    "/api/questions/{question_id}/versions": {
         parameters: {
             query?: never;
             header?: never;
@@ -391,98 +414,24 @@ export interface paths {
         };
         get?: never;
         put?: never;
-        /** Bulk Status */
-        post: operations["bulk_status_api_questions_bulk_status_post"];
+        /** Edit Question */
+        post: operations["edit_question_api_questions__question_id__versions_post"];
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/assessments": {
+    "/api/sources": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        /** List Assessments */
-        get: operations["list_assessments_api_assessments_get"];
+        /** List Sources */
+        get: operations["list_sources_api_sources_get"];
         put?: never;
-        /** Create Assessment */
-        post: operations["create_assessment_api_assessments_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/assessments/{assessment_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Assessment */
-        get: operations["get_assessment_api_assessments__assessment_id__get"];
-        put?: never;
-        post?: never;
-        /** Delete Assessment */
-        delete: operations["delete_assessment_api_assessments__assessment_id__delete"];
-        options?: never;
-        head?: never;
-        /** Update Assessment */
-        patch: operations["update_assessment_api_assessments__assessment_id__patch"];
-        trace?: never;
-    };
-    "/api/assessments/{assessment_id}/items": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        /**
-         * Add Items
-         * @description Pin each question's current version. Items sharing a stimulus are kept next to each other.
-         */
-        post: operations["add_items_api_assessments__assessment_id__items_post"];
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/assessments/{assessment_id}/items/{item_id}": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        put?: never;
-        post?: never;
-        /** Remove Item */
-        delete: operations["remove_item_api_assessments__assessment_id__items__item_id__delete"];
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/api/assessments/{assessment_id}/items/order": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        get?: never;
-        /** Reorder Items */
-        put: operations["reorder_items_api_assessments__assessment_id__items_order_put"];
         post?: never;
         delete?: never;
         options?: never;
@@ -490,27 +439,58 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/api/assessments/{assessment_id}/items/{item_id}/refresh": {
+    "/api/standards": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** List Standards */
+        get: operations["list_standards_api_standards_get"];
         put?: never;
-        /**
-         * Refresh Item
-         * @description Re-pin an item to its question's latest version.
-         */
-        post: operations["refresh_item_api_assessments__assessment_id__items__item_id__refresh_post"];
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
         patch?: never;
         trace?: never;
     };
-    "/api/assessments/{assessment_id}/print": {
+    "/api/standards/{standard_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Standard Detail */
+        get: operations["get_standard_detail_api_standards__standard_id__get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/topics": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Topics */
+        get: operations["list_topics_api_topics_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/healthz": {
         parameters: {
             query?: never;
             header?: never;
@@ -518,10 +498,30 @@ export interface paths {
             cookie?: never;
         };
         /**
-         * Print View
-         * @description Printable content. The student variant is built without any key data at all.
+         * Healthz
+         * @description Liveness check — does not touch the database.
          */
-        get: operations["print_view_api_assessments__assessment_id__print_get"];
+        get: operations["healthz_healthz_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/readyz": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Readyz
+         * @description Readiness check — confirms the database connection works.
+         */
+        get: operations["readyz_readyz_get"];
         put?: never;
         post?: never;
         delete?: never;
@@ -550,8 +550,6 @@ export interface components {
         };
         /** AssessmentCreate */
         AssessmentCreate: {
-            /** Title */
-            title: string;
             /** Course Id */
             course_id?: number | null;
             /**
@@ -559,43 +557,53 @@ export interface components {
              * @default
              */
             instructions: string;
+            /** Title */
+            title: string;
         };
         /** AssessmentDetail */
         AssessmentDetail: {
-            /** Id */
-            id: number;
-            /** Title */
-            title: string;
             /** Course Id */
             course_id: number | null;
             /** Course Name */
             course_name: string | null;
+            /** Dok Distribution */
+            dok_distribution: {
+                [key: string]: number;
+            };
+            /** Id */
+            id: number;
             /** Instructions */
             instructions: string;
             /** Item Count */
             item_count: number;
+            /** Items */
+            items: components["schemas"]["AssessmentItemOut"][];
+            /** Question Type Counts */
+            question_type_counts: {
+                [key: string]: number;
+            };
+            /** Standards Coverage */
+            standards_coverage: Record<string, never>[];
+            /** Title */
+            title: string;
             /**
              * Updated At
              * Format: date-time
              */
             updated_at: string;
-            /** Items */
-            items: components["schemas"]["AssessmentItemOut"][];
-            /** Dok Distribution */
-            dok_distribution: {
-                [key: string]: number;
-            };
-            /** Standards Coverage */
-            standards_coverage: Record<string, never>[];
-            /** Question Type Counts */
-            question_type_counts: {
-                [key: string]: number;
-            };
         };
         /** AssessmentItemOut */
         AssessmentItemOut: {
+            /** Course Name */
+            course_name: string;
+            /** Dok */
+            dok: number;
             /** Id */
             id: number;
+            /** Latest Version No */
+            latest_version_no: number;
+            /** Pinned Version No */
+            pinned_version_no: number;
             /** Position */
             position: number;
             /** Question Id */
@@ -605,42 +613,34 @@ export interface components {
              * @enum {string}
              */
             question_status: "generated" | "reviewed" | "approved" | "rejected" | "archived";
-            /** Pinned Version No */
-            pinned_version_no: number;
-            /** Latest Version No */
-            latest_version_no: number;
-            /** Standard Code */
-            standard_code: string;
-            /** Course Name */
-            course_name: string;
-            /** Stimulus Id */
-            stimulus_id: number | null;
-            /** Stimulus Title */
-            stimulus_title: string | null;
-            /** Dok */
-            dok: number;
             /**
              * Question Type
              * @enum {string}
              */
             question_type: "multiple_choice" | "constructed_response";
+            /** Standard Code */
+            standard_code: string;
             /** Stem */
             stem: string;
+            /** Stimulus Id */
+            stimulus_id: number | null;
+            /** Stimulus Title */
+            stimulus_title: string | null;
         };
         /** AssessmentSummary */
         AssessmentSummary: {
-            /** Id */
-            id: number;
-            /** Title */
-            title: string;
             /** Course Id */
             course_id: number | null;
             /** Course Name */
             course_name: string | null;
+            /** Id */
+            id: number;
             /** Instructions */
             instructions: string;
             /** Item Count */
             item_count: number;
+            /** Title */
+            title: string;
             /**
              * Updated At
              * Format: date-time
@@ -649,52 +649,52 @@ export interface components {
         };
         /** AssessmentUpdate */
         AssessmentUpdate: {
-            /** Title */
-            title?: string | null;
             /** Course Id */
             course_id?: number | null;
             /** Instructions */
             instructions?: string | null;
+            /** Title */
+            title?: string | null;
         };
         /** BulkStatusChange */
         BulkStatusChange: {
+            /** Note */
+            note?: string | null;
+            /** Question Ids */
+            question_ids: number[];
             /**
              * To Status
              * @enum {string}
              */
             to_status: "generated" | "reviewed" | "approved" | "rejected" | "archived";
-            /** Note */
-            note?: string | null;
-            /** Question Ids */
-            question_ids: number[];
         };
         /** BulkStatusOut */
         BulkStatusOut: {
-            /** Updated */
-            updated: number[];
             /** Skipped */
             skipped: {
                 [key: string]: string;
             };
+            /** Updated */
+            updated: number[];
         };
         /** BundleOut */
         BundleOut: {
-            /** Id */
-            id: number;
-            /** Course Id */
-            course_id: number;
-            /** Course Name */
-            course_name: string;
-            /** Name */
-            name: string;
-            /** Narrative */
-            narrative: string;
             /** Aligned */
             aligned: components["schemas"]["BundleStandardOut"][];
             /** Connected Pes */
             connected_pes: string[];
+            /** Course Id */
+            course_id: number;
+            /** Course Name */
+            course_name: string;
             /** Example Anchoring Phenomena */
             example_anchoring_phenomena: string[];
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+            /** Narrative */
+            narrative: string;
             /** Source Document Title */
             source_document_title: string;
         };
@@ -709,19 +709,17 @@ export interface components {
         };
         /** BundleStandardOut */
         BundleStandardOut: {
-            /** Standard Id */
-            standard_id: number;
             /** Code */
             code: string;
             /** Partial */
             partial: boolean;
             /** Performance Expectation */
             performance_expectation: string;
+            /** Standard Id */
+            standard_id: number;
         };
         /** ChoiceIn */
         ChoiceIn: {
-            /** Text */
-            text: string;
             /** Correct */
             correct: boolean;
             /**
@@ -729,41 +727,43 @@ export interface components {
              * @default
              */
             rationale: string;
+            /** Text */
+            text: string;
         };
         /** ChoiceOut */
         ChoiceOut: {
-            /** Label */
-            label: string;
-            /** Text */
-            text: string;
             /** Correct */
             correct: boolean;
+            /** Label */
+            label: string;
             /** Rationale */
             rationale: string;
+            /** Text */
+            text: string;
         };
         /** CourseOut */
         CourseOut: {
+            /** Active */
+            active: boolean;
+            /** Bundles Count */
+            bundles_count: number;
             /** Id */
             id: number;
+            /** Name */
+            name: string;
+            /** Notes */
+            notes: string | null;
+            /** Slug */
+            slug: string;
+            source_document: components["schemas"]["SourceDocumentOut"];
+            /** Standards Base */
+            standards_base: string | null;
+            /** Standards Count */
+            standards_count: number;
             /** State */
             state: string;
             /** Use Year */
             use_year: string;
-            /** Slug */
-            slug: string;
-            /** Name */
-            name: string;
-            /** Standards Base */
-            standards_base: string | null;
-            /** Notes */
-            notes: string | null;
-            /** Active */
-            active: boolean;
-            /** Standards Count */
-            standards_count: number;
-            /** Bundles Count */
-            bundles_count: number;
-            source_document: components["schemas"]["SourceDocumentOut"];
         };
         /** DciOut */
         DciOut: {
@@ -776,31 +776,31 @@ export interface components {
         };
         /** FamilyBindingOut */
         FamilyBindingOut: {
-            /** State */
-            state: string;
-            /** Course Slug */
-            course_slug: string;
             /** Code */
             code: string;
+            /** Course Slug */
+            course_slug: string;
             /** Standard Ids */
             standard_ids: number[];
+            /** State */
+            state: string;
         };
         /** FamilyOut */
         FamilyOut: {
-            /** Key */
-            key: string;
-            /** Version */
-            version: string;
-            /** Title */
-            title: string;
-            /** Description */
-            description: string;
-            /** Stimulus Kind */
-            stimulus_kind: string;
             /** Bindings */
             bindings: components["schemas"]["FamilyBindingOut"][];
+            /** Description */
+            description: string;
+            /** Key */
+            key: string;
+            /** Stimulus Kind */
+            stimulus_kind: string;
             /** Templates */
             templates: components["schemas"]["TemplateOut"][];
+            /** Title */
+            title: string;
+            /** Version */
+            version: string;
         };
         /** FamilyRef */
         FamilyRef: {
@@ -817,37 +817,43 @@ export interface components {
             family_key: string;
             /** Family Version */
             family_version: string;
-            /** Seed */
-            seed: string;
-            /** Options */
-            options: Record<string, never>;
-            standard: components["schemas"]["StandardSummary"];
             /** Groups */
             groups: components["schemas"]["GeneratedGroupOut"][];
+            /** Options */
+            options: Record<string, never>;
+            /** Seed */
+            seed: string;
+            standard: components["schemas"]["StandardSummary"];
         };
         /** GenerateRequest */
         GenerateRequest: {
-            /** Standard Id */
-            standard_id: number;
+            /**
+             * Doks
+             * @default []
+             */
+            doks: number[];
             /** Family Key */
             family_key: string;
-            /** Seed */
-            seed?: string | null;
+            /**
+             * Generation Mode
+             * @default classroom
+             * @enum {string}
+             */
+            generation_mode: "classroom" | "eocep";
             /**
              * Quantity
              * @default 5
              */
             quantity: number;
             /**
-             * Doks
-             * @default []
-             */
-            doks: number[];
-            /**
              * Question Types
              * @default []
              */
             question_types: ("multiple_choice" | "constructed_response")[];
+            /** Seed */
+            seed?: string | null;
+            /** Standard Id */
+            standard_id: number;
             /**
              * Template Keys
              * @default []
@@ -856,12 +862,12 @@ export interface components {
         };
         /** GenerateSaveOut */
         GenerateSaveOut: {
+            /** Question Ids */
+            question_ids: number[];
             /** Run Id */
             run_id: number;
             /** Seed */
             seed: string;
-            /** Question Ids */
-            question_ids: number[];
         };
         /** GeneratedGroupOut */
         GeneratedGroupOut: {
@@ -869,19 +875,24 @@ export interface components {
             index: number;
             /** Parameters */
             parameters: Record<string, never>;
-            /** Stimulus */
-            stimulus: Record<string, never>;
             /** Questions */
             questions: components["schemas"]["GeneratedQuestionOut"][];
+            /** Stimulus */
+            stimulus: Record<string, never>;
         };
         /** GeneratedQuestionOut */
         GeneratedQuestionOut: {
-            /** Template Key */
-            template_key: string;
-            /** Title */
-            title: string;
+            /** Answer */
+            answer: string;
+            /** Attempt */
+            attempt: number;
+            /** Choices */
+            choices: components["schemas"]["ChoiceOut"][];
             /** Dok */
             dok: number;
+            /** Explanation */
+            explanation: string;
+            observable: components["schemas"]["ObservableRef"];
             /**
              * Question Type
              * @enum {string}
@@ -889,15 +900,10 @@ export interface components {
             question_type: "multiple_choice" | "constructed_response";
             /** Stem */
             stem: string;
-            /** Choices */
-            choices: components["schemas"]["ChoiceOut"][];
-            /** Answer */
-            answer: string;
-            /** Explanation */
-            explanation: string;
-            observable: components["schemas"]["ObservableRef"];
-            /** Attempt */
-            attempt: number;
+            /** Template Key */
+            template_key: string;
+            /** Title */
+            title: string;
         };
         /** HTTPValidationError */
         HTTPValidationError: {
@@ -906,17 +912,17 @@ export interface components {
         };
         /** LoginRequest */
         LoginRequest: {
-            /** Username */
-            username: string;
             /** Password */
             password: string;
+            /** Username */
+            username: string;
         };
         /** NamedText */
         NamedText: {
-            /** Name */
-            name: string;
             /** Description */
             description: string;
+            /** Name */
+            name: string;
         };
         /** ObservableRef */
         ObservableRef: {
@@ -929,46 +935,54 @@ export interface components {
         };
         /** PrintBlock */
         PrintBlock: {
+            /** Questions */
+            questions: components["schemas"]["PrintQuestion"][];
             /** Stimulus */
             stimulus: Record<string, never> | null;
             /** Stimulus Title */
             stimulus_title: string | null;
-            /** Questions */
-            questions: components["schemas"]["PrintQuestion"][];
         };
         /** PrintChoice */
         PrintChoice: {
-            /** Label */
-            label: string;
-            /** Text */
-            text: string;
             /** Correct */
             correct?: boolean | null;
+            /** Label */
+            label: string;
             /** Rationale */
             rationale?: string | null;
+            /** Text */
+            text: string;
         };
         /** PrintOut */
         PrintOut: {
-            /**
-             * Variant
-             * @enum {string}
-             */
-            variant: "teacher" | "student";
-            /** Title */
-            title: string;
+            /** Blocks */
+            blocks: components["schemas"]["PrintBlock"][];
             /** Course Name */
             course_name: string | null;
             /** Instructions */
             instructions: string;
             /** Question Count */
             question_count: number;
-            /** Blocks */
-            blocks: components["schemas"]["PrintBlock"][];
             /** Standards */
             standards?: Record<string, never>[] | null;
+            /** Title */
+            title: string;
+            /**
+             * Variant
+             * @enum {string}
+             */
+            variant: "teacher" | "student";
         };
         /** PrintQuestion */
         PrintQuestion: {
+            /** Answer */
+            answer?: string | null;
+            /** Choices */
+            choices: components["schemas"]["PrintChoice"][];
+            /** Dok */
+            dok: number;
+            /** Explanation */
+            explanation?: string | null;
             /** Number */
             number: number;
             /**
@@ -976,45 +990,17 @@ export interface components {
              * @enum {string}
              */
             question_type: "multiple_choice" | "constructed_response";
-            /** Dok */
-            dok: number;
             /** Standard Code */
             standard_code: string;
             /** Stem */
             stem: string;
-            /** Choices */
-            choices: components["schemas"]["PrintChoice"][];
-            /** Answer */
-            answer?: string | null;
-            /** Explanation */
-            explanation?: string | null;
             /** Teacher Edited */
             teacher_edited?: boolean | null;
         };
         /** QuestionDetail */
         QuestionDetail: {
-            /** Id */
-            id: number;
-            /**
-             * Status
-             * @enum {string}
-             */
-            status: "generated" | "reviewed" | "approved" | "rejected" | "archived";
             /** Allowed Transitions */
             allowed_transitions: ("generated" | "reviewed" | "approved" | "rejected" | "archived")[];
-            standard: components["schemas"]["StandardSummary"];
-            /** Family Key */
-            family_key: string | null;
-            /** Template Key */
-            template_key: string | null;
-            /** Provenance */
-            provenance: Record<string, never>;
-            stimulus: components["schemas"]["StimulusOut"] | null;
-            current: components["schemas"]["QuestionVersionOut"];
-            /** Versions */
-            versions: components["schemas"]["QuestionVersionOut"][];
-            /** Status Events */
-            status_events: components["schemas"]["StatusEventOut"][];
             /** Assessment Ids */
             assessment_ids: number[];
             /**
@@ -1022,39 +1008,57 @@ export interface components {
              * Format: date-time
              */
             created_at: string;
+            current: components["schemas"]["QuestionVersionOut"];
+            /** Family Key */
+            family_key: string | null;
+            /** Id */
+            id: number;
+            /** Provenance */
+            provenance: Record<string, never>;
+            standard: components["schemas"]["StandardSummary"];
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generated" | "reviewed" | "approved" | "rejected" | "archived";
+            /** Status Events */
+            status_events: components["schemas"]["StatusEventOut"][];
+            stimulus: components["schemas"]["StimulusOut"] | null;
+            /** Template Key */
+            template_key: string | null;
             /**
              * Updated At
              * Format: date-time
              */
             updated_at: string;
+            /** Versions */
+            versions: components["schemas"]["QuestionVersionOut"][];
         };
         /** QuestionEdit */
         QuestionEdit: {
-            /** Stem */
-            stem: string;
-            /** Dok */
-            dok: number;
+            /** Answer */
+            answer?: string | null;
+            /** Change Note */
+            change_note?: string | null;
             /**
              * Choices
              * @default []
              */
             choices: components["schemas"]["ChoiceIn"][];
-            /** Answer */
-            answer?: string | null;
+            /** Dok */
+            dok: number;
             /**
              * Explanation
              * @default
              */
             explanation: string;
-            /** Change Note */
-            change_note?: string | null;
+            /** Stem */
+            stem: string;
         };
         /** QuestionPage */
         QuestionPage: {
             /** Items */
             items: components["schemas"]["QuestionSummary"][];
-            /** Total */
-            total: number;
             /** Page */
             page: number;
             /** Page Size */
@@ -1063,60 +1067,75 @@ export interface components {
             status_counts: {
                 [key: string]: number;
             };
+            /** Total */
+            total: number;
         };
         /** QuestionSummary */
         QuestionSummary: {
+            /** Course Name */
+            course_name: string;
+            /** Current Version No */
+            current_version_no: number;
+            /** Dok */
+            dok: number;
+            /** Family Key */
+            family_key: string | null;
             /** Id */
             id: number;
+            /**
+             * Origin
+             * @enum {string}
+             */
+            origin: "engine" | "teacher_edit";
+            /**
+             * Question Type
+             * @enum {string}
+             */
+            question_type: "multiple_choice" | "constructed_response";
+            /** Standard Code */
+            standard_code: string;
+            /** Standard Id */
+            standard_id: number;
             /**
              * Status
              * @enum {string}
              */
             status: "generated" | "reviewed" | "approved" | "rejected" | "archived";
-            /** Standard Id */
-            standard_id: number;
-            /** Standard Code */
-            standard_code: string;
-            /** Course Name */
-            course_name: string;
-            /** Use Year */
-            use_year: string;
-            /** Family Key */
-            family_key: string | null;
-            /** Template Key */
-            template_key: string | null;
+            /** Stem */
+            stem: string;
             /** Stimulus Id */
             stimulus_id: number | null;
             /** Stimulus Title */
             stimulus_title: string | null;
-            /** Current Version No */
-            current_version_no: number;
-            /**
-             * Origin
-             * @enum {string}
-             */
-            origin: "engine" | "teacher_edit";
-            /**
-             * Question Type
-             * @enum {string}
-             */
-            question_type: "multiple_choice" | "constructed_response";
-            /** Dok */
-            dok: number;
-            /** Stem */
-            stem: string;
+            /** Template Key */
+            template_key: string | null;
             /**
              * Updated At
              * Format: date-time
              */
             updated_at: string;
+            /** Use Year */
+            use_year: string;
         };
         /** QuestionVersionOut */
         QuestionVersionOut: {
+            /** Answer */
+            answer: string;
+            /** Change Note */
+            change_note: string | null;
+            /** Choices */
+            choices: components["schemas"]["ChoiceOut"][];
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Dok */
+            dok: number;
+            /** Explanation */
+            explanation: string;
             /** Id */
             id: number;
-            /** Version No */
-            version_no: number;
             /**
              * Origin
              * @enum {string}
@@ -1127,30 +1146,17 @@ export interface components {
              * @enum {string}
              */
             question_type: "multiple_choice" | "constructed_response";
-            /** Dok */
-            dok: number;
             /** Stem */
             stem: string;
-            /** Choices */
-            choices: components["schemas"]["ChoiceOut"][];
-            /** Answer */
-            answer: string;
-            /** Explanation */
-            explanation: string;
-            /** Change Note */
-            change_note: string | null;
-            /**
-             * Created At
-             * Format: date-time
-             */
-            created_at: string;
+            /** Version No */
+            version_no: number;
         };
         /** RegisterRequest */
         RegisterRequest: {
-            /** Username */
-            username: string;
             /** Password */
             password: string;
+            /** Username */
+            username: string;
         };
         /** RegistrationStatus */
         RegistrationStatus: {
@@ -1169,173 +1175,173 @@ export interface components {
         };
         /** SourceDocumentOut */
         SourceDocumentOut: {
-            /** Id */
-            id: number;
-            /** State */
-            state: string;
-            /** Document Key */
-            document_key: string;
-            /** Title */
-            title: string;
-            /** Resource Type */
-            resource_type: string;
             /** Authority */
             authority: string | null;
-            /** Use Year */
-            use_year: string | null;
-            /** Published */
-            published: string | null;
-            /** Url */
-            url: string | null;
-            /** Data File */
-            data_file: string | null;
             /** Content Sha256 */
             content_sha256: string | null;
+            /** Data File */
+            data_file: string | null;
+            /** Document Key */
+            document_key: string;
+            /** Id */
+            id: number;
             /**
              * Imported At
              * Format: date-time
              */
             imported_at: string;
+            /** Published */
+            published: string | null;
+            /** Resource Type */
+            resource_type: string;
+            /** State */
+            state: string;
+            /** Title */
+            title: string;
+            /** Url */
+            url: string | null;
+            /** Use Year */
+            use_year: string | null;
         };
         /** StandardDetail */
         StandardDetail: {
-            /** Id */
-            id: number;
+            /** Bundles */
+            bundles: components["schemas"]["BundleRef"][];
+            ccc: components["schemas"]["NamedText"];
+            /** Clarification Statement */
+            clarification_statement: string | null;
+            /** Code */
+            code: string;
+            /** Content Sha256 */
+            content_sha256: string;
             /** Course Id */
             course_id: number;
             /** Course Name */
             course_name: string;
             /** Course Slug */
             course_slug: string;
-            /** Use Year */
-            use_year: string;
-            /** Code */
-            code: string;
+            /** Dci */
+            dci: components["schemas"]["DciOut"][];
             /** Domain Code */
             domain_code: string;
             /** Domain Name */
             domain_name: string;
-            /** Performance Expectation */
-            performance_expectation: string;
-            /** Topics */
-            topics: string[];
-            /** Question Family Candidate */
-            question_family_candidate: boolean;
-            /** Repeat Of Biology 1 */
-            repeat_of_biology_1: boolean;
             /** Families */
             families: components["schemas"]["FamilyRef"][];
-            /** Clarification Statement */
-            clarification_statement: string | null;
-            /** State Assessment Boundary */
-            state_assessment_boundary: string | null;
-            sep: components["schemas"]["NamedText"];
-            /** Dci */
-            dci: components["schemas"]["DciOut"][];
-            ccc: components["schemas"]["NamedText"];
+            /** Id */
+            id: number;
             /** Observable Performances */
             observable_performances: {
                 [key: string]: string[];
             };
-            /** Terminology */
-            terminology: string[];
-            /** Question Sentence Stems */
-            question_sentence_stems: string[] | null;
-            /** Content Sha256 */
-            content_sha256: string;
-            source_document: components["schemas"]["SourceDocumentOut"];
-            /** Bundles */
-            bundles: components["schemas"]["BundleRef"][];
+            /** Performance Expectation */
+            performance_expectation: string;
             /** Question Counts */
             question_counts: {
                 [key: string]: number;
             };
+            /** Question Family Candidate */
+            question_family_candidate: boolean;
+            /** Question Sentence Stems */
+            question_sentence_stems: string[] | null;
+            /** Repeat Of Biology 1 */
+            repeat_of_biology_1: boolean;
+            sep: components["schemas"]["NamedText"];
+            source_document: components["schemas"]["SourceDocumentOut"];
+            /** State Assessment Boundary */
+            state_assessment_boundary: string | null;
+            /** Terminology */
+            terminology: string[];
+            /** Topics */
+            topics: string[];
+            /** Use Year */
+            use_year: string;
         };
         /** StandardSummary */
         StandardSummary: {
-            /** Id */
-            id: number;
+            /** Code */
+            code: string;
             /** Course Id */
             course_id: number;
             /** Course Name */
             course_name: string;
             /** Course Slug */
             course_slug: string;
-            /** Use Year */
-            use_year: string;
-            /** Code */
-            code: string;
             /** Domain Code */
             domain_code: string;
             /** Domain Name */
             domain_name: string;
+            /** Families */
+            families: components["schemas"]["FamilyRef"][];
+            /** Id */
+            id: number;
             /** Performance Expectation */
             performance_expectation: string;
-            /** Topics */
-            topics: string[];
             /** Question Family Candidate */
             question_family_candidate: boolean;
             /** Repeat Of Biology 1 */
             repeat_of_biology_1: boolean;
-            /** Families */
-            families: components["schemas"]["FamilyRef"][];
+            /** Topics */
+            topics: string[];
+            /** Use Year */
+            use_year: string;
         };
         /** StatusChange */
         StatusChange: {
+            /** Note */
+            note?: string | null;
             /**
              * To Status
              * @enum {string}
              */
             to_status: "generated" | "reviewed" | "approved" | "rejected" | "archived";
-            /** Note */
-            note?: string | null;
         };
         /** StatusEventOut */
         StatusEventOut: {
-            /** Id */
-            id: number;
-            /** From Status */
-            from_status: string | null;
-            /** To Status */
-            to_status: string;
-            /** Note */
-            note: string | null;
             /**
              * Created At
              * Format: date-time
              */
             created_at: string;
+            /** From Status */
+            from_status: string | null;
+            /** Id */
+            id: number;
+            /** Note */
+            note: string | null;
+            /** To Status */
+            to_status: string;
         };
         /** StimulusOut */
         StimulusOut: {
+            /** Body */
+            body: Record<string, never>;
             /** Id */
             id: number;
             /** Kind */
             kind: string;
             /** Title */
             title: string;
-            /** Body */
-            body: Record<string, never>;
         };
         /** TemplateOut */
         TemplateOut: {
-            /** Key */
-            key: string;
-            /** Title */
-            title: string;
             /** Dok */
             dok: number;
-            /**
-             * Question Type
-             * @enum {string}
-             */
-            question_type: "multiple_choice" | "constructed_response";
+            /** Key */
+            key: string;
             /** Observable Category */
             observable_category: string;
             /** Observable Index */
             observable_index: number;
             /** Observable Text */
             observable_text?: string | null;
+            /**
+             * Question Type
+             * @enum {string}
+             */
+            question_type: "multiple_choice" | "constructed_response";
+            /** Title */
+            title: string;
         };
         /** ValidationError */
         ValidationError: {
@@ -1355,701 +1361,6 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    healthz_healthz_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
-    readyz_readyz_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
-    login_api_auth_login_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["LoginRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionUser"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    registration_status_api_auth_registration_status_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["RegistrationStatus"];
-                };
-            };
-        };
-    };
-    register_api_auth_register_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["RegisterRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionUser"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    logout_api_auth_logout_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": Record<string, never>;
-                };
-            };
-        };
-    };
-    me_api_auth_me_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SessionUser"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_courses_api_courses_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["CourseOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_standards_api_standards_get: {
-        parameters: {
-            query?: {
-                course_id?: number | null;
-                q?: string | null;
-                domain?: string | null;
-                topic?: string | null;
-                candidate_only?: boolean;
-                with_family_only?: boolean;
-            };
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StandardSummary"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_standard_detail_api_standards__standard_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                standard_id: number;
-            };
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["StandardDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_topics_api_topics_get: {
-        parameters: {
-            query?: {
-                course_id?: number | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": string[];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_bundles_api_bundles_get: {
-        parameters: {
-            query?: {
-                course_id?: number | null;
-            };
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BundleOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_sources_api_sources_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["SourceDocumentOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_families_api_families_get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["FamilyOut"][];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    preview_api_generate_preview_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GenerateRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GeneratePreviewOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    save_api_generate_save_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["GenerateRequest"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["GenerateSaveOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    list_questions_api_questions_get: {
-        parameters: {
-            query?: {
-                status?: ("generated" | "reviewed" | "approved" | "rejected" | "archived")[];
-                course_id?: number | null;
-                standard_id?: number | null;
-                family_key?: string | null;
-                dok?: number[];
-                question_type?: ("multiple_choice" | "constructed_response") | null;
-                stimulus_id?: number | null;
-                q?: string | null;
-                page?: number;
-                page_size?: number;
-            };
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestionPage"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    get_question_api_questions__question_id__get: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                question_id: number;
-            };
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestionDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    edit_question_api_questions__question_id__versions_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                question_id: number;
-            };
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["QuestionEdit"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestionDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    restore_version_api_questions__question_id__restore__version_no__post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                question_id: number;
-                version_no: number;
-            };
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody?: never;
-        responses: {
-            /** @description Successful Response */
-            201: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestionDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    set_status_api_questions__question_id__status_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                question_id: number;
-            };
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["StatusChange"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["QuestionDetail"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
-    bulk_status_api_questions_bulk_status_post: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: {
-                science_bank_session?: string | null;
-            };
-        };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["BulkStatusChange"];
-            };
-        };
-        responses: {
-            /** @description Successful Response */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["BulkStatusOut"];
-                };
-            };
-            /** @description Validation Error */
-            422: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["HTTPValidationError"];
-                };
-            };
-        };
-    };
     list_assessments_api_assessments_get: {
         parameters: {
             query?: never;
@@ -2254,19 +1565,22 @@ export interface operations {
             };
         };
     };
-    remove_item_api_assessments__assessment_id__items__item_id__delete: {
+    reorder_items_api_assessments__assessment_id__items_order_put: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 assessment_id: number;
-                item_id: number;
             };
             cookie?: {
                 science_bank_session?: string | null;
             };
         };
-        requestBody?: never;
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderItems"];
+            };
+        };
         responses: {
             /** @description Successful Response */
             200: {
@@ -2288,22 +1602,19 @@ export interface operations {
             };
         };
     };
-    reorder_items_api_assessments__assessment_id__items_order_put: {
+    remove_item_api_assessments__assessment_id__items__item_id__delete: {
         parameters: {
             query?: never;
             header?: never;
             path: {
                 assessment_id: number;
+                item_id: number;
             };
             cookie?: {
                 science_bank_session?: string | null;
             };
         };
-        requestBody: {
-            content: {
-                "application/json": components["schemas"]["ReorderItems"];
-            };
-        };
+        requestBody?: never;
         responses: {
             /** @description Successful Response */
             200: {
@@ -2390,6 +1701,701 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    login_api_auth_login_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LoginRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionUser"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    logout_api_auth_logout_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    me_api_auth_me_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionUser"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    register_api_auth_register_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionUser"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    registration_status_api_auth_registration_status_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegistrationStatus"];
+                };
+            };
+        };
+    };
+    list_bundles_api_bundles_get: {
+        parameters: {
+            query?: {
+                course_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BundleOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_courses_api_courses_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_families_api_families_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FamilyOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_api_generate_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GeneratePreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_api_generate_save_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateSaveOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_questions_api_questions_get: {
+        parameters: {
+            query?: {
+                status?: ("generated" | "reviewed" | "approved" | "rejected" | "archived")[];
+                course_id?: number | null;
+                standard_id?: number | null;
+                family_key?: string | null;
+                dok?: number[];
+                question_type?: ("multiple_choice" | "constructed_response") | null;
+                stimulus_id?: number | null;
+                q?: string | null;
+                page?: number;
+                page_size?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionPage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    bulk_status_api_questions_bulk_status_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BulkStatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BulkStatusOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_question_api_questions__question_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                question_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_version_api_questions__question_id__restore__version_no__post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                question_id: number;
+                version_no: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_status_api_questions__question_id__status_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                question_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["StatusChange"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    edit_question_api_questions__question_id__versions_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                question_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["QuestionEdit"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["QuestionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_sources_api_sources_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SourceDocumentOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_standards_api_standards_get: {
+        parameters: {
+            query?: {
+                course_id?: number | null;
+                q?: string | null;
+                domain?: string | null;
+                topic?: string | null;
+                candidate_only?: boolean;
+                with_family_only?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StandardSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    get_standard_detail_api_standards__standard_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                standard_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StandardDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_topics_api_topics_get: {
+        parameters: {
+            query?: {
+                course_id?: number | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string[];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    healthz_healthz_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+        };
+    };
+    readyz_readyz_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": Record<string, never>;
                 };
             };
         };

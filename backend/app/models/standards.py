@@ -82,6 +82,7 @@ class Standard(Base):
     question_sentence_stems: Mapped[list | None] = mapped_column(JSONB)
     question_family_candidate: Mapped[bool] = mapped_column(Boolean, default=False)
     repeat_of_biology_1: Mapped[bool] = mapped_column(Boolean, default=False)
+    eocep_constraints: Mapped[dict | None] = mapped_column(JSONB)
     content_sha256: Mapped[str] = mapped_column(String(64))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()

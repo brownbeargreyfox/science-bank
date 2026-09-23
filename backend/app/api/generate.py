@@ -14,6 +14,11 @@ router = APIRouter(prefix="/generate", tags=["generate"])
 
 def _generate(db: Session, req: GenerateRequest, seed: str):
     std = get_standard(db, req.standard_id)
+    if req.generation_mode == "eocep" and (std.course.slug != "biology-1" or not std.eocep_constraints):
+        raise HTTPException(
+            status.HTTP_422_UNPROCESSABLE_ENTITY,
+            "EOCEP mode is available only for Biology 1 standards with imported EOCEP constraints",
+        )
     family = resolve_family(std, req.family_key)
     unknown = set(req.template_keys) - {t.key for t in family.templates}
     if unknown:
@@ -32,6 +37,9 @@ def _generate(db: Session, req: GenerateRequest, seed: str):
     for group in out["groups"]:
         for q in group["questions"]:
             q["observable"]["text"] = observable_text(std, q["observable"]["category"], q["observable"]["index"])
+    out["options"]["generation_mode"] = req.generation_mode
+    if req.generation_mode == "eocep":
+        out["eocep_constraints"] = std.eocep_constraints
     return std, family, out
 
 

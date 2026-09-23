@@ -209,7 +209,9 @@ hides `/docs`, and refuses to start with a weak `JWT_SECRET`.
    C-PS3-4 (thermal equilibrium), B-LS4-4 (natural selection data), Biology 2 B-LS2-2/B-LS2-4.
    Each new family: bind to exact (course, code), cite observable performances, add invariant tests.
 3. Bundle-driven sets: one shared stimulus serving several aligned PEs of a bundle.
-4. Ingest the EOCEP documents (section 3) for an "EOCEP practice" constraint mode.
+4. Extend EOCEP practice mode beyond its current Biology 1 B-LS2-1/B-LS3-3 constraints as additional
+   supported families are added. The official source PDFs are in `SCDoE Targets/` and the imported
+   constraint data is `data/standards/SC/2026-2027/biology-1-eocep.json`.
 5. Polish: export (DOCX/PDF) beyond browser print, question tagging, backups on a schedule.
 
 ## 6. Useful facts for whoever resumes this

@@ -244,7 +244,10 @@ def import_standards(db: Session, standards_dir: Path) -> ImportReport:
         manifest = json.loads(manifest_path.read_text(encoding="utf-8")) if manifest_path.exists() else {}
         for year_dir in sorted(p for p in state_dir.iterdir() if p.is_dir()):
             use_year = year_dir.name
-            course_files = sorted(p for p in year_dir.glob("*.json") if not p.stem.endswith("-bundles"))
+            eocep_files = sorted(year_dir.glob("*-eocep.json"))
+            course_files = sorted(
+                p for p in year_dir.glob("*.json") if not p.stem.endswith(("-bundles", "-eocep"))
+            )
             courses = {
                 p.stem: _import_course_file(db, report, state, use_year, p, manifest, topics) for p in course_files
             }
@@ -253,5 +256,16 @@ def import_standards(db: Session, standards_dir: Path) -> ImportReport:
                 if slug not in courses:
                     raise StandardsDataError(f"{bundle_path}: no matching course file {slug}.json")
                 _import_bundle_file(db, report, state, use_year, bundle_path, courses[slug], manifest)
+            for path in eocep_files:
+                data = json.loads(path.read_text(encoding="utf-8"))
+                course = courses.get(data.get("course_slug"))
+                if course is None:
+                    raise StandardsDataError(f"{path}: no matching course file")
+                standards = {s.code: s for s in db.scalars(select(Standard).where(Standard.course_id == course.id))}
+                for code, constraints in data.get("constraints", {}).items():
+                    if code not in standards:
+                        raise StandardsDataError(f"{path}: unknown standard {code}")
+                    standards[code].eocep_constraints = constraints
+                    report.bump("unchanged", "eocep_constraints")
     db.flush()
     return report

@@ -154,6 +154,7 @@ class GenerateRequest(BaseModel):
     doks: list[int] = []
     question_types: list[QuestionType] = []
     template_keys: list[str] = []
+    generation_mode: Literal["classroom", "eocep"] = "classroom"
 
 
 class ChoiceOut(BaseModel):

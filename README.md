@@ -48,6 +48,14 @@ OpenID Connect provider (email verification, password recovery, MFA/passkeys) an
 per-teacher workspaces plus explicit sharing. That keeps each teacher's question bank private by
 default while preserving collaborative sharing when wanted.
 
+## EOCEP practice mode
+
+The Generate page includes **EOCEP practice** mode for supported Biology 1 families. It uses
+structured constraints transcribed from the official SCDE EOCEP Biology 1 Assessment
+Specifications, stored with the standard version and included in saved generation provenance.
+Classroom mode remains the default; EOCEP mode is deliberately unavailable for standards that do
+not yet have imported EOCEP constraints.
+
 ## Stack
 
 ```

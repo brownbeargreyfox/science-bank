@@ -852,6 +852,15 @@
             "title": "Family Key",
             "type": "string"
           },
+          "generation_mode": {
+            "default": "classroom",
+            "enum": [
+              "classroom",
+              "eocep"
+            ],
+            "title": "Generation Mode",
+            "type": "string"
+          },
           "quantity": {
             "default": 5,
             "maximum": 40.0,

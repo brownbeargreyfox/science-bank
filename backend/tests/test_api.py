@@ -93,6 +93,23 @@ def test_unknown_api_path_is_json_404(client):
     assert r.status_code == 404 and r.json() == {"detail": "Not found"}
 
 
+def test_eocep_mode_uses_imported_biology_1_constraints(client):
+    standards = client.get("/api/standards").json()
+    bio1 = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS3-3")
+    response = client.post(
+        "/api/generate/preview",
+        json={"standard_id": bio1["id"], "family_key": "trait-probability", "quantity": 1, "generation_mode": "eocep"},
+    )
+    assert response.status_code == 200
+    assert response.json()["options"]["generation_mode"] == "eocep"
+    chemistry = next(s for s in standards if s["course_slug"] == "chemistry" and s["code"] == "C-PS1-5")
+    denied = client.post(
+        "/api/generate/preview",
+        json={"standard_id": chemistry["id"], "family_key": "reaction-rate", "quantity": 1, "generation_mode": "eocep"},
+    )
+    assert denied.status_code == 422
+
+
 # ---- standards -------------------------------------------------------------------------------
 
 
