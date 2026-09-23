@@ -118,11 +118,29 @@ class ReactionRate(QuestionFamily):
     templates = (
         TemplateSpec("concentration_trend", "Pattern: concentration and rate", 1, "multiple_choice", "evidence", 0),
         TemplateSpec("temperature_trend", "Pattern: temperature and rate", 1, "multiple_choice", "evidence", 1),
-        TemplateSpec("explain_concentration", "Explain the concentration effect", 2, "multiple_choice", "articulating_explanation", 1),
-        TemplateSpec("explain_temperature", "Explain the temperature effect", 2, "multiple_choice", "articulating_explanation", 0),
-        TemplateSpec("unsuccessful_collisions", "Why not every collision reacts", 2, "multiple_choice", "articulating_explanation", 2),
+        TemplateSpec(
+            "explain_concentration",
+            "Explain the concentration effect",
+            2,
+            "multiple_choice",
+            "articulating_explanation",
+            1,
+        ),
+        TemplateSpec(
+            "explain_temperature", "Explain the temperature effect", 2, "multiple_choice", "articulating_explanation", 0
+        ),
+        TemplateSpec(
+            "unsuccessful_collisions",
+            "Why not every collision reacts",
+            2,
+            "multiple_choice",
+            "articulating_explanation",
+            2,
+        ),
         TemplateSpec("predict_temperature_trial", "Predict a new trial", 2, "multiple_choice", "evidence", 1),
-        TemplateSpec("explain_with_evidence", "Explain both experiments with evidence", 3, "constructed_response", "reasoning", 0),
+        TemplateSpec(
+            "explain_with_evidence", "Explain both experiments with evidence", 3, "constructed_response", "reasoning", 0
+        ),
     )
 
     # ---- scenario ---------------------------------------------------------------------------
@@ -187,7 +205,9 @@ class ReactionRate(QuestionFamily):
                     "table_index": len(tables),
                 }
             )
-            charts.append(self._chart(rx, "concentration", "Concentration of " + rx["varied_reactant"] + " (mol/L)", len(tables)))
+            charts.append(
+                self._chart(rx, "concentration", "Concentration of " + rx["varied_reactant"] + " (mol/L)", len(tables))
+            )
             tables.append(
                 {
                     "caption": "Experiment 1: changing concentration",
@@ -277,7 +297,16 @@ class ReactionRate(QuestionFamily):
                 )
             ),
             choices=[
-                DraftChoice(correct, True, f"Correct: {evidence}" + (", and a shorter time means a faster reaction." if timed else ", so more product formed in the same time.")),
+                DraftChoice(
+                    correct,
+                    True,
+                    f"Correct: {evidence}"
+                    + (
+                        ", and a shorter time means a faster reaction."
+                        if timed
+                        else ", so more product formed in the same time."
+                    ),
+                ),
                 DraftChoice(
                     misread,
                     False,
@@ -300,7 +329,9 @@ class ReactionRate(QuestionFamily):
 
     def _q_concentration_trend(self, params, rng: Rng) -> DraftQuestion:
         rx = self._rx(params)
-        return self._trend(params, rng, "concentration", f"the concentration of {rx['varied_reactant']}", " mol/L", "experiment1")
+        return self._trend(
+            params, rng, "concentration", f"the concentration of {rx['varied_reactant']}", " mol/L", "experiment1"
+        )
 
     def _q_temperature_trend(self, params, rng: Rng) -> DraftQuestion:
         return self._trend(params, rng, "temperature", "temperature", "°C", "experiment2")
@@ -380,9 +411,13 @@ class ReactionRate(QuestionFamily):
         row = params["experiment2"][0]
         value = f"{_fmt(row['value'], rx['decimals'])} {rx['unit']}"
         observation = (
-            f"the X took {value} to disappear" if rx["measure"] == "time" else f"the {rx['measure_short']} was only {value}"
+            f"the X took {value} to disappear"
+            if rx["measure"] == "time"
+            else f"the {rx['measure_short']} was only {value}"
         )
-        correct = "Most collisions do not have enough energy to break the reactants' bonds, so they do not form products."
+        correct = (
+            "Most collisions do not have enough energy to break the reactants' bonds, so they do not form products."
+        )
         return DraftQuestion(
             stem=(
                 f"In Experiment 2 at {row['temperature']}°C, {observation}, even though the reactant particles collide "
@@ -396,7 +431,11 @@ class ReactionRate(QuestionFamily):
                 "proceeds more slowly."
             ),
             choices=[
-                DraftChoice(correct, True, "Correct: not all collisions result in a reaction, because many lack enough kinetic energy."),
+                DraftChoice(
+                    correct,
+                    True,
+                    "Correct: not all collisions result in a reaction, because many lack enough kinetic energy.",
+                ),
                 DraftChoice(
                     "The particles run out of kinetic energy after their first collision.",
                     False,
@@ -440,9 +479,21 @@ class ReactionRate(QuestionFamily):
                 f"slower than at the higher one, giving a {rx['measure_short']} between those values."
             ),
             choices=[
-                DraftChoice(correct, True, "Correct: the rate should fall between the rates at the two neighboring temperatures."),
-                DraftChoice(slower_than, False, f"This would mean the reaction is slower than at {a['temperature']}°C, even though it is warmer."),
-                DraftChoice(faster_than, False, f"This would mean the reaction is faster than at {b['temperature']}°C, even though it is cooler."),
+                DraftChoice(
+                    correct,
+                    True,
+                    "Correct: the rate should fall between the rates at the two neighboring temperatures.",
+                ),
+                DraftChoice(
+                    slower_than,
+                    False,
+                    f"This would mean the reaction is slower than at {a['temperature']}°C, even though it is warmer.",
+                ),
+                DraftChoice(
+                    faster_than,
+                    False,
+                    f"This would mean the reaction is faster than at {b['temperature']}°C, even though it is cooler.",
+                ),
                 DraftChoice(
                     f"Exactly {f(far['value'])}, the same as at {far['temperature']}°C",
                     False,
@@ -475,7 +526,8 @@ class ReactionRate(QuestionFamily):
             ),
             explanation=(
                 "Scoring guide (4 points): (1) cites data showing the concentration effect; (2) cites data showing the "
-                "temperature effect" + (" and interprets shorter times as faster rates" if timed else "")
+                "temperature effect"
+                + (" and interprets shorter times as faster rates" if timed else "")
                 + "; (3) explains concentration with collision frequency; (4) explains temperature with collision "
                 "frequency and energy, noting not all collisions react."
             ),

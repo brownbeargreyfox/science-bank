@@ -211,12 +211,25 @@ class PopulationCarryingCapacity(QuestionFamily):
     stimulus_kind = "population_dataset"
     bindings = (Binding("SC", "biology-1", "B-LS2-1"),)
     templates = (
-        TemplateSpec("fastest_growth_interval", "Interval of fastest growth", 1, "multiple_choice", "representation", 0),
+        TemplateSpec(
+            "fastest_growth_interval", "Interval of fastest growth", 1, "multiple_choice", "representation", 0
+        ),
         TemplateSpec("classify_factor", "Classify the limiting factor", 1, "multiple_choice", "analysis", 0),
-        TemplateSpec("estimate_carrying_capacity", "Estimate carrying capacity", 2, "multiple_choice", "representation", 0),
-        TemplateSpec("identify_limiting_factor", "Identify the factor with the largest effect", 2, "multiple_choice", "analysis", 2),
+        TemplateSpec(
+            "estimate_carrying_capacity", "Estimate carrying capacity", 2, "multiple_choice", "representation", 0
+        ),
+        TemplateSpec(
+            "identify_limiting_factor",
+            "Identify the factor with the largest effect",
+            2,
+            "multiple_choice",
+            "analysis",
+            2,
+        ),
         TemplateSpec("predict_factor_reversal", "Predict the effect of a change", 2, "multiple_choice", "analysis", 1),
-        TemplateSpec("scale_prediction", "Carrying capacity at a different scale", 2, "multiple_choice", "representation", 1),
+        TemplateSpec(
+            "scale_prediction", "Carrying capacity at a different scale", 2, "multiple_choice", "representation", 1
+        ),
         TemplateSpec("explain_with_data", "Explain the change using data", 3, "constructed_response", "analysis", 0),
     )
 
@@ -307,24 +320,28 @@ class PopulationCarryingCapacity(QuestionFamily):
                 f"({size['measure']}: {size['value']} {size['unit']}). At each survey they also recorded two "
                 f"environmental measurements. The data are shown in the table and graph."
             ),
-            "tables": [{
-                "caption": f"{sc['organism_plural'].capitalize()} survey data",
-                "columns": [
-                    {"key": "t", "label": unit},
-                    {"key": "n", "label": sc["count_label"]},
-                    {"key": "factor", "label": ev["column"]},
-                    {"key": "control", "label": sc["control"]["label"]},
-                ],
-                "rows": params["rows"],
-            }],
-            "charts": [{
-                "type": "line",
-                "title": f"{sc['count_label']} over time",
-                "x": {"key": "t", "label": unit},
-                "y": {"label": sc["count_label"], "min": 0},
-                "series": [{"key": "n", "label": sc["count_label"]}],
-                "table_index": 0,
-            }],
+            "tables": [
+                {
+                    "caption": f"{sc['organism_plural'].capitalize()} survey data",
+                    "columns": [
+                        {"key": "t", "label": unit},
+                        {"key": "n", "label": sc["count_label"]},
+                        {"key": "factor", "label": ev["column"]},
+                        {"key": "control", "label": sc["control"]["label"]},
+                    ],
+                    "rows": params["rows"],
+                }
+            ],
+            "charts": [
+                {
+                    "type": "line",
+                    "title": f"{sc['count_label']} over time",
+                    "x": {"key": "t", "label": unit},
+                    "y": {"label": sc["count_label"], "min": 0},
+                    "series": [{"key": "n", "label": sc["count_label"]}],
+                    "table_index": 0,
+                }
+            ],
         }
 
     # ---- items ------------------------------------------------------------------------------
@@ -339,9 +356,7 @@ class PopulationCarryingCapacity(QuestionFamily):
     def _q_fastest_growth_interval(self, params, rng: Rng) -> DraftQuestion:
         sc, _, rows = self._ctx(params)
         unit = sc["time_unit"]
-        intervals = [
-            (rows[i]["t"], rows[i + 1]["t"], rows[i + 1]["n"] - rows[i]["n"]) for i in range(len(rows) - 1)
-        ]
+        intervals = [(rows[i]["t"], rows[i + 1]["t"], rows[i + 1]["n"] - rows[i]["n"]) for i in range(len(rows) - 1)]
         best = max(intervals, key=lambda iv: iv[2])
         others = [iv for iv in intervals if iv is not best and iv[2] <= 0.6 * best[2]]
         if len(others) < 3:
@@ -356,9 +371,17 @@ class PopulationCarryingCapacity(QuestionFamily):
             return f"the count changed by {d:+,}" if d else "the count did not change"
 
         choices = [
-            DraftChoice(label(best), True, f"Correct: the count rose by {best[2]:,}, the largest increase between any two surveys."),
+            DraftChoice(
+                label(best),
+                True,
+                f"Correct: the count rose by {best[2]:,}, the largest increase between any two surveys.",
+            ),
             *[
-                DraftChoice(label(iv), False, f"In this interval {change(iv)}, less than the {best[2]:,} increase from {unit} {best[0]} to {best[1]}.")
+                DraftChoice(
+                    label(iv),
+                    False,
+                    f"In this interval {change(iv)}, less than the {best[2]:,} increase from {unit} {best[0]} to {best[1]}.",
+                )
                 for iv in distractors
             ],
         ]
@@ -375,9 +398,8 @@ class PopulationCarryingCapacity(QuestionFamily):
     def _q_classify_factor(self, params, rng: Rng) -> DraftQuestion:
         _, ev, _ = self._ctx(params)
         b_true, d_true = ev["biotic"], ev["density_dependent"]
-        b_reason = (
-            f"{'biotic' if b_true else 'abiotic'}: "
-            + ("it involves living organisms" if b_true else "it is a nonliving physical or chemical condition")
+        b_reason = f"{'biotic' if b_true else 'abiotic'}: " + (
+            "it involves living organisms" if b_true else "it is a nonliving physical or chemical condition"
         )
         d_reason = f"density-{'dependent' if d_true else 'independent'}: " + (
             "its effect on each individual grows as the population becomes more crowded"
@@ -413,10 +435,16 @@ class PopulationCarryingCapacity(QuestionFamily):
         t_event = params["model"]["t_event"]
         unit = sc["time_unit"]
         candidates = {
-            "half": (_round_to(k1 / 2, sc["k_round"]), "This is about half the carrying capacity, where growth is fastest, not the level where the population levels off."),
+            "half": (
+                _round_to(k1 / 2, sc["k_round"]),
+                "This is about half the carrying capacity, where growth is fastest, not the level where the population levels off.",
+            ),
             "later": (k2, f"This is where the population leveled off after {unit} {t_event}, not before the change."),
             "start": (rows[0]["n"], "This is the starting population, not the maximum the habitat supported."),
-            "above": (_round_to(k1 * 1.5, sc["k_round"]), "The population never approached this size; the counts leveled off well below it."),
+            "above": (
+                _round_to(k1 * 1.5, sc["k_round"]),
+                "The population never approached this size; the counts leveled off well below it.",
+            ),
         }
         picked = []
         for name in rng.shuffled(list(candidates)):
@@ -502,7 +530,11 @@ class PopulationCarryingCapacity(QuestionFamily):
                 f"carrying capacity back toward {fmt_num(k1)}."
             ),
             choices=[
-                DraftChoice(f"It would {toward} toward about {fmt_num(k1)}", True, "Correct: the data link that factor level to a carrying capacity near this value."),
+                DraftChoice(
+                    f"It would {toward} toward about {fmt_num(k1)}",
+                    True,
+                    "Correct: the data link that factor level to a carrying capacity near this value.",
+                ),
                 DraftChoice(
                     f"It would stay at about {fmt_num(k2)}",
                     False,
@@ -531,10 +563,19 @@ class PopulationCarryingCapacity(QuestionFamily):
         rnd = sc["k_round"]
         correct = _round_to(k1 * ratio, rnd)
         options = {
-            correct: (True, f"Correct: with the same resources per unit of {size['measure']}, carrying capacity scales with {size['measure']} ({ratio:g} × {fmt_num(k1)})."),
-            k1: (False, "This ignores scale: a habitat with a different amount of resources supports a different number of individuals."),
+            correct: (
+                True,
+                f"Correct: with the same resources per unit of {size['measure']}, carrying capacity scales with {size['measure']} ({ratio:g} × {fmt_num(k1)}).",
+            ),
+            k1: (
+                False,
+                "This ignores scale: a habitat with a different amount of resources supports a different number of individuals.",
+            ),
             _round_to(k1 / ratio, rnd): (False, "This scales in the wrong direction."),
-            _round_to(k1 * ratio * ratio, rnd): (False, f"This multiplies by the ratio twice; carrying capacity scales once with {size['measure']}."),
+            _round_to(k1 * ratio * ratio, rnd): (
+                False,
+                f"This multiplies by the ratio twice; carrying capacity scales once with {size['measure']}.",
+            ),
         }
         if len(options) != 4:
             raise GenerationError("scale options collided after rounding")

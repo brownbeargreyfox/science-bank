@@ -22,9 +22,7 @@ def families_for_standard(standard: Standard) -> list[QuestionFamily]:
     return [
         f
         for f in FAMILIES.values()
-        if any(
-            b.state == course.state and b.course_slug == course.slug and b.code == standard.code for b in f.bindings
-        )
+        if any(b.state == course.state and b.course_slug == course.slug and b.code == standard.code for b in f.bindings)
     ]
 
 

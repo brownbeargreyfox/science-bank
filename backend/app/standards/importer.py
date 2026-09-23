@@ -121,9 +121,7 @@ def _import_course_file(
         "notes": data.get("notes"),
         "source_document_id": source.id,
     }
-    course = db.scalar(
-        select(Course).where(Course.state == state, Course.use_year == use_year, Course.slug == slug)
-    )
+    course = db.scalar(select(Course).where(Course.state == state, Course.use_year == use_year, Course.slug == slug))
     if course is None:
         course = Course(state=state, use_year=use_year, slug=slug, active=True, **course_values)
         db.add(course)

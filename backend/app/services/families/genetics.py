@@ -246,11 +246,31 @@ class TraitProbability(QuestionFamily):
     templates = (
         TemplateSpec("phenotype_probability", "Probability of a phenotype", 1, "multiple_choice", "organizing_data", 1),
         TemplateSpec("genotypic_ratio", "Expected genotypic ratio", 1, "multiple_choice", "organizing_data", 0),
-        TemplateSpec("expected_offspring_count", "Expected number of offspring", 2, "multiple_choice", "organizing_data", 1),
-        TemplateSpec("infer_parent_genotypes", "Infer parents from an offspring distribution", 2, "multiple_choice", "organizing_data", 0),
-        TemplateSpec("environment_relationship", "Environment and trait expression", 2, "multiple_choice", "identifying_relationships", 0),
-        TemplateSpec("environment_prediction", "Predict a trait distribution", 2, "multiple_choice", "interpreting_data", 0),
-        TemplateSpec("explain_variation", "Explain variation in a trait", 3, "constructed_response", "interpreting_data", 1),
+        TemplateSpec(
+            "expected_offspring_count", "Expected number of offspring", 2, "multiple_choice", "organizing_data", 1
+        ),
+        TemplateSpec(
+            "infer_parent_genotypes",
+            "Infer parents from an offspring distribution",
+            2,
+            "multiple_choice",
+            "organizing_data",
+            0,
+        ),
+        TemplateSpec(
+            "environment_relationship",
+            "Environment and trait expression",
+            2,
+            "multiple_choice",
+            "identifying_relationships",
+            0,
+        ),
+        TemplateSpec(
+            "environment_prediction", "Predict a trait distribution", 2, "multiple_choice", "interpreting_data", 0
+        ),
+        TemplateSpec(
+            "explain_variation", "Explain variation in a trait", 3, "constructed_response", "interpreting_data", 1
+        ),
     )
 
     # ---- scenario ---------------------------------------------------------------------------
@@ -297,8 +317,10 @@ class TraitProbability(QuestionFamily):
                     p = 1 - p
                 env_rows.append({"level": level, "present": _binomial(rng, n, p), "total": n})
             present = [r["present"] for r in env_rows]
-            monotone = all(a >= b for a, b in zip(present, present[1:])) if env["decreasing"] else all(
-                a <= b for a, b in zip(present, present[1:])
+            monotone = (
+                all(a >= b for a, b in zip(present, present[1:]))
+                if env["decreasing"]
+                else all(a <= b for a, b in zip(present, present[1:]))
             )
             if monotone and abs(present[0] - present[-1]) >= 0.7 * n:
                 break
@@ -335,7 +357,12 @@ class TraitProbability(QuestionFamily):
             f"{trait['recessive']} = recessive allele ({trait['recessive_phenotype']})."
         )
         if keys & (PART_A | PART_B):
-            sections.append({"heading": "Inheritance of " + trait["trait"], "text": f"In {trait['organism']}, {trait['trait']} is controlled by one gene. {note}"})
+            sections.append(
+                {
+                    "heading": "Inheritance of " + trait["trait"],
+                    "text": f"In {trait['organism']}, {trait['trait']} is controlled by one gene. {note}",
+                }
+            )
         if keys & PART_A:
             p1, p2 = params["known_cross"]
             sections.append(
@@ -359,7 +386,10 @@ class TraitProbability(QuestionFamily):
             tables.append(
                 {
                     "caption": "Cross 2 offspring",
-                    "columns": [{"key": "phenotype", "label": "Phenotype"}, {"key": "count", "label": "Number of offspring"}],
+                    "columns": [
+                        {"key": "phenotype", "label": "Phenotype"},
+                        {"key": "count", "label": "Number of offspring"},
+                    ],
                     "rows": [
                         {"phenotype": ph.capitalize(), "count": c} for ph, c in zip(obs["phenotypes"], obs["counts"])
                     ],
@@ -509,9 +539,7 @@ class TraitProbability(QuestionFamily):
             return ", ".join(f"{int(f * 4)}/4 {ph}" for f, ph in zip(vec, order) if f) or "none"
 
         observed_text = ", ".join(f"{c} {ph}" for c, ph in zip(obs["counts"], order) if c)
-        obs_pct = ", ".join(
-            f"about {round(100 * c / obs['total'])}% {ph}" for c, ph in zip(obs["counts"], order) if c
-        )
+        obs_pct = ", ".join(f"about {round(100 * c / obs['total'])}% {ph}" for c, ph in zip(obs["counts"], order) if c)
         return DraftQuestion(
             stem=(
                 "Based on the Cross 2 data, which pair of parent genotypes is most likely? "
@@ -524,9 +552,17 @@ class TraitProbability(QuestionFamily):
                 "little from expected ones because each offspring is a separate chance event."
             ),
             choices=[
-                DraftChoice(f"{unknown[0]} × {unknown[1]}", True, f"Correct: expected {expected_text(unknown)}, close to what was observed."),
+                DraftChoice(
+                    f"{unknown[0]} × {unknown[1]}",
+                    True,
+                    f"Correct: expected {expected_text(unknown)}, close to what was observed.",
+                ),
                 *[
-                    DraftChoice(f"{c[0]} × {c[1]}", False, f"This cross is expected to produce {expected_text(c)}, which does not match the observed counts.")
+                    DraftChoice(
+                        f"{c[0]} × {c[1]}",
+                        False,
+                        f"This cross is expected to produce {expected_text(c)}, which does not match the observed counts.",
+                    )
                     for c in others
                 ],
             ],
@@ -541,7 +577,9 @@ class TraitProbability(QuestionFamily):
         var = _var(env)
         first, last = rows[0], rows[-1]
         trend = "fewer" if first["percent"] > last["percent"] else "more"
-        correct = f"As {var} increases, {trend} individuals {env['trait_verb']}, even though they are genetically identical."
+        correct = (
+            f"As {var} increases, {trend} individuals {env['trait_verb']}, even though they are genetically identical."
+        )
         return DraftQuestion(
             stem="Which conclusion is best supported by the environment study data?",
             answer=correct,
@@ -551,9 +589,14 @@ class TraitProbability(QuestionFamily):
                 f"difference in expression comes from the environment. {env['mechanism']}."
             ),
             choices=[
-                DraftChoice(correct, True, "Correct: the genotype is constant, so the environment explains the change in the trait's distribution."),
                 DraftChoice(
-                    f"As {var} increases, more individuals {env['trait_verb']}." if trend == "fewer"
+                    correct,
+                    True,
+                    "Correct: the genotype is constant, so the environment explains the change in the trait's distribution.",
+                ),
+                DraftChoice(
+                    f"As {var} increases, more individuals {env['trait_verb']}."
+                    if trend == "fewer"
                     else f"As {var} increases, fewer individuals {env['trait_verb']}.",
                     False,
                     f"The data show the opposite trend: {first['percent']}% at {_level(env, first['level'])} vs. "
@@ -596,7 +639,11 @@ class TraitProbability(QuestionFamily):
                 "between those values."
             ),
             choices=[
-                DraftChoice(f"Between {lo}% and {hi}%", True, "Correct: the new level lies between two tested levels, so the result should too."),
+                DraftChoice(
+                    f"Between {lo}% and {hi}%",
+                    True,
+                    "Correct: the new level lies between two tested levels, so the result should too.",
+                ),
                 *self._out_of_range_choices(env, rows, lo, hi),
             ],
         )
