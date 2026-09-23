@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { Navigate, useNavigate, useSearchParams } from "react-router";
 import { api, unwrap } from "../api/client";
@@ -13,9 +13,21 @@ export default function LoginPage() {
   const me = useMe();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const registration = useQuery({
+    queryKey: ["auth", "registration-status"],
+    queryFn: () => unwrap(api.GET("/api/auth/registration-status")),
+  });
 
   const login = useMutation({
     mutationFn: () => unwrap(api.POST("/api/auth/login", { body: { username, password } })),
+    onSuccess: (user) => {
+      queryClient.setQueryData(ME_KEY, user);
+      navigate(next, { replace: true });
+    },
+  });
+
+  const register = useMutation({
+    mutationFn: () => unwrap(api.POST("/api/auth/register", { body: { username, password } })),
     onSuccess: (user) => {
       queryClient.setQueryData(ME_KEY, user);
       navigate(next, { replace: true });
@@ -26,7 +38,7 @@ export default function LoginPage() {
 
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    login.mutate();
+    (registration.data?.registration_open ? register : login).mutate();
   };
 
   return (
@@ -44,6 +56,7 @@ export default function LoginPage() {
           </div>
         </div>
         <form onSubmit={submit} className="panel space-y-4 p-5" noValidate>
+          {registration.data?.registration_open ? <p className="rounded border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">Create the one teacher account for this private installation. Registration closes after this step.</p> : null}
           <div>
             <label htmlFor="username" className="field-label">
               Username
@@ -66,15 +79,16 @@ export default function LoginPage() {
               id="password"
               type="password"
               className="input"
-              autoComplete="current-password"
+              autoComplete={registration.data?.registration_open ? "new-password" : "current-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <div aria-live="polite">{login.isError ? <ErrorNotice error={login.error} /> : null}</div>
-          <button type="submit" className="btn btn-primary w-full" disabled={login.isPending || !username || !password}>
-            {login.isPending ? "Logging in…" : "Log in"}
+          <p className="text-xs text-muted">{registration.data?.registration_open ? "Use at least 12 characters for the password." : null}</p>
+          <div aria-live="polite">{login.isError ? <ErrorNotice error={login.error} /> : register.isError ? <ErrorNotice error={register.error} /> : null}</div>
+          <button type="submit" className="btn btn-primary w-full" disabled={login.isPending || register.isPending || !username || !password || (registration.data?.registration_open && password.length < 12)}>
+            {registration.data?.registration_open ? (register.isPending ? "Creating account…" : "Create teacher account") : login.isPending ? "Logging in…" : "Log in"}
           </button>
         </form>
       </div>
