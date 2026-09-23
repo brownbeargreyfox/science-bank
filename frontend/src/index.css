@@ -1,1 +1,331 @@
 @import "tailwindcss";
+
+/*
+ * Science Bank design tokens.
+ * Two voices: Atkinson Hyperlegible for the teacher's working UI, and
+ * Source Serif 4 for anything a student would read (stimuli, stems, choices),
+ * so the screen previews what the printed booklet will look like.
+ */
+@theme {
+  --font-sans: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+
+  --color-paper: #f3f5f4;
+  --color-surface: #ffffff;
+  --color-ink: #1b2a30;
+  --color-muted: #4b5b61;
+  --color-line: #c9d3d4;
+  --color-line-soft: #e2e8e8;
+  --color-petrol: #0f5563;
+  --color-petrol-dark: #0a3f4a;
+  --color-petrol-soft: #e1eeef;
+  --color-mark: #fbe38a;
+  --color-mark-edge: #b08a00;
+  --color-bound: #7a4200;
+  --color-bound-soft: #fdf1dc;
+  --color-danger: #a1241f;
+  --color-danger-soft: #fbe6e4;
+  --color-ok: #1d6a3a;
+  --color-ok-soft: #e1f2e6;
+}
+
+@layer base {
+  html {
+    background: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    min-height: 100vh;
+    background: var(--color-paper);
+    line-height: 1.5;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    line-height: 1.2;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-petrol);
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+  a {
+    color: var(--color-petrol);
+    text-underline-offset: 0.18em;
+  }
+  a:hover {
+    color: var(--color-petrol-dark);
+  }
+  input,
+  select,
+  textarea,
+  button {
+    font: inherit;
+  }
+}
+
+@layer components {
+  /* ---- Buttons ---- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.95rem;
+    border-radius: 5px;
+    border: 1px solid var(--color-line);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font-weight: 700;
+    font-size: 0.9375rem;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .btn:hover {
+    border-color: var(--color-petrol);
+    color: var(--color-petrol-dark);
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .btn-primary {
+    background: var(--color-petrol);
+    border-color: var(--color-petrol);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background: var(--color-petrol-dark);
+    border-color: var(--color-petrol-dark);
+    color: #fff;
+  }
+  .btn-danger {
+    color: var(--color-danger);
+  }
+  .btn-danger:hover {
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+  }
+  .btn-sm {
+    min-height: 2.25rem;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.875rem;
+  }
+  .btn-quiet {
+    border-color: transparent;
+    background: transparent;
+  }
+
+  /* ---- Form controls ---- */
+  .field-label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.9375rem;
+    margin-bottom: 0.3rem;
+  }
+  .hint {
+    color: var(--color-muted);
+    font-size: 0.875rem;
+  }
+  .input {
+    display: block;
+    width: 100%;
+    min-height: 2.5rem;
+    padding: 0.45rem 0.65rem;
+    border: 1px solid #8d9ca1;
+    border-radius: 5px;
+    background: var(--color-surface);
+    color: var(--color-ink);
+  }
+  textarea.input {
+    min-height: 5rem;
+    line-height: 1.45;
+  }
+  .input:focus-visible {
+    outline-offset: 0;
+  }
+  .check {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--color-petrol);
+    flex: none;
+  }
+
+  /* ---- Panels ---- */
+  .panel {
+    background: var(--color-surface);
+    border: 1px solid var(--color-line);
+    border-radius: 6px;
+  }
+
+  /* ---- The standard code "specimen tag" ---- */
+  .code-tag {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.35rem;
+    border: 1px solid var(--color-petrol);
+    border-left-width: 4px;
+    border-radius: 3px;
+    padding: 0.05rem 0.45rem;
+    background: var(--color-surface);
+    color: var(--color-petrol-dark);
+    font-weight: 700;
+    font-size: 0.875rem;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+  }
+  .code-tag .course {
+    font-weight: 400;
+    color: var(--color-muted);
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    border-radius: 999px;
+    padding: 0.05rem 0.55rem;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    white-space: nowrap;
+  }
+
+  /* ---- Student-facing material ---- */
+  .booklet {
+    font-family: var(--font-serif);
+    font-size: 1.0625rem;
+    line-height: 1.6;
+  }
+  .booklet h3,
+  .booklet h4 {
+    font-family: var(--font-serif);
+  }
+  .data-table {
+    border-collapse: collapse;
+    font-family: var(--font-serif);
+    font-size: 0.9375rem;
+    font-variant-numeric: tabular-nums;
+  }
+  .data-table caption {
+    caption-side: top;
+    text-align: left;
+    font-weight: 700;
+    padding-bottom: 0.35rem;
+  }
+  .data-table th,
+  .data-table td {
+    border: 1px solid #7f8f94;
+    padding: 0.3rem 0.65rem;
+    text-align: right;
+  }
+  .data-table thead th {
+    background: var(--color-petrol-soft);
+    text-align: center;
+    font-weight: 700;
+  }
+  .data-table td:first-child,
+  .data-table th[scope="row"] {
+    text-align: left;
+  }
+
+  /* Correct choice: highlighter mark + border + glyph, so it survives B&W print. */
+  .choice-correct {
+    background: var(--color-mark);
+    box-shadow: inset 0 0 0 2px var(--color-mark-edge);
+  }
+  .answer-line {
+    border-bottom: 1px solid #555;
+    height: 2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Print ---- */
+@page {
+  size: letter;
+  margin: 0.6in 0.65in 0.7in;
+}
+
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-sheet {
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+  .booklet {
+    font-size: 11.5pt;
+  }
+  a {
+    color: #000;
+    text-decoration: none;
+  }
+  .keep,
+  figure,
+  table,
+  .print-question {
+    break-inside: avoid;
+  }
+  .keep-with-next {
+    break-after: avoid;
+  }
+  /* Answer key: stem, meta line and choices stay together; the explanation may flow on. */
+  .print-question-key .q-core {
+    break-inside: avoid;
+  }
+  figure {
+    max-width: 5.25in !important;
+  }
+  h2,
+  h3,
+  h4 {
+    break-after: avoid;
+  }
+  .data-table thead th {
+    background: #fff !important;
+  }
+  /* Compact tables so a stimulus's intro, data table and chart usually share a page. */
+  .data-table {
+    font-size: 9.5pt;
+    line-height: 1.2;
+  }
+  .data-table th,
+  .data-table td {
+    padding: 1.5pt 6pt;
+  }
+  figure {
+    max-width: 4.75in !important;
+  }
+  .choice-correct {
+    background: #fff !important;
+    box-shadow: inset 0 0 0 1.5px #000 !important;
+  }
+}

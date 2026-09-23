@@ -1,0 +1,4293 @@
+{
+  "components": {
+    "schemas": {
+      "AddItems": {
+        "properties": {
+          "question_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Question Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "question_ids"
+        ],
+        "title": "AddItems",
+        "type": "object"
+      },
+      "AddItemsOut": {
+        "properties": {
+          "added": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Added",
+            "type": "array"
+          },
+          "skipped": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Skipped",
+            "type": "object"
+          }
+        },
+        "required": [
+          "added",
+          "skipped"
+        ],
+        "title": "AddItemsOut",
+        "type": "object"
+      },
+      "AssessmentCreate": {
+        "properties": {
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "instructions": {
+            "default": "",
+            "maxLength": 5000,
+            "title": "Instructions",
+            "type": "string"
+          },
+          "title": {
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "title"
+        ],
+        "title": "AssessmentCreate",
+        "type": "object"
+      },
+      "AssessmentDetail": {
+        "properties": {
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "course_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Name"
+          },
+          "dok_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Dok Distribution",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "instructions": {
+            "title": "Instructions",
+            "type": "string"
+          },
+          "item_count": {
+            "title": "Item Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AssessmentItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "question_type_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Question Type Counts",
+            "type": "object"
+          },
+          "standards_coverage": {
+            "items": {
+              "type": "object"
+            },
+            "title": "Standards Coverage",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "course_id",
+          "course_name",
+          "instructions",
+          "item_count",
+          "updated_at",
+          "items",
+          "dok_distribution",
+          "standards_coverage",
+          "question_type_counts"
+        ],
+        "title": "AssessmentDetail",
+        "type": "object"
+      },
+      "AssessmentItemOut": {
+        "properties": {
+          "course_name": {
+            "title": "Course Name",
+            "type": "string"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "latest_version_no": {
+            "title": "Latest Version No",
+            "type": "integer"
+          },
+          "pinned_version_no": {
+            "title": "Pinned Version No",
+            "type": "integer"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "question_id": {
+            "title": "Question Id",
+            "type": "integer"
+          },
+          "question_status": {
+            "enum": [
+              "generated",
+              "reviewed",
+              "approved",
+              "rejected",
+              "archived"
+            ],
+            "title": "Question Status",
+            "type": "string"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "standard_code": {
+            "title": "Standard Code",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "stimulus_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus Id"
+          },
+          "stimulus_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus Title"
+          }
+        },
+        "required": [
+          "id",
+          "position",
+          "question_id",
+          "question_status",
+          "pinned_version_no",
+          "latest_version_no",
+          "standard_code",
+          "course_name",
+          "stimulus_id",
+          "stimulus_title",
+          "dok",
+          "question_type",
+          "stem"
+        ],
+        "title": "AssessmentItemOut",
+        "type": "object"
+      },
+      "AssessmentSummary": {
+        "properties": {
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "course_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Name"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "instructions": {
+            "title": "Instructions",
+            "type": "string"
+          },
+          "item_count": {
+            "title": "Item Count",
+            "type": "integer"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "title",
+          "course_id",
+          "course_name",
+          "instructions",
+          "item_count",
+          "updated_at"
+        ],
+        "title": "AssessmentSummary",
+        "type": "object"
+      },
+      "AssessmentUpdate": {
+        "properties": {
+          "course_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Id"
+          },
+          "instructions": {
+            "anyOf": [
+              {
+                "maxLength": 5000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Instructions"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "maxLength": 300,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "title": "AssessmentUpdate",
+        "type": "object"
+      },
+      "BulkStatusChange": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "question_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 200,
+            "minItems": 1,
+            "title": "Question Ids",
+            "type": "array"
+          },
+          "to_status": {
+            "enum": [
+              "generated",
+              "reviewed",
+              "approved",
+              "rejected",
+              "archived"
+            ],
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "to_status",
+          "question_ids"
+        ],
+        "title": "BulkStatusChange",
+        "type": "object"
+      },
+      "BulkStatusOut": {
+        "properties": {
+          "skipped": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "title": "Skipped",
+            "type": "object"
+          },
+          "updated": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Updated",
+            "type": "array"
+          }
+        },
+        "required": [
+          "updated",
+          "skipped"
+        ],
+        "title": "BulkStatusOut",
+        "type": "object"
+      },
+      "BundleOut": {
+        "properties": {
+          "aligned": {
+            "items": {
+              "$ref": "#/components/schemas/BundleStandardOut"
+            },
+            "title": "Aligned",
+            "type": "array"
+          },
+          "connected_pes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Connected Pes",
+            "type": "array"
+          },
+          "course_id": {
+            "title": "Course Id",
+            "type": "integer"
+          },
+          "course_name": {
+            "title": "Course Name",
+            "type": "string"
+          },
+          "example_anchoring_phenomena": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Example Anchoring Phenomena",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "narrative": {
+            "title": "Narrative",
+            "type": "string"
+          },
+          "source_document_title": {
+            "title": "Source Document Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "course_name",
+          "name",
+          "narrative",
+          "aligned",
+          "connected_pes",
+          "example_anchoring_phenomena",
+          "source_document_title"
+        ],
+        "title": "BundleOut",
+        "type": "object"
+      },
+      "BundleRef": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "partial": {
+            "title": "Partial",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "partial"
+        ],
+        "title": "BundleRef",
+        "type": "object"
+      },
+      "BundleStandardOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "partial": {
+            "title": "Partial",
+            "type": "boolean"
+          },
+          "performance_expectation": {
+            "title": "Performance Expectation",
+            "type": "string"
+          },
+          "standard_id": {
+            "title": "Standard Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "standard_id",
+          "code",
+          "partial",
+          "performance_expectation"
+        ],
+        "title": "BundleStandardOut",
+        "type": "object"
+      },
+      "ChoiceIn": {
+        "properties": {
+          "correct": {
+            "title": "Correct",
+            "type": "boolean"
+          },
+          "rationale": {
+            "default": "",
+            "maxLength": 2000,
+            "title": "Rationale",
+            "type": "string"
+          },
+          "text": {
+            "maxLength": 2000,
+            "minLength": 1,
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "text",
+          "correct"
+        ],
+        "title": "ChoiceIn",
+        "type": "object"
+      },
+      "ChoiceOut": {
+        "properties": {
+          "correct": {
+            "title": "Correct",
+            "type": "boolean"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "rationale": {
+            "title": "Rationale",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "text",
+          "correct",
+          "rationale"
+        ],
+        "title": "ChoiceOut",
+        "type": "object"
+      },
+      "CourseOut": {
+        "properties": {
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "bundles_count": {
+            "title": "Bundles Count",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "notes": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Notes"
+          },
+          "slug": {
+            "title": "Slug",
+            "type": "string"
+          },
+          "source_document": {
+            "$ref": "#/components/schemas/SourceDocumentOut"
+          },
+          "standards_base": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standards Base"
+          },
+          "standards_count": {
+            "title": "Standards Count",
+            "type": "integer"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "use_year": {
+            "title": "Use Year",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "use_year",
+          "slug",
+          "name",
+          "standards_base",
+          "notes",
+          "active",
+          "standards_count",
+          "bundles_count",
+          "source_document"
+        ],
+        "title": "CourseOut",
+        "type": "object"
+      },
+      "DciOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "text"
+        ],
+        "title": "DciOut",
+        "type": "object"
+      },
+      "FamilyBindingOut": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "course_slug": {
+            "title": "Course Slug",
+            "type": "string"
+          },
+          "standard_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Standard Ids",
+            "type": "array"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          }
+        },
+        "required": [
+          "state",
+          "course_slug",
+          "code",
+          "standard_ids"
+        ],
+        "title": "FamilyBindingOut",
+        "type": "object"
+      },
+      "FamilyOut": {
+        "properties": {
+          "bindings": {
+            "items": {
+              "$ref": "#/components/schemas/FamilyBindingOut"
+            },
+            "title": "Bindings",
+            "type": "array"
+          },
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "stimulus_kind": {
+            "title": "Stimulus Kind",
+            "type": "string"
+          },
+          "templates": {
+            "items": {
+              "$ref": "#/components/schemas/TemplateOut"
+            },
+            "title": "Templates",
+            "type": "array"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "version",
+          "title",
+          "description",
+          "stimulus_kind",
+          "bindings",
+          "templates"
+        ],
+        "title": "FamilyOut",
+        "type": "object"
+      },
+      "FamilyRef": {
+        "properties": {
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "version": {
+            "title": "Version",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "version"
+        ],
+        "title": "FamilyRef",
+        "type": "object"
+      },
+      "GeneratePreviewOut": {
+        "properties": {
+          "family_key": {
+            "title": "Family Key",
+            "type": "string"
+          },
+          "family_version": {
+            "title": "Family Version",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GeneratedGroupOut"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "options": {
+            "title": "Options",
+            "type": "object"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "string"
+          },
+          "standard": {
+            "$ref": "#/components/schemas/StandardSummary"
+          }
+        },
+        "required": [
+          "family_key",
+          "family_version",
+          "seed",
+          "options",
+          "standard",
+          "groups"
+        ],
+        "title": "GeneratePreviewOut",
+        "type": "object"
+      },
+      "GenerateRequest": {
+        "properties": {
+          "doks": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Doks",
+            "type": "array"
+          },
+          "family_key": {
+            "title": "Family Key",
+            "type": "string"
+          },
+          "quantity": {
+            "default": 5,
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "question_types": {
+            "default": [],
+            "items": {
+              "enum": [
+                "multiple_choice",
+                "constructed_response"
+              ],
+              "type": "string"
+            },
+            "title": "Question Types",
+            "type": "array"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9._-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "standard_id": {
+            "title": "Standard Id",
+            "type": "integer"
+          },
+          "template_keys": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Template Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "standard_id",
+          "family_key"
+        ],
+        "title": "GenerateRequest",
+        "type": "object"
+      },
+      "GenerateSaveOut": {
+        "properties": {
+          "question_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Question Ids",
+            "type": "array"
+          },
+          "run_id": {
+            "title": "Run Id",
+            "type": "integer"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "string"
+          }
+        },
+        "required": [
+          "run_id",
+          "seed",
+          "question_ids"
+        ],
+        "title": "GenerateSaveOut",
+        "type": "object"
+      },
+      "GeneratedGroupOut": {
+        "properties": {
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "parameters": {
+            "title": "Parameters",
+            "type": "object"
+          },
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/GeneratedQuestionOut"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "stimulus": {
+            "title": "Stimulus",
+            "type": "object"
+          }
+        },
+        "required": [
+          "index",
+          "parameters",
+          "stimulus",
+          "questions"
+        ],
+        "title": "GeneratedGroupOut",
+        "type": "object"
+      },
+      "GeneratedQuestionOut": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "attempt": {
+            "title": "Attempt",
+            "type": "integer"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/ChoiceOut"
+            },
+            "title": "Choices",
+            "type": "array"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "observable": {
+            "$ref": "#/components/schemas/ObservableRef"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "template_key": {
+            "title": "Template Key",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "template_key",
+          "title",
+          "dok",
+          "question_type",
+          "stem",
+          "choices",
+          "answer",
+          "explanation",
+          "observable",
+          "attempt"
+        ],
+        "title": "GeneratedQuestionOut",
+        "type": "object"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "title": "Detail",
+            "type": "array"
+          }
+        },
+        "title": "HTTPValidationError",
+        "type": "object"
+      },
+      "LoginRequest": {
+        "properties": {
+          "password": {
+            "title": "Password",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginRequest",
+        "type": "object"
+      },
+      "NamedText": {
+        "properties": {
+          "description": {
+            "title": "Description",
+            "type": "string"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "title": "NamedText",
+        "type": "object"
+      },
+      "ObservableRef": {
+        "properties": {
+          "category": {
+            "title": "Category",
+            "type": "string"
+          },
+          "index": {
+            "title": "Index",
+            "type": "integer"
+          },
+          "text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Text"
+          }
+        },
+        "required": [
+          "category",
+          "index"
+        ],
+        "title": "ObservableRef",
+        "type": "object"
+      },
+      "PrintBlock": {
+        "properties": {
+          "questions": {
+            "items": {
+              "$ref": "#/components/schemas/PrintQuestion"
+            },
+            "title": "Questions",
+            "type": "array"
+          },
+          "stimulus": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus"
+          },
+          "stimulus_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus Title"
+          }
+        },
+        "required": [
+          "stimulus",
+          "stimulus_title",
+          "questions"
+        ],
+        "title": "PrintBlock",
+        "type": "object"
+      },
+      "PrintChoice": {
+        "properties": {
+          "correct": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correct"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "rationale": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rationale"
+          },
+          "text": {
+            "title": "Text",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "text"
+        ],
+        "title": "PrintChoice",
+        "type": "object"
+      },
+      "PrintOut": {
+        "properties": {
+          "blocks": {
+            "items": {
+              "$ref": "#/components/schemas/PrintBlock"
+            },
+            "title": "Blocks",
+            "type": "array"
+          },
+          "course_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Course Name"
+          },
+          "instructions": {
+            "title": "Instructions",
+            "type": "string"
+          },
+          "question_count": {
+            "title": "Question Count",
+            "type": "integer"
+          },
+          "standards": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standards"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "variant": {
+            "enum": [
+              "teacher",
+              "student"
+            ],
+            "title": "Variant",
+            "type": "string"
+          }
+        },
+        "required": [
+          "variant",
+          "title",
+          "course_name",
+          "instructions",
+          "question_count",
+          "blocks"
+        ],
+        "title": "PrintOut",
+        "type": "object"
+      },
+      "PrintQuestion": {
+        "properties": {
+          "answer": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/PrintChoice"
+            },
+            "title": "Choices",
+            "type": "array"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "explanation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explanation"
+          },
+          "number": {
+            "title": "Number",
+            "type": "integer"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "standard_code": {
+            "title": "Standard Code",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "teacher_edited": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Teacher Edited"
+          }
+        },
+        "required": [
+          "number",
+          "question_type",
+          "dok",
+          "standard_code",
+          "stem",
+          "choices"
+        ],
+        "title": "PrintQuestion",
+        "type": "object"
+      },
+      "QuestionDetail": {
+        "properties": {
+          "allowed_transitions": {
+            "items": {
+              "enum": [
+                "generated",
+                "reviewed",
+                "approved",
+                "rejected",
+                "archived"
+              ],
+              "type": "string"
+            },
+            "title": "Allowed Transitions",
+            "type": "array"
+          },
+          "assessment_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Assessment Ids",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "current": {
+            "$ref": "#/components/schemas/QuestionVersionOut"
+          },
+          "family_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Key"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "provenance": {
+            "title": "Provenance",
+            "type": "object"
+          },
+          "standard": {
+            "$ref": "#/components/schemas/StandardSummary"
+          },
+          "status": {
+            "enum": [
+              "generated",
+              "reviewed",
+              "approved",
+              "rejected",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "status_events": {
+            "items": {
+              "$ref": "#/components/schemas/StatusEventOut"
+            },
+            "title": "Status Events",
+            "type": "array"
+          },
+          "stimulus": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/StimulusOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "template_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template Key"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionVersionOut"
+            },
+            "title": "Versions",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "allowed_transitions",
+          "standard",
+          "family_key",
+          "template_key",
+          "provenance",
+          "stimulus",
+          "current",
+          "versions",
+          "status_events",
+          "assessment_ids",
+          "created_at",
+          "updated_at"
+        ],
+        "title": "QuestionDetail",
+        "type": "object"
+      },
+      "QuestionEdit": {
+        "properties": {
+          "answer": {
+            "anyOf": [
+              {
+                "maxLength": 10000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Answer"
+          },
+          "change_note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Note"
+          },
+          "choices": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/ChoiceIn"
+            },
+            "title": "Choices",
+            "type": "array"
+          },
+          "dok": {
+            "maximum": 4.0,
+            "minimum": 1.0,
+            "title": "Dok",
+            "type": "integer"
+          },
+          "explanation": {
+            "default": "",
+            "maxLength": 10000,
+            "title": "Explanation",
+            "type": "string"
+          },
+          "stem": {
+            "maxLength": 10000,
+            "minLength": 1,
+            "title": "Stem",
+            "type": "string"
+          }
+        },
+        "required": [
+          "stem",
+          "dok"
+        ],
+        "title": "QuestionEdit",
+        "type": "object"
+      },
+      "QuestionPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionSummary"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "page": {
+            "title": "Page",
+            "type": "integer"
+          },
+          "page_size": {
+            "title": "Page Size",
+            "type": "integer"
+          },
+          "status_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Status Counts",
+            "type": "object"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size",
+          "status_counts"
+        ],
+        "title": "QuestionPage",
+        "type": "object"
+      },
+      "QuestionSummary": {
+        "properties": {
+          "course_name": {
+            "title": "Course Name",
+            "type": "string"
+          },
+          "current_version_no": {
+            "title": "Current Version No",
+            "type": "integer"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "family_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Key"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "origin": {
+            "enum": [
+              "engine",
+              "teacher_edit"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "standard_code": {
+            "title": "Standard Code",
+            "type": "string"
+          },
+          "standard_id": {
+            "title": "Standard Id",
+            "type": "integer"
+          },
+          "status": {
+            "enum": [
+              "generated",
+              "reviewed",
+              "approved",
+              "rejected",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "stimulus_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus Id"
+          },
+          "stimulus_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus Title"
+          },
+          "template_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template Key"
+          },
+          "updated_at": {
+            "format": "date-time",
+            "title": "Updated At",
+            "type": "string"
+          },
+          "use_year": {
+            "title": "Use Year",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "standard_id",
+          "standard_code",
+          "course_name",
+          "use_year",
+          "family_key",
+          "template_key",
+          "stimulus_id",
+          "stimulus_title",
+          "current_version_no",
+          "origin",
+          "question_type",
+          "dok",
+          "stem",
+          "updated_at"
+        ],
+        "title": "QuestionSummary",
+        "type": "object"
+      },
+      "QuestionVersionOut": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "change_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Change Note"
+          },
+          "choices": {
+            "items": {
+              "$ref": "#/components/schemas/ChoiceOut"
+            },
+            "title": "Choices",
+            "type": "array"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "origin": {
+            "enum": [
+              "engine",
+              "teacher_edit"
+            ],
+            "title": "Origin",
+            "type": "string"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "version_no": {
+            "title": "Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "version_no",
+          "origin",
+          "question_type",
+          "dok",
+          "stem",
+          "choices",
+          "answer",
+          "explanation",
+          "change_note",
+          "created_at"
+        ],
+        "title": "QuestionVersionOut",
+        "type": "object"
+      },
+      "ReorderItems": {
+        "properties": {
+          "item_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Item Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "item_ids"
+        ],
+        "title": "ReorderItems",
+        "type": "object"
+      },
+      "SessionUser": {
+        "properties": {
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username"
+        ],
+        "title": "SessionUser",
+        "type": "object"
+      },
+      "SourceDocumentOut": {
+        "properties": {
+          "authority": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Authority"
+          },
+          "content_sha256": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content Sha256"
+          },
+          "data_file": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data File"
+          },
+          "document_key": {
+            "title": "Document Key",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "imported_at": {
+            "format": "date-time",
+            "title": "Imported At",
+            "type": "string"
+          },
+          "published": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Published"
+          },
+          "resource_type": {
+            "title": "Resource Type",
+            "type": "string"
+          },
+          "state": {
+            "title": "State",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          },
+          "url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Url"
+          },
+          "use_year": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Use Year"
+          }
+        },
+        "required": [
+          "id",
+          "state",
+          "document_key",
+          "title",
+          "resource_type",
+          "authority",
+          "use_year",
+          "published",
+          "url",
+          "data_file",
+          "content_sha256",
+          "imported_at"
+        ],
+        "title": "SourceDocumentOut",
+        "type": "object"
+      },
+      "StandardDetail": {
+        "properties": {
+          "bundles": {
+            "items": {
+              "$ref": "#/components/schemas/BundleRef"
+            },
+            "title": "Bundles",
+            "type": "array"
+          },
+          "ccc": {
+            "$ref": "#/components/schemas/NamedText"
+          },
+          "clarification_statement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Clarification Statement"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "content_sha256": {
+            "title": "Content Sha256",
+            "type": "string"
+          },
+          "course_id": {
+            "title": "Course Id",
+            "type": "integer"
+          },
+          "course_name": {
+            "title": "Course Name",
+            "type": "string"
+          },
+          "course_slug": {
+            "title": "Course Slug",
+            "type": "string"
+          },
+          "dci": {
+            "items": {
+              "$ref": "#/components/schemas/DciOut"
+            },
+            "title": "Dci",
+            "type": "array"
+          },
+          "domain_code": {
+            "title": "Domain Code",
+            "type": "string"
+          },
+          "domain_name": {
+            "title": "Domain Name",
+            "type": "string"
+          },
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/FamilyRef"
+            },
+            "title": "Families",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "observable_performances": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "title": "Observable Performances",
+            "type": "object"
+          },
+          "performance_expectation": {
+            "title": "Performance Expectation",
+            "type": "string"
+          },
+          "question_counts": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "title": "Question Counts",
+            "type": "object"
+          },
+          "question_family_candidate": {
+            "title": "Question Family Candidate",
+            "type": "boolean"
+          },
+          "question_sentence_stems": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question Sentence Stems"
+          },
+          "repeat_of_biology_1": {
+            "title": "Repeat Of Biology 1",
+            "type": "boolean"
+          },
+          "sep": {
+            "$ref": "#/components/schemas/NamedText"
+          },
+          "source_document": {
+            "$ref": "#/components/schemas/SourceDocumentOut"
+          },
+          "state_assessment_boundary": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "State Assessment Boundary"
+          },
+          "terminology": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Terminology",
+            "type": "array"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Topics",
+            "type": "array"
+          },
+          "use_year": {
+            "title": "Use Year",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "course_name",
+          "course_slug",
+          "use_year",
+          "code",
+          "domain_code",
+          "domain_name",
+          "performance_expectation",
+          "topics",
+          "question_family_candidate",
+          "repeat_of_biology_1",
+          "families",
+          "clarification_statement",
+          "state_assessment_boundary",
+          "sep",
+          "dci",
+          "ccc",
+          "observable_performances",
+          "terminology",
+          "question_sentence_stems",
+          "content_sha256",
+          "source_document",
+          "bundles",
+          "question_counts"
+        ],
+        "title": "StandardDetail",
+        "type": "object"
+      },
+      "StandardSummary": {
+        "properties": {
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "course_id": {
+            "title": "Course Id",
+            "type": "integer"
+          },
+          "course_name": {
+            "title": "Course Name",
+            "type": "string"
+          },
+          "course_slug": {
+            "title": "Course Slug",
+            "type": "string"
+          },
+          "domain_code": {
+            "title": "Domain Code",
+            "type": "string"
+          },
+          "domain_name": {
+            "title": "Domain Name",
+            "type": "string"
+          },
+          "families": {
+            "items": {
+              "$ref": "#/components/schemas/FamilyRef"
+            },
+            "title": "Families",
+            "type": "array"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "performance_expectation": {
+            "title": "Performance Expectation",
+            "type": "string"
+          },
+          "question_family_candidate": {
+            "title": "Question Family Candidate",
+            "type": "boolean"
+          },
+          "repeat_of_biology_1": {
+            "title": "Repeat Of Biology 1",
+            "type": "boolean"
+          },
+          "topics": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Topics",
+            "type": "array"
+          },
+          "use_year": {
+            "title": "Use Year",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "course_id",
+          "course_name",
+          "course_slug",
+          "use_year",
+          "code",
+          "domain_code",
+          "domain_name",
+          "performance_expectation",
+          "topics",
+          "question_family_candidate",
+          "repeat_of_biology_1",
+          "families"
+        ],
+        "title": "StandardSummary",
+        "type": "object"
+      },
+      "StatusChange": {
+        "properties": {
+          "note": {
+            "anyOf": [
+              {
+                "maxLength": 1000,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "to_status": {
+            "enum": [
+              "generated",
+              "reviewed",
+              "approved",
+              "rejected",
+              "archived"
+            ],
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "to_status"
+        ],
+        "title": "StatusChange",
+        "type": "object"
+      },
+      "StatusEventOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "from_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "From Status"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Note"
+          },
+          "to_status": {
+            "title": "To Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "from_status",
+          "to_status",
+          "note",
+          "created_at"
+        ],
+        "title": "StatusEventOut",
+        "type": "object"
+      },
+      "StimulusOut": {
+        "properties": {
+          "body": {
+            "title": "Body",
+            "type": "object"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "kind",
+          "title",
+          "body"
+        ],
+        "title": "StimulusOut",
+        "type": "object"
+      },
+      "TemplateOut": {
+        "properties": {
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "key": {
+            "title": "Key",
+            "type": "string"
+          },
+          "observable_category": {
+            "title": "Observable Category",
+            "type": "string"
+          },
+          "observable_index": {
+            "title": "Observable Index",
+            "type": "integer"
+          },
+          "observable_text": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observable Text"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "title": {
+            "title": "Title",
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "dok",
+          "question_type",
+          "observable_category",
+          "observable_index"
+        ],
+        "title": "TemplateOut",
+        "type": "object"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "title": "Location",
+            "type": "array"
+          },
+          "msg": {
+            "title": "Message",
+            "type": "string"
+          },
+          "type": {
+            "title": "Error Type",
+            "type": "string"
+          }
+        },
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError",
+        "type": "object"
+      }
+    }
+  },
+  "info": {
+    "title": "Science Bank",
+    "version": "0.1.0"
+  },
+  "openapi": "3.1.0",
+  "paths": {
+    "/api/assessments": {
+      "get": {
+        "operationId": "list_assessments_api_assessments_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AssessmentSummary"
+                  },
+                  "title": "Response List Assessments Api Assessments Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Assessments",
+        "tags": [
+          "assessments"
+        ]
+      },
+      "post": {
+        "operationId": "create_assessment_api_assessments_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create Assessment",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
+    "/api/assessments/{assessment_id}": {
+      "delete": {
+        "operationId": "delete_assessment_api_assessments__assessment_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Assessment",
+        "tags": [
+          "assessments"
+        ]
+      },
+      "get": {
+        "operationId": "get_assessment_api_assessments__assessment_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Assessment",
+        "tags": [
+          "assessments"
+        ]
+      },
+      "patch": {
+        "operationId": "update_assessment_api_assessments__assessment_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssessmentUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Assessment",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
+    "/api/assessments/{assessment_id}/items": {
+      "post": {
+        "description": "Pin each question's current version. Items sharing a stimulus are kept next to each other.",
+        "operationId": "add_items_api_assessments__assessment_id__items_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddItems"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddItemsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Items",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
+    "/api/assessments/{assessment_id}/items/order": {
+      "put": {
+        "operationId": "reorder_items_api_assessments__assessment_id__items_order_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderItems"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Reorder Items",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
+    "/api/assessments/{assessment_id}/items/{item_id}": {
+      "delete": {
+        "operationId": "remove_item_api_assessments__assessment_id__items__item_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Remove Item",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
+    "/api/assessments/{assessment_id}/items/{item_id}/refresh": {
+      "post": {
+        "description": "Re-pin an item to its question's latest version.",
+        "operationId": "refresh_item_api_assessments__assessment_id__items__item_id__refresh_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "item_id",
+            "required": true,
+            "schema": {
+              "title": "Item Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Refresh Item",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
+    "/api/assessments/{assessment_id}/print": {
+      "get": {
+        "description": "Printable content. The student variant is built without any key data at all.",
+        "operationId": "print_view_api_assessments__assessment_id__print_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "variant",
+            "required": false,
+            "schema": {
+              "default": "student",
+              "enum": [
+                "teacher",
+                "student"
+              ],
+              "title": "Variant",
+              "type": "string"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PrintOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Print View",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "login_api_auth_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionUser"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Login",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "logout_api_auth_logout_post",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Logout Api Auth Logout Post",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Logout",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "me_api_auth_me_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SessionUser"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Me",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/bundles": {
+      "get": {
+        "operationId": "list_bundles_api_bundles_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "course_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course Id"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/BundleOut"
+                  },
+                  "title": "Response List Bundles Api Bundles Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Bundles",
+        "tags": [
+          "standards"
+        ]
+      }
+    },
+    "/api/courses": {
+      "get": {
+        "operationId": "list_courses_api_courses_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/CourseOut"
+                  },
+                  "title": "Response List Courses Api Courses Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Courses",
+        "tags": [
+          "standards"
+        ]
+      }
+    },
+    "/api/families": {
+      "get": {
+        "operationId": "list_families_api_families_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/FamilyOut"
+                  },
+                  "title": "Response List Families Api Families Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Families",
+        "tags": [
+          "standards"
+        ]
+      }
+    },
+    "/api/generate/preview": {
+      "post": {
+        "description": "Generate without saving. Omit `seed` for a fresh one; the returned seed reproduces this exact set.",
+        "operationId": "preview_api_generate_preview_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GeneratePreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview",
+        "tags": [
+          "generate"
+        ]
+      }
+    },
+    "/api/generate/save": {
+      "post": {
+        "description": "Regenerate server-side from the seed (never trusting client-edited content) and store in the bank.",
+        "operationId": "save_api_generate_save_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateSaveOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save",
+        "tags": [
+          "generate"
+        ]
+      }
+    },
+    "/api/questions": {
+      "get": {
+        "operationId": "list_questions_api_questions_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "status",
+            "required": false,
+            "schema": {
+              "default": [],
+              "items": {
+                "enum": [
+                  "generated",
+                  "reviewed",
+                  "approved",
+                  "rejected",
+                  "archived"
+                ],
+                "type": "string"
+              },
+              "title": "Status",
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "course_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "standard_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Standard Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "family_key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Family Key"
+            }
+          },
+          {
+            "in": "query",
+            "name": "dok",
+            "required": false,
+            "schema": {
+              "default": [],
+              "items": {
+                "type": "integer"
+              },
+              "title": "Dok",
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "question_type",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "enum": [
+                    "multiple_choice",
+                    "constructed_response"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Question Type"
+            }
+          },
+          {
+            "in": "query",
+            "name": "stimulus_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Stimulus Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "required": false,
+            "schema": {
+              "default": 1,
+              "minimum": 1,
+              "title": "Page",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page_size",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Page Size",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Questions",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/bulk-status": {
+      "post": {
+        "operationId": "bulk_status_api_questions_bulk_status_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BulkStatusChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BulkStatusOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Bulk Status",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/{question_id}": {
+      "get": {
+        "operationId": "get_question_api_questions__question_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "title": "Question Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Question",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/{question_id}/restore/{version_no}": {
+      "post": {
+        "description": "Make an older version current again by copying it forward as a new version.",
+        "operationId": "restore_version_api_questions__question_id__restore__version_no__post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "title": "Question Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "version_no",
+            "required": true,
+            "schema": {
+              "title": "Version No",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Restore Version",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/{question_id}/status": {
+      "post": {
+        "operationId": "set_status_api_questions__question_id__status_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "title": "Question Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatusChange"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Status",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/questions/{question_id}/versions": {
+      "post": {
+        "operationId": "edit_question_api_questions__question_id__versions_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "title": "Question Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestionEdit"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Edit Question",
+        "tags": [
+          "questions"
+        ]
+      }
+    },
+    "/api/sources": {
+      "get": {
+        "operationId": "list_sources_api_sources_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/SourceDocumentOut"
+                  },
+                  "title": "Response List Sources Api Sources Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Sources",
+        "tags": [
+          "standards"
+        ]
+      }
+    },
+    "/api/standards": {
+      "get": {
+        "operationId": "list_standards_api_standards_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "course_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "q",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "maxLength": 200,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Q"
+            }
+          },
+          {
+            "in": "query",
+            "name": "domain",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Domain"
+            }
+          },
+          {
+            "in": "query",
+            "name": "topic",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Topic"
+            }
+          },
+          {
+            "in": "query",
+            "name": "candidate_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Candidate Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "with_family_only",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "With Family Only",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/StandardSummary"
+                  },
+                  "title": "Response List Standards Api Standards Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Standards",
+        "tags": [
+          "standards"
+        ]
+      }
+    },
+    "/api/standards/{standard_id}": {
+      "get": {
+        "operationId": "get_standard_detail_api_standards__standard_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "standard_id",
+            "required": true,
+            "schema": {
+              "title": "Standard Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StandardDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Standard Detail",
+        "tags": [
+          "standards"
+        ]
+      }
+    },
+    "/api/topics": {
+      "get": {
+        "operationId": "list_topics_api_topics_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "course_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course Id"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "type": "string"
+                  },
+                  "title": "Response List Topics Api Topics Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Topics",
+        "tags": [
+          "standards"
+        ]
+      }
+    },
+    "/healthz": {
+      "get": {
+        "description": "Liveness check \u2014 does not touch the database.",
+        "operationId": "healthz_healthz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Healthz Healthz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Healthz",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/readyz": {
+      "get": {
+        "description": "Readiness check \u2014 confirms the database connection works.",
+        "operationId": "readyz_readyz_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Readyz Readyz Get",
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "Readyz",
+        "tags": [
+          "health"
+        ]
+      }
+    }
+  }
+}

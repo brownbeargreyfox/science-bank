@@ -1,6 +1,10 @@
 import react from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 
+// Dev proxy target: set API_PROXY_TARGET (e.g. http://127.0.0.1:8791) to point
+// the dev server at a running backend. Defaults to a local uvicorn on :8000.
+const apiTarget = process.env.API_PROXY_TARGET ?? 'http://127.0.0.1:8000'
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
@@ -8,9 +12,9 @@ export default defineConfig({
     host: true,
     port: 5173,
     proxy: {
-      '/api': { target: 'http://backend:8000', changeOrigin: true },
-      '/healthz': { target: 'http://backend:8000', changeOrigin: true },
-      '/readyz': { target: 'http://backend:8000', changeOrigin: true },
+      '/api': { target: apiTarget, changeOrigin: true },
+      '/healthz': { target: apiTarget, changeOrigin: true },
+      '/readyz': { target: apiTarget, changeOrigin: true },
     },
   },
 })
