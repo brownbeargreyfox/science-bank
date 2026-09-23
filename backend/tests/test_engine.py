@@ -20,8 +20,8 @@ BACKEND = Path(__file__).resolve().parents[1]
 STANDARDS = REPO_ROOT / "data" / "standards" / "SC"
 SEEDS = [f"inv-{i}" for i in range(150)]
 
-# Golden digests of generate_set(family, "golden", 12). A change here means previously saved seeds
-# would no longer regenerate identically: bump the family version instead of editing these.
+# Golden digests of generate_set(family, "golden", 12). If one changes, output for existing seeds has
+# changed: bump that family's version (it feeds every sub-seed) and re-pin the digest in the same commit.
 GOLDEN = {
     "population-carrying-capacity": "0c8ee45939b20ce51b7dca113cea1742cf4ca9aaad92086d30df1e8e685860db",
     "trait-probability": "ff980b3df37a613d7f891355941547eb80306d08e2be9dde702114c2b114571a",

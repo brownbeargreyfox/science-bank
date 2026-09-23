@@ -10,8 +10,9 @@ families**: seeded generators that draw scientifically valid datasets (populatio
 Punnett crosses, reaction-rate experiments) and compute every answer and distractor from the same
 parameters the student sees. Each family is bound to one exact Performance Expectation in the
 official SCDE standards data under [`data/standards/`](data/standards/), and every template cites
-the SCDE "observable feature of student performance" it targets. The same seed always regenerates
-the same set.
+the SCDE "observable feature of student performance" it targets. The same seed and family version
+always regenerate the same set; saved questions store their full content, so they never depend on
+regeneration.
 
 ## What works today (MVP)
 
@@ -67,6 +68,9 @@ science.example.com {
 ```
 
 With `ENVIRONMENT=production` the session cookie is `Secure`, so serve it over HTTPS (Caddy does).
+Browsing to plain `http://<lan-ip>:<port>` (e.g. with `APP_BIND=0.0.0.0`) will appear to log in
+and then bounce back to the login page; use the Caddy HTTPS hostname, or `ENVIRONMENT=development`
+for LAN-only testing.
 
 ### Operations
 

@@ -160,9 +160,13 @@ deploy/dev commands.
 Invariants (all covered by `backend/tests/test_engine.py`):
 - Sub-seeds are sha256(seed, family, version, group, template, attempt) — never Python `hash()`.
   Randomness goes only through `Rng`, built on `random.Random.random()` (the one stream CPython
-  guarantees across versions). Same seed + options ⇒ byte-identical output, also across processes
-  with different PYTHONHASHSEED. Golden digests are pinned per family: **if a change alters output,
-  bump the family `version`** rather than editing the digest, so saved seeds stay reproducible.
+  guarantees across versions). Same seed + options + family version ⇒ byte-identical output, also
+  across processes with different PYTHONHASHSEED. The family version is part of every sub-seed, and
+  only the current version's code ships, so **bumping a version changes what an old seed produces**.
+  That is acceptable because saved questions store their full content (regeneration is never needed
+  to print or edit them); the bump makes the change visible in provenance, and the question page
+  warns when "Regenerate this set" would use a newer family version. Golden digests are pinned per
+  family: if a change alters output, bump the family `version` and re-pin the digest in the same commit.
 - Keys and distractors are computed from exactly the values rendered to students (rounded/noised
   table values), and ambiguous draws (ties, near-duplicate distractors) are rejected and redrawn
   deterministically. Every MC item has exactly one key and four distinct choices, each with a rationale.
@@ -172,7 +176,7 @@ Invariants (all covered by `backend/tests/test_engine.py`):
   observable performance, seed, group, attempt).
 - Save re-generates server-side from the seed; client-edited payloads are never trusted.
 
-Families (version 1.0.0):
+Families (population-carrying-capacity 1.0.0, trait-probability 1.1.0, reaction-rate 1.0.0):
 | Key | Standard | Notes on alignment |
 |---|---|---|
 | `population-carrying-capacity` | Biology 1 B-LS2-1 | Logistic survey data with one limiting-factor change (drought, predators, forage, dissolved O₂, food supply, salinity) and a constant control factor; items on fastest growth, estimating K, identifying/classifying the factor, predicting reversal, scale (PE mentions scale). No equation derivation (boundary). |

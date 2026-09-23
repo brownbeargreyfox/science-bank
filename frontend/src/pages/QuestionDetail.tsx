@@ -2,7 +2,7 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useState, type FormEvent } from "react";
 import { Link, useParams } from "react-router";
 import { api, unwrap } from "../api/client";
-import { queryClient, useAssessments } from "../api/queries";
+import { queryClient, useAssessments, useFamilies } from "../api/queries";
 import { STATUS_LABEL, TYPE_LABEL, type QuestionDetail, type Status } from "../api/types";
 import { EditQuestionForm } from "../components/EditQuestionForm";
 import { QuestionBody } from "../components/QuestionBody";
@@ -106,6 +106,9 @@ function ProvenancePanel({ q }: { q: QuestionDetail }) {
         })
       : null;
   const src = p.source_document;
+  const families = useFamilies();
+  const currentVersion = families.data?.find((f) => f.key === (p.family?.key ?? q.family_key))?.version;
+  const versionChanged = Boolean(regen && p.family?.version && currentVersion && currentVersion !== p.family.version);
   return (
     <Section
       title="Provenance"
@@ -119,6 +122,12 @@ function ProvenancePanel({ q }: { q: QuestionDetail }) {
       }
     >
       <p className="mb-2 text-sm text-muted">Recorded when this question was generated.</p>
+      {versionChanged ? (
+        <p className="mb-2 text-sm" role="note">
+          This question was built with family version {p.family?.version}; the current version is {currentVersion}.
+          Regenerating with the same seed will produce a different set. This saved question is unaffected.
+        </p>
+      ) : null}
       <dl>
         <Meta label="Standard">
           <CodeTag code={p.standard?.code ?? q.standard.code} course={p.standard?.course ?? q.standard.course_name} to={`/standards/${q.standard.id}`} />
