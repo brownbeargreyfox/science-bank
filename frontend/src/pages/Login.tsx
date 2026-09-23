@@ -13,6 +13,7 @@ export default function LoginPage() {
   const me = useMe();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"login" | "register">("login");
   const registration = useQuery({
     queryKey: ["auth", "registration-status"],
     queryFn: () => unwrap(api.GET("/api/auth/registration-status")),
@@ -36,9 +37,12 @@ export default function LoginPage() {
 
   if (me.data) return <Navigate to={next} replace />;
 
+  const canRegister = registration.data?.registration_open === true;
+  const isRegistering = mode === "register" && canRegister;
+
   const submit = (e: FormEvent) => {
     e.preventDefault();
-    (registration.data?.registration_open ? register : login).mutate();
+    (isRegistering ? register : login).mutate();
   };
 
   return (
@@ -56,7 +60,11 @@ export default function LoginPage() {
           </div>
         </div>
         <form onSubmit={submit} className="panel space-y-4 p-5" noValidate>
-          {registration.data?.registration_open ? <p className="rounded border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">Create the one teacher account for this private installation. Registration closes after this step.</p> : null}
+          <div className="flex rounded-lg bg-slate-100 p-1 text-sm font-medium" role="tablist" aria-label="Account action">
+            <button type="button" role="tab" aria-selected={!isRegistering} className={`flex-1 rounded-md px-3 py-2 ${!isRegistering ? "bg-white text-ink shadow-sm" : "text-muted"}`} onClick={() => setMode("login")}>Log in</button>
+            {canRegister ? <button type="button" role="tab" aria-selected={isRegistering} className={`flex-1 rounded-md px-3 py-2 ${isRegistering ? "bg-white text-ink shadow-sm" : "text-muted"}`} onClick={() => setMode("register")}>Create account</button> : null}
+          </div>
+          {isRegistering ? <p className="rounded border border-teal-200 bg-teal-50 p-3 text-sm text-teal-900">Create a teacher account for this private installation.</p> : null}
           <div>
             <label htmlFor="username" className="field-label">
               Username
@@ -79,16 +87,16 @@ export default function LoginPage() {
               id="password"
               type="password"
               className="input"
-              autoComplete={registration.data?.registration_open ? "new-password" : "current-password"}
+              autoComplete={isRegistering ? "new-password" : "current-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
           </div>
-          <p className="text-xs text-muted">{registration.data?.registration_open ? "Use at least 12 characters for the password." : null}</p>
+          <p className="text-xs text-muted">{isRegistering ? "Use at least 12 characters for the password." : null}</p>
           <div aria-live="polite">{login.isError ? <ErrorNotice error={login.error} /> : register.isError ? <ErrorNotice error={register.error} /> : null}</div>
-          <button type="submit" className="btn btn-primary w-full" disabled={login.isPending || register.isPending || !username || !password || (registration.data?.registration_open && password.length < 12)}>
-            {registration.data?.registration_open ? (register.isPending ? "Creating account…" : "Create teacher account") : login.isPending ? "Logging in…" : "Log in"}
+          <button type="submit" className="btn btn-primary w-full" disabled={login.isPending || register.isPending || !username || !password || (isRegistering && password.length < 12)}>
+            {isRegistering ? (register.isPending ? "Creating account…" : "Create teacher account") : login.isPending ? "Logging in…" : "Log in"}
           </button>
         </form>
       </div>

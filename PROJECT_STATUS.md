@@ -6,7 +6,8 @@ cold with zero prior context.
 ## 1. What this project is
 
 A self-hosted **teacher question-bank and assessment-generation tool** for South Carolina high
-school science (Biology 1, Biology 2, Chemistry to start), being built for **Nina**, a science
+school science (Biology 1, Biology 2, Chemistry to start), being built for a small teacher team
+including **Nina**, a science
 teacher. The person driving this build is Nina's spouse/colleague (the user in this chat),
 working from a homelab (existing Docker/Caddy/Ollama setup).
 
@@ -147,7 +148,7 @@ deploy/dev commands.
   - The importer only reads the JSON, upserts on natural keys with per-record sha256, reports
     created/updated/unchanged, never deletes (questions reference standards), and resolves each
     bundle's `aligned_pes` inside that bundle's own course. Re-running is a no-op (tested).
-- `users` (single teacher; bcrypt hash set via `python -m app.cli set-password`).
+- `users` (multiple teacher accounts; bcrypt hashes can be set/reset with `python -m app.cli set-password`).
 - `question_families` (catalog mirror of code-defined families, synced at start-up after checking
   every template's observable-performance citation exists), `question_family_runs` (seed + options +
   parameters of each saved generation), `stimuli`, `questions` (status + provenance snapshot),

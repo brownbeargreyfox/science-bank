@@ -77,6 +77,17 @@ def test_login_logout_and_throttle(anon):
     assert anon.post("/api/auth/login", json=TEACHER).status_code == 429
 
 
+def test_registration_allows_multiple_teacher_accounts(anon):
+    alex = {"username": "alex", "password": "another correct horse"}
+    status = anon.get("/api/auth/registration-status")
+    assert status.status_code == 200 and status.json() == {"registration_open": True}
+    created = anon.post("/api/auth/register", json=alex)
+    assert created.status_code == 201 and created.json() == {"username": "alex"}
+    assert anon.post("/api/auth/register", json=alex).status_code == 409
+    anon.post("/api/auth/logout")
+    assert anon.post("/api/auth/login", json=alex).status_code == 200
+
+
 def test_unknown_api_path_is_json_404(client):
     r = client.get("/api/does-not-exist")
     assert r.status_code == 404 and r.json() == {"detail": "Not found"}

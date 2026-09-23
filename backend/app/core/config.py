@@ -19,9 +19,11 @@ class Settings(BaseSettings):
     static_dir: Path | None = None
 
     teacher_username: str = "nina"
-    # Optional bootstrap: creates the teacher account on first start if no account exists yet.
+    # Optional bootstrap: creates this account on first start if no account exists yet.
     # Prefer `python -m app.cli set-password` which stores the hash in the database.
     teacher_password_hash: str = ""
+    # Private installs can disable new self-service accounts without affecting existing teachers.
+    registration_open: bool = True
 
     jwt_secret: str = DEFAULT_JWT_SECRET
     jwt_algorithm: str = "HS256"

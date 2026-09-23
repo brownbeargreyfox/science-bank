@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.core.config import get_settings
@@ -65,16 +65,18 @@ def login(payload: LoginRequest, request: Request, response: Response, db: Sessi
 
 
 @router.get("/registration-status", response_model=RegistrationStatus)
-def registration_status(db: Session = Depends(get_db)) -> RegistrationStatus:
-    """Only expose registration while the single-teacher database has no account."""
-    return RegistrationStatus(registration_open=(db.scalar(select(func.count(User.id))) or 0) == 0)
+def registration_status() -> RegistrationStatus:
+    """Report whether this private installation currently accepts new teacher accounts."""
+    return RegistrationStatus(registration_open=get_settings().registration_open)
 
 
 @router.post("/register", response_model=SessionUser, status_code=status.HTTP_201_CREATED)
-def register(payload: RegisterRequest, request: Request, response: Response, db: Session = Depends(get_db)) -> SessionUser:
-    """One-time bootstrap registration; permanently closes once an account exists."""
-    if (db.scalar(select(func.count(User.id))) or 0) != 0:
-        raise HTTPException(status.HTTP_403_FORBIDDEN, "Registration is closed. Ask the teacher account owner to reset access.")
+def register(
+    payload: RegisterRequest, request: Request, response: Response, db: Session = Depends(get_db)
+) -> SessionUser:
+    """Create another teacher account for this private installation."""
+    if not get_settings().registration_open:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Registration is currently closed.")
 
     client = request.client.host if request.client else "unknown"
     login_throttle.check(client)
@@ -82,9 +84,9 @@ def register(payload: RegisterRequest, request: Request, response: Response, db:
     db.add(user)
     try:
         db.commit()
-    except Exception:
+    except Exception as err:
         db.rollback()
-        raise HTTPException(status.HTTP_409_CONFLICT, "That username is unavailable")
+        raise HTTPException(status.HTTP_409_CONFLICT, "That username is unavailable") from err
     login_throttle.reset(client)
     settings = get_settings()
     response.set_cookie(
