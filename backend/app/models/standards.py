@@ -83,7 +83,9 @@ class Standard(Base):
     question_family_candidate: Mapped[bool] = mapped_column(Boolean, default=False)
     repeat_of_biology_1: Mapped[bool] = mapped_column(Boolean, default=False)
     content_sha256: Mapped[str] = mapped_column(String(64))
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
 
     course: Mapped[Course] = relationship(back_populates="standards")
     topics: Mapped[list[Topic]] = relationship(secondary="standard_topics", order_by="Topic.name")
