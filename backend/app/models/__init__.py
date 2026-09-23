@@ -1,7 +1,33 @@
 from app.core.db import Base
+from app.models.bank import (
+    Assessment,
+    AssessmentItem,
+    GenerationRun,
+    Question,
+    QuestionFamily,
+    QuestionStatusEvent,
+    QuestionVersion,
+    Stimulus,
+    User,
+)
+from app.models.standards import Bundle, BundleStandard, Course, SourceDocument, Standard, StandardTopic, Topic
 
-# Phase 2 (standards schema) and later phases add model modules here, e.g.:
-#   from app.models.standard import Standard  # noqa: F401
-# Alembic autogenerate needs every model imported here so it's registered on Base.metadata.
-
-__all__ = ["Base"]
+__all__ = [
+    "Assessment",
+    "AssessmentItem",
+    "Base",
+    "Bundle",
+    "BundleStandard",
+    "Course",
+    "GenerationRun",
+    "Question",
+    "QuestionFamily",
+    "QuestionStatusEvent",
+    "QuestionVersion",
+    "SourceDocument",
+    "Standard",
+    "StandardTopic",
+    "Stimulus",
+    "Topic",
+    "User",
+]
