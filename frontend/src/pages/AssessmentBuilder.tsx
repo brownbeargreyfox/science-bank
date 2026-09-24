@@ -436,7 +436,7 @@ export default function AssessmentBuilderPage() {
       </nav>
       <PageHeader
         title={a.title}
-        lead={`${a.course_name ?? "Any course"}, ${pluralize(a.item_count, "question")}`}
+        lead={`${a.course_name ?? "Any course"}, ${pluralize(a.item_count, "question")}. Owned by ${a.owner.username}.`}
         actions={
           <>
             <Link to={`/assessments/${a.id}/print/student`} className="btn btn-primary">
@@ -449,9 +449,18 @@ export default function AssessmentBuilderPage() {
         }
       />
 
+      {!a.can_modify ? (
+        <div className="mb-4">
+          <Notice tone="info">
+            This assessment belongs to {a.owner.username}. You can view and print it; only its owner or a power user
+            can change it.
+          </Notice>
+        </div>
+      ) : null}
+
       <div className="grid gap-5 xl:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0 space-y-5">
-          <DetailsForm key={a.id} a={a} />
+          {a.can_modify ? <DetailsForm key={a.id} a={a} /> : null}
 
           <Section title="Questions" id="items-h">
             <p className="sr-only" aria-live="polite">
@@ -473,7 +482,7 @@ export default function AssessmentBuilderPage() {
               </p>
             ) : null}
             {items.length === 0 ? (
-              <Empty>No questions yet. Add some from the panel below.</Empty>
+              <Empty>No questions yet.{a.can_modify ? " Add some from the panel below." : ""}</Empty>
             ) : (
               <ol className="mt-2 divide-y divide-line-soft">
                 {items.map((it, i) => {
@@ -499,7 +508,7 @@ export default function AssessmentBuilderPage() {
                           <StatusBadge status={it.question_status} />
                           <span className="text-muted">Version {it.pinned_version_no}</span>
                         </div>
-                        {stale ? (
+                        {stale && a.can_modify ? (
                           <div className="mt-2 flex flex-wrap items-center gap-2 rounded-md border border-[#e2c28c] bg-bound-soft px-3 py-1.5 text-sm text-bound">
                             <span className="font-bold">
                               Uses version {it.pinned_version_no}; version {it.latest_version_no} is newer.
@@ -510,37 +519,39 @@ export default function AssessmentBuilderPage() {
                           </div>
                         ) : null}
                       </div>
-                      <div className="flex flex-none flex-col gap-1 sm:flex-row sm:items-start">
-                        <button
-                          id={`mv-up-${it.id}`}
-                          type="button"
-                          className="btn btn-sm"
-                          disabled={i === 0 || busy}
-                          onClick={() => move(i, -1)}
-                          aria-label={`Move question ${i + 1} up`}
-                        >
-                          ↑<span className="sr-only sm:not-sr-only">Up</span>
-                        </button>
-                        <button
-                          id={`mv-down-${it.id}`}
-                          type="button"
-                          className="btn btn-sm"
-                          disabled={i === items.length - 1 || busy}
-                          onClick={() => move(i, 1)}
-                          aria-label={`Move question ${i + 1} down`}
-                        >
-                          ↓<span className="sr-only sm:not-sr-only">Down</span>
-                        </button>
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-danger"
-                          disabled={busy}
-                          onClick={() => remove.mutate(it.id)}
-                          aria-label={`Remove question ${i + 1}`}
-                        >
-                          Remove
-                        </button>
-                      </div>
+                      {a.can_modify ? (
+                        <div className="flex flex-none flex-col gap-1 sm:flex-row sm:items-start">
+                          <button
+                            id={`mv-up-${it.id}`}
+                            type="button"
+                            className="btn btn-sm"
+                            disabled={i === 0 || busy}
+                            onClick={() => move(i, -1)}
+                            aria-label={`Move question ${i + 1} up`}
+                          >
+                            ↑<span className="sr-only sm:not-sr-only">Up</span>
+                          </button>
+                          <button
+                            id={`mv-down-${it.id}`}
+                            type="button"
+                            className="btn btn-sm"
+                            disabled={i === items.length - 1 || busy}
+                            onClick={() => move(i, 1)}
+                            aria-label={`Move question ${i + 1} down`}
+                          >
+                            ↓<span className="sr-only sm:not-sr-only">Down</span>
+                          </button>
+                          <button
+                            type="button"
+                            className="btn btn-sm btn-danger"
+                            disabled={busy}
+                            onClick={() => remove.mutate(it.id)}
+                            aria-label={`Remove question ${i + 1}`}
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      ) : null}
                     </li>
                   );
                 })}
@@ -548,33 +559,41 @@ export default function AssessmentBuilderPage() {
             )}
           </Section>
 
-          <AddPanel
-            a={a}
-            onAdded={(out) => {
-              setAddResult(out);
-              void queryClient.invalidateQueries({ queryKey: key });
-              void queryClient.invalidateQueries({ queryKey: ["assessments"] });
-              void queryClient.invalidateQueries({ queryKey: ["question"] });
-            }}
-          />
+          {a.can_modify ? (
+            <AddPanel
+              a={a}
+              onAdded={(out) => {
+                setAddResult(out);
+                void queryClient.invalidateQueries({ queryKey: key });
+                void queryClient.invalidateQueries({ queryKey: ["assessments"] });
+                void queryClient.invalidateQueries({ queryKey: ["question"] });
+              }}
+            />
+          ) : null}
         </div>
 
         <aside className="min-w-0 space-y-5">
           <Summary a={a} />
-          <Section title="Delete" id="del-h">
-            <p className="mb-2 text-sm text-muted">Removes the assessment. The questions stay in the bank.</p>
-            <button
-              type="button"
-              className="btn btn-sm btn-danger"
-              disabled={del.isPending}
-              onClick={() => {
-                if (window.confirm(`Delete “${a.title}”? The questions stay in the bank.`)) del.mutate();
-              }}
-            >
-              Delete assessment
-            </button>
-            <ErrorNotice error={del.error} />
-          </Section>
+          {a.can_modify ? (
+            <Section title="Delete" id="del-h">
+              <p className="mb-2 text-sm text-muted">
+                Moves the assessment out of your list. The questions stay in the bank, and you can restore it from
+                Assessments → Show deleted.
+              </p>
+              <button
+                type="button"
+                className="btn btn-sm btn-danger"
+                disabled={del.isPending}
+                onClick={() => {
+                  if (window.confirm(`Delete “${a.title}”? You can restore it later from Assessments → Show deleted.`))
+                    del.mutate();
+                }}
+              >
+                Delete assessment
+              </button>
+              <ErrorNotice error={del.error} />
+            </Section>
+          ) : null}
         </aside>
       </div>
     </>

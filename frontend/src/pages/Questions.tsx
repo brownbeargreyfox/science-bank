@@ -67,6 +67,8 @@ export default function QuestionsPage() {
   const standards = useStandards({ course_id: courseId }, courseId !== null);
 
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  // Selected questions owned by someone else: still usable for "Add to assessment", but not for status changes.
+  const [readOnly, setReadOnly] = useState<Set<number>>(new Set());
   const [bulkTo, setBulkTo] = useState<Status | "">("");
   const [bulkNote, setBulkNote] = useState("");
 
@@ -77,40 +79,47 @@ export default function QuestionsPage() {
   const pages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const pageIds = items.map((i) => i.id);
   const allOnPage = pageIds.length > 0 && pageIds.every((id) => selected.has(id));
+  const changeable = [...selected].filter((id) => !readOnly.has(id));
+  const lockedCount = selected.size - changeable.length;
 
   const bulk = useMutation({
     mutationFn: (to: Status) =>
       unwrap(
         api.POST("/api/questions/bulk-status", {
-          body: { question_ids: [...selected], to_status: to, note: bulkNote.trim() || null },
+          body: { question_ids: changeable, to_status: to, note: bulkNote.trim() || null },
         }),
       ),
     onSuccess: (out) => {
       setBulkNote("");
-      setSelected(new Set([...Object.keys(out.skipped).map(Number)]));
+      setSelected(new Set([...Object.keys(out.skipped).map(Number), ...readOnly]));
       void queryClient.invalidateQueries({ queryKey: ["questions"] });
       void queryClient.invalidateQueries({ queryKey: ["question"] });
     },
   });
 
-  const toggleOne = (id: number, on: boolean) => {
+  const select = (ids: number[], on: boolean) => {
     const next = new Set(selected);
-    if (on) next.add(id);
-    else next.delete(id);
-    setSelected(next);
-  };
-  const toggleAll = (on: boolean) => {
-    const next = new Set(selected);
-    for (const id of pageIds) {
+    const locked = new Set(readOnly);
+    for (const id of ids) {
       if (on) next.add(id);
       else next.delete(id);
+      const item = items.find((i) => i.id === id);
+      if (on && item && !item.can_modify) locked.add(id);
+      else locked.delete(id);
     }
     setSelected(next);
+    setReadOnly(locked);
+  };
+  const toggleOne = (id: number, on: boolean) => select([id], on);
+  const toggleAll = (on: boolean) => select(pageIds, on);
+  const clearSelection = () => {
+    setSelected(new Set());
+    setReadOnly(new Set());
   };
 
   const submitBulk = (e: FormEvent) => {
     e.preventDefault();
-    if (bulkTo && selected.size) bulk.mutate(bulkTo);
+    if (bulkTo && changeable.length) bulk.mutate(bulkTo);
   };
 
   const tabs: { key: Status | null; label: string; count: number }[] = [
@@ -271,34 +280,43 @@ export default function QuestionsPage() {
         <section aria-label="Bulk actions" className="panel mb-4 space-y-4 border-petrol p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-bold">{pluralize(selected.size, "question")} selected</p>
-            <button type="button" className="btn btn-sm btn-quiet" onClick={() => setSelected(new Set())}>
+            <button type="button" className="btn btn-sm btn-quiet" onClick={clearSelection}>
               Clear selection
             </button>
           </div>
-          <form onSubmit={submitBulk} className="flex flex-wrap items-end gap-2">
-            <div>
-              <label htmlFor="bulk-to" className="field-label">
-                Change status to
-              </label>
-              <select id="bulk-to" className="input" value={bulkTo} onChange={(e) => setBulkTo(e.target.value as Status | "")}>
-                <option value="">Choose…</option>
-                {STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {STATUS_LABEL[s]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="min-w-[12rem] flex-1">
-              <label htmlFor="bulk-note" className="field-label">
-                Note <span className="font-normal text-muted">(optional)</span>
-              </label>
-              <input id="bulk-note" className="input" value={bulkNote} onChange={(e) => setBulkNote(e.target.value)} />
-            </div>
-            <button type="submit" className="btn btn-primary" disabled={!bulkTo || bulk.isPending}>
-              {bulk.isPending ? "Updating…" : "Update status"}
-            </button>
-          </form>
+          {lockedCount > 0 ? (
+            <p className="text-sm text-muted">
+              {changeable.length === 0
+                ? "These questions belong to other teachers, so you can't change their status. You can still add them to your assessments."
+                : `${pluralize(lockedCount, "selected question")} belong${lockedCount === 1 ? "s" : ""} to other teachers; status changes apply only to your own ${pluralize(changeable.length, "question")}.`}
+            </p>
+          ) : null}
+          {changeable.length > 0 ? (
+            <form onSubmit={submitBulk} className="flex flex-wrap items-end gap-2">
+              <div>
+                <label htmlFor="bulk-to" className="field-label">
+                  Change status to
+                </label>
+                <select id="bulk-to" className="input" value={bulkTo} onChange={(e) => setBulkTo(e.target.value as Status | "")}>
+                  <option value="">Choose…</option>
+                  {STATUSES.map((s) => (
+                    <option key={s} value={s}>
+                      {STATUS_LABEL[s]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="min-w-[12rem] flex-1">
+                <label htmlFor="bulk-note" className="field-label">
+                  Note <span className="font-normal text-muted">(optional)</span>
+                </label>
+                <input id="bulk-note" className="input" value={bulkNote} onChange={(e) => setBulkNote(e.target.value)} />
+              </div>
+              <button type="submit" className="btn btn-primary" disabled={!bulkTo || bulk.isPending}>
+                {bulk.isPending ? "Updating…" : "Update status"}
+              </button>
+            </form>
+          ) : null}
           <div className="border-t border-line-soft pt-4">
             <AddToAssessment questionIds={[...selected]} />
           </div>
@@ -346,7 +364,7 @@ export default function QuestionsPage() {
                   <TypeBadge type={it.question_type} short />
                   <StatusBadge status={it.status} />
                   <span className="text-muted">
-                    Version {it.current_version_no}
+                    By {it.owner.username}, version {it.current_version_no}
                     {it.origin === "teacher_edit" ? ", teacher-edited" : ""}
                   </span>
                   {it.stimulus_title ? (
