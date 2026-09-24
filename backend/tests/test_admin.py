@@ -83,6 +83,58 @@ def test_registration_toggle(anon):
         anon.patch("/api/admin/settings", json={"registration_open": True})
 
 
+def test_concurrent_demotions_cannot_remove_every_admin(database, db):
+    """Two transactions demoting different admins must serialize; the second sees the first's commit."""
+    import threading
+
+    from app.core.db import SessionLocal
+    from app.core.policy import would_remove_last_admin
+    from app.core.security import hash_password
+    from app.models import User
+
+    others = db.scalars(select(User).where(User.role == "admin", User.is_active)).all()
+    for o in others:
+        o.is_active = False
+    a = User(username="race-a", password_hash=hash_password("race password a"), role="admin")
+    b = User(username="race-b", password_hash=hash_password("race password b"), role="admin")
+    db.add_all([a, b])
+    db.commit()
+    result: dict = {}
+    s1, s2 = SessionLocal(), SessionLocal()
+    try:
+        ua = s1.get(User, a.id)
+        assert would_remove_last_admin(s1, ua, new_role="regular", new_active=True) is False  # b is still an admin
+        ub = s2.get(User, b.id)
+        t = threading.Thread(
+            target=lambda: result.update(refuse=would_remove_last_admin(s2, ub, new_role="regular", new_active=True))
+        )
+        t.start()
+        t.join(timeout=1.0)
+        assert t.is_alive(), "second demotion did not wait for the first transaction"
+        ua.role = "regular"
+        s1.commit()
+        t.join(timeout=5.0)
+        assert result == {"refuse": True}
+    finally:
+        s2.rollback()
+        s1.close()
+        s2.close()
+        db.expire_all()
+        for u in db.scalars(select(User).where(User.username.in_(["race-a", "race-b"]))):
+            u.is_active = False
+        for o in others:
+            o.is_active = True
+        db.commit()
+
+
+def test_duplicate_username_race_returns_409(anon, monkeypatch):
+    """If a case-equivalent username lands between the pre-check and the insert, answer 409, not 500."""
+    login_as(anon, "admin")
+    monkeypatch.setattr("app.api.admin.find_user", lambda db, name: None)
+    r = anon.post("/api/admin/users", json={"username": "PAT", "password": "a fine long password", "role": "regular"})
+    assert r.status_code == 409
+
+
 # ---- CLI ---------------------------------------------------------------------------------------
 
 

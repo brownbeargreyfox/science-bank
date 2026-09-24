@@ -2,6 +2,7 @@
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.db import get_db
@@ -47,7 +48,11 @@ def create_user(
         raise HTTPException(status.HTTP_409_CONFLICT, "That username is unavailable")
     user = User(username=body.username, password_hash=hash_password(body.password), role=body.role)
     db.add(user)
-    db.flush()
+    try:
+        db.flush()
+    except IntegrityError as err:  # a case-equivalent name was created after the check above
+        db.rollback()
+        raise HTTPException(status.HTTP_409_CONFLICT, "That username is unavailable") from err
     record_audit(
         db,
         _actor(request, admin),
