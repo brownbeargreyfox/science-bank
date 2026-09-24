@@ -63,12 +63,12 @@ CI, `deploy.sh`). `docker-compose.yml` passes `build.args` from `${APP_COMMIT:-u
 
 | Source | How | `source` value |
 |---|---|---|
-| Unhandled exception in a request | FastAPI `@app.exception_handler(Exception)` | `unhandled` |
+| Unhandled exception in a request | exception boundary in the request-context middleware (request context in scope) | `unhandled` |
 | Handled error logged by app code | `logging.Handler` on the `app` logger, level `ERROR` | `logged` |
 
 - Only the `app` logger hierarchy is ingested (not `uvicorn.*`, `sqlalchemy.*`), so Uvicorn's own
   "Exception in ASGI application" line cannot create a duplicate.
-- The exception handler marks the exception object as captured (`exc.__sb_captured__ = <public_id>`).
+- The exception boundary marks the exception object as captured (`exc.__sb_captured__ = <public_id>`).
   The log handler skips any record whose `exc_info` exception carries that marker. One exception → one
   occurrence.
 - `logged` records without `exc_info` are captured with an empty stack; the message is the log message.
@@ -147,7 +147,7 @@ Tracebacks are formatted with `traceback.format_exception` (no local variables).
 - `track_job(kind, trigger)` context manager: inserts a `running` row, and on exit sets `succeeded` +
   counts, or `failed` + sanitized error text, and `finished_at`. Uses its own session. If recording
   fails, stderr only; the job itself still runs and its exit status is unchanged.
-- **Startup order** (`docker-compose` entrypoint): `python -m app.cli migrate` → `python -m app.cli
+- **Startup order** (`backend/docker-entrypoint.sh`): `python -m app.cli migrate` → `python -m app.cli
   bootstrap` (mark-interrupted, import_standards, sync_families, prune) → Uvicorn.
 - **migrate**: records `from_revision` (read before upgrading) and `to_revision`. It runs Alembic
   programmatically and writes the job row **after** the upgrade, because `job_runs` may not exist
@@ -227,8 +227,9 @@ audit events (last 24h).
 | `GET /api/admin/jobs/{job_id}` | one run |
 | `GET /api/admin/audit` | §6 |
 
-`PATCH /api/admin/errors/{group_id}` is added to the Phase 1 route-inventory guard (admin routes are
-tested for admin-only access in `test_admin.py`, and every admin mutation must write an audit row, which is tested).
+Every admin route is tested for admin-only access (403 power/regular, 401 anonymous). The one 2a
+mutation, `PATCH /api/admin/errors/{group_id}`, is tested to write exactly one audit row. (The Phase 1
+content-route inventory guard excludes `/api/admin/*` by design.)
 
 **Copy diagnostics block** (plain text, already sanitized):
 
