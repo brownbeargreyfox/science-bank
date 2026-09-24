@@ -115,9 +115,21 @@ export function useQuestions(filter: QuestionFilter) {
   });
 }
 
-export function useAssessments() {
+export function useAssessments(includeDeleted = false) {
   return useQuery({
-    queryKey: ["assessments"],
-    queryFn: () => unwrap(api.GET("/api/assessments")),
+    queryKey: ["assessments", { includeDeleted }],
+    queryFn: () =>
+      unwrap(api.GET("/api/assessments", { params: { query: includeDeleted ? { include_deleted: true } : {} } })),
   });
+}
+
+export const ADMIN_USERS_KEY = ["admin", "users"] as const;
+export const SITE_SETTINGS_KEY = ["admin", "settings"] as const;
+
+export function useAdminUsers() {
+  return useQuery({ queryKey: ADMIN_USERS_KEY, queryFn: () => unwrap(api.GET("/api/admin/users")) });
+}
+
+export function useSiteSettings() {
+  return useQuery({ queryKey: SITE_SETTINGS_KEY, queryFn: () => unwrap(api.GET("/api/admin/settings")) });
 }

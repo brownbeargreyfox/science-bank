@@ -43,6 +43,124 @@
         "title": "AddItemsOut",
         "type": "object"
       },
+      "AdminUserCreate": {
+        "properties": {
+          "password": {
+            "maxLength": 128,
+            "minLength": 12,
+            "title": "Password",
+            "type": "string"
+          },
+          "role": {
+            "default": "regular",
+            "enum": [
+              "admin",
+              "power",
+              "regular"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "username": {
+            "maxLength": 64,
+            "minLength": 3,
+            "pattern": "^[A-Za-z0-9_.-]+$",
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "AdminUserCreate",
+        "type": "object"
+      },
+      "AdminUserOut": {
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "is_active": {
+            "title": "Is Active",
+            "type": "boolean"
+          },
+          "last_login_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Login At"
+          },
+          "role": {
+            "enum": [
+              "admin",
+              "power",
+              "regular"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username",
+          "role",
+          "is_active",
+          "created_at",
+          "last_login_at"
+        ],
+        "title": "AdminUserOut",
+        "type": "object"
+      },
+      "AdminUserUpdate": {
+        "properties": {
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          },
+          "role": {
+            "anyOf": [
+              {
+                "enum": [
+                  "admin",
+                  "power",
+                  "regular"
+                ],
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Role"
+          }
+        },
+        "title": "AdminUserUpdate",
+        "type": "object"
+      },
       "AssessmentCreate": {
         "properties": {
           "course_id": {
@@ -77,6 +195,10 @@
       },
       "AssessmentDetail": {
         "properties": {
+          "can_modify": {
+            "title": "Can Modify",
+            "type": "boolean"
+          },
           "course_id": {
             "anyOf": [
               {
@@ -98,6 +220,18 @@
               }
             ],
             "title": "Course Name"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
           },
           "dok_distribution": {
             "additionalProperties": {
@@ -124,6 +258,9 @@
             },
             "title": "Items",
             "type": "array"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerOut"
           },
           "question_type_counts": {
             "additionalProperties": {
@@ -157,6 +294,8 @@
           "instructions",
           "item_count",
           "updated_at",
+          "owner",
+          "can_modify",
           "items",
           "dok_distribution",
           "standards_coverage",
@@ -265,6 +404,10 @@
       },
       "AssessmentSummary": {
         "properties": {
+          "can_modify": {
+            "title": "Can Modify",
+            "type": "boolean"
+          },
           "course_id": {
             "anyOf": [
               {
@@ -287,6 +430,18 @@
             ],
             "title": "Course Name"
           },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
           "id": {
             "title": "Id",
             "type": "integer"
@@ -298,6 +453,9 @@
           "item_count": {
             "title": "Item Count",
             "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerOut"
           },
           "title": {
             "title": "Title",
@@ -316,7 +474,9 @@
           "course_name",
           "instructions",
           "item_count",
-          "updated_at"
+          "updated_at",
+          "owner",
+          "can_modify"
         ],
         "title": "AssessmentSummary",
         "type": "object"
@@ -1112,6 +1272,39 @@
         "title": "ObservableRef",
         "type": "object"
       },
+      "OwnerOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "username": {
+            "title": "Username",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "username"
+        ],
+        "title": "OwnerOut",
+        "type": "object"
+      },
+      "PasswordSet": {
+        "properties": {
+          "password": {
+            "maxLength": 128,
+            "minLength": 12,
+            "title": "Password",
+            "type": "string"
+          }
+        },
+        "required": [
+          "password"
+        ],
+        "title": "PasswordSet",
+        "type": "object"
+      },
       "PrintBlock": {
         "properties": {
           "questions": {
@@ -1359,6 +1552,10 @@
             "title": "Assessment Ids",
             "type": "array"
           },
+          "can_modify": {
+            "title": "Can Modify",
+            "type": "boolean"
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -1381,6 +1578,9 @@
           "id": {
             "title": "Id",
             "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerOut"
           },
           "provenance": {
             "title": "Provenance",
@@ -1455,7 +1655,9 @@
           "status_events",
           "assessment_ids",
           "created_at",
-          "updated_at"
+          "updated_at",
+          "owner",
+          "can_modify"
         ],
         "title": "QuestionDetail",
         "type": "object"
@@ -1561,6 +1763,10 @@
       },
       "QuestionSummary": {
         "properties": {
+          "can_modify": {
+            "title": "Can Modify",
+            "type": "boolean"
+          },
           "course_name": {
             "title": "Course Name",
             "type": "string"
@@ -1595,6 +1801,9 @@
             ],
             "title": "Origin",
             "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerOut"
           },
           "question_type": {
             "enum": [
@@ -1686,7 +1895,9 @@
           "question_type",
           "dok",
           "stem",
-          "updated_at"
+          "updated_at",
+          "owner",
+          "can_modify"
         ],
         "title": "QuestionSummary",
         "type": "object"
@@ -1827,15 +2038,56 @@
       },
       "SessionUser": {
         "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "role": {
+            "enum": [
+              "admin",
+              "power",
+              "regular"
+            ],
+            "title": "Role",
+            "type": "string"
+          },
           "username": {
             "title": "Username",
             "type": "string"
           }
         },
         "required": [
-          "username"
+          "id",
+          "username",
+          "role"
         ],
         "title": "SessionUser",
+        "type": "object"
+      },
+      "SiteSettingsOut": {
+        "properties": {
+          "registration_open": {
+            "title": "Registration Open",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "registration_open"
+        ],
+        "title": "SiteSettingsOut",
+        "type": "object"
+      },
+      "SiteSettingsUpdate": {
+        "properties": {
+          "registration_open": {
+            "title": "Registration Open",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "registration_open"
+        ],
+        "title": "SiteSettingsUpdate",
         "type": "object"
       },
       "SourceDocumentOut": {
@@ -2408,10 +2660,366 @@
   },
   "openapi": "3.1.0",
   "paths": {
+    "/api/admin/settings": {
+      "get": {
+        "operationId": "read_settings_api_admin_settings_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Read Settings",
+        "tags": [
+          "admin"
+        ]
+      },
+      "patch": {
+        "operationId": "update_settings_api_admin_settings_patch",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SiteSettingsUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettingsOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Settings",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/users": {
+      "get": {
+        "operationId": "list_users_api_admin_users_get",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdminUserOut"
+                  },
+                  "title": "Response List Users Api Admin Users Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Users",
+        "tags": [
+          "admin"
+        ]
+      },
+      "post": {
+        "operationId": "create_user_api_admin_users_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Create User",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/users/{user_id}": {
+      "patch": {
+        "operationId": "update_user_api_admin_users__user_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUserUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update User",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
+    "/api/admin/users/{user_id}/password": {
+      "post": {
+        "operationId": "set_password_api_admin_users__user_id__password_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "user_id",
+            "required": true,
+            "schema": {
+              "title": "User Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordSet"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Set Password",
+        "tags": [
+          "admin"
+        ]
+      }
+    },
     "/api/assessments": {
       "get": {
+        "description": "Deleted assessments are listed only on request, and only those the caller could restore.",
         "operationId": "list_assessments_api_assessments_get",
         "parameters": [
+          {
+            "in": "query",
+            "name": "include_deleted",
+            "required": false,
+            "schema": {
+              "default": false,
+              "title": "Include Deleted",
+              "type": "boolean"
+            }
+          },
           {
             "in": "cookie",
             "name": "science_bank_session",
@@ -2520,6 +3128,7 @@
     },
     "/api/assessments/{assessment_id}": {
       "delete": {
+        "description": "Soft delete: the owner or a moderator can restore it later.",
         "operationId": "delete_assessment_api_assessments__assessment_id__delete",
         "parameters": [
           {
@@ -3036,6 +3645,64 @@
         ]
       }
     },
+    "/api/assessments/{assessment_id}/restore": {
+      "post": {
+        "operationId": "restore_assessment_api_assessments__assessment_id__restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssessmentDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Restore Assessment",
+        "tags": [
+          "assessments"
+        ]
+      }
+    },
     "/api/auth/login": {
       "post": {
         "operationId": "login_api_auth_login_post",
@@ -3150,7 +3817,7 @@
     },
     "/api/auth/register": {
       "post": {
-        "description": "Create another teacher account for this private installation.",
+        "description": "Create a regular teacher account while registration is open.",
         "operationId": "register_api_auth_register_post",
         "requestBody": {
           "content": {
@@ -3192,7 +3859,7 @@
     },
     "/api/auth/registration-status": {
       "get": {
-        "description": "Report whether this private installation currently accepts new teacher accounts.",
+        "description": "Report whether this installation currently accepts new self-service accounts.",
         "operationId": "registration_status_api_auth_registration_status_get",
         "responses": {
           "200": {

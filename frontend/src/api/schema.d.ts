@@ -4,6 +4,76 @@
  */
 
 export interface paths {
+    "/api/admin/settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Read Settings */
+        get: operations["read_settings_api_admin_settings_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update Settings */
+        patch: operations["update_settings_api_admin_settings_patch"];
+        trace?: never;
+    };
+    "/api/admin/users": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Users */
+        get: operations["list_users_api_admin_users_get"];
+        put?: never;
+        /** Create User */
+        post: operations["create_user_api_admin_users_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/users/{user_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** Update User */
+        patch: operations["update_user_api_admin_users__user_id__patch"];
+        trace?: never;
+    };
+    "/api/admin/users/{user_id}/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Set Password */
+        post: operations["set_password_api_admin_users__user_id__password_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/assessments": {
         parameters: {
             query?: never;
@@ -11,7 +81,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List Assessments */
+        /**
+         * List Assessments
+         * @description Deleted assessments are listed only on request, and only those the caller could restore.
+         */
         get: operations["list_assessments_api_assessments_get"];
         put?: never;
         /** Create Assessment */
@@ -33,7 +106,10 @@ export interface paths {
         get: operations["get_assessment_api_assessments__assessment_id__get"];
         put?: never;
         post?: never;
-        /** Delete Assessment */
+        /**
+         * Delete Assessment
+         * @description Soft delete: the owner or a moderator can restore it later.
+         */
         delete: operations["delete_assessment_api_assessments__assessment_id__delete"];
         options?: never;
         head?: never;
@@ -135,6 +211,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/assessments/{assessment_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Assessment */
+        post: operations["restore_assessment_api_assessments__assessment_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/auth/login": {
         parameters: {
             query?: never;
@@ -197,7 +290,7 @@ export interface paths {
         put?: never;
         /**
          * Register
-         * @description Create another teacher account for this private installation.
+         * @description Create a regular teacher account while registration is open.
          */
         post: operations["register_api_auth_register_post"];
         delete?: never;
@@ -215,7 +308,7 @@ export interface paths {
         };
         /**
          * Registration Status
-         * @description Report whether this private installation currently accepts new teacher accounts.
+         * @description Report whether this installation currently accepts new self-service accounts.
          */
         get: operations["registration_status_api_auth_registration_status_get"];
         put?: never;
@@ -548,6 +641,47 @@ export interface components {
                 [key: string]: string;
             };
         };
+        /** AdminUserCreate */
+        AdminUserCreate: {
+            /** Password */
+            password: string;
+            /**
+             * Role
+             * @default regular
+             * @enum {string}
+             */
+            role: "admin" | "power" | "regular";
+            /** Username */
+            username: string;
+        };
+        /** AdminUserOut */
+        AdminUserOut: {
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Id */
+            id: number;
+            /** Is Active */
+            is_active: boolean;
+            /** Last Login At */
+            last_login_at: string | null;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "admin" | "power" | "regular";
+            /** Username */
+            username: string;
+        };
+        /** AdminUserUpdate */
+        AdminUserUpdate: {
+            /** Is Active */
+            is_active?: boolean | null;
+            /** Role */
+            role?: ("admin" | "power" | "regular") | null;
+        };
         /** AssessmentCreate */
         AssessmentCreate: {
             /** Course Id */
@@ -562,10 +696,14 @@ export interface components {
         };
         /** AssessmentDetail */
         AssessmentDetail: {
+            /** Can Modify */
+            can_modify: boolean;
             /** Course Id */
             course_id: number | null;
             /** Course Name */
             course_name: string | null;
+            /** Deleted At */
+            deleted_at?: string | null;
             /** Dok Distribution */
             dok_distribution: {
                 [key: string]: number;
@@ -578,6 +716,7 @@ export interface components {
             item_count: number;
             /** Items */
             items: components["schemas"]["AssessmentItemOut"][];
+            owner: components["schemas"]["OwnerOut"];
             /** Question Type Counts */
             question_type_counts: {
                 [key: string]: number;
@@ -629,16 +768,21 @@ export interface components {
         };
         /** AssessmentSummary */
         AssessmentSummary: {
+            /** Can Modify */
+            can_modify: boolean;
             /** Course Id */
             course_id: number | null;
             /** Course Name */
             course_name: string | null;
+            /** Deleted At */
+            deleted_at?: string | null;
             /** Id */
             id: number;
             /** Instructions */
             instructions: string;
             /** Item Count */
             item_count: number;
+            owner: components["schemas"]["OwnerOut"];
             /** Title */
             title: string;
             /**
@@ -933,6 +1077,18 @@ export interface components {
             /** Text */
             text?: string | null;
         };
+        /** OwnerOut */
+        OwnerOut: {
+            /** Id */
+            id: number;
+            /** Username */
+            username: string;
+        };
+        /** PasswordSet */
+        PasswordSet: {
+            /** Password */
+            password: string;
+        };
         /** PrintBlock */
         PrintBlock: {
             /** Questions */
@@ -1003,6 +1159,8 @@ export interface components {
             allowed_transitions: ("generated" | "reviewed" | "approved" | "rejected" | "archived")[];
             /** Assessment Ids */
             assessment_ids: number[];
+            /** Can Modify */
+            can_modify: boolean;
             /**
              * Created At
              * Format: date-time
@@ -1013,6 +1171,7 @@ export interface components {
             family_key: string | null;
             /** Id */
             id: number;
+            owner: components["schemas"]["OwnerOut"];
             /** Provenance */
             provenance: Record<string, never>;
             standard: components["schemas"]["StandardSummary"];
@@ -1072,6 +1231,8 @@ export interface components {
         };
         /** QuestionSummary */
         QuestionSummary: {
+            /** Can Modify */
+            can_modify: boolean;
             /** Course Name */
             course_name: string;
             /** Current Version No */
@@ -1087,6 +1248,7 @@ export interface components {
              * @enum {string}
              */
             origin: "engine" | "teacher_edit";
+            owner: components["schemas"]["OwnerOut"];
             /**
              * Question Type
              * @enum {string}
@@ -1170,8 +1332,25 @@ export interface components {
         };
         /** SessionUser */
         SessionUser: {
+            /** Id */
+            id: number;
+            /**
+             * Role
+             * @enum {string}
+             */
+            role: "admin" | "power" | "regular";
             /** Username */
             username: string;
+        };
+        /** SiteSettingsOut */
+        SiteSettingsOut: {
+            /** Registration Open */
+            registration_open: boolean;
+        };
+        /** SiteSettingsUpdate */
+        SiteSettingsUpdate: {
+            /** Registration Open */
+            registration_open: boolean;
         };
         /** SourceDocumentOut */
         SourceDocumentOut: {
@@ -1361,9 +1540,215 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
-    list_assessments_api_assessments_get: {
+    read_settings_api_admin_settings_get: {
         parameters: {
             query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_settings_api_admin_settings_patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SiteSettingsUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SiteSettingsOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_users_api_admin_users_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    create_user_api_admin_users_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminUserCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_user_api_admin_users__user_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminUserUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminUserOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    set_password_api_admin_users__user_id__password_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                user_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PasswordSet"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_assessments_api_assessments_get: {
+        parameters: {
+            query?: {
+                include_deleted?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: {
@@ -1692,6 +2077,39 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PrintOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_assessment_api_assessments__assessment_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assessment_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssessmentDetail"];
                 };
             };
             /** @description Validation Error */
