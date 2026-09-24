@@ -81,3 +81,50 @@ def test_registration_toggle(anon):
     finally:
         login_as(anon, "admin")
         anon.patch("/api/admin/settings", json={"registration_open": True})
+
+
+# ---- CLI ---------------------------------------------------------------------------------------
+
+
+def test_cli_set_role_and_list_users(database, capsys, db):
+    from app import cli
+    from app.models import AuditEvent, User
+
+    assert cli.main(["set-role", "--username", "REG2", "--role", "power"]) == 0
+    db.expire_all()
+    assert db.scalar(select(User.role).where(User.username == "reg2")) == "power"
+    assert cli.main(["set-role", "--username", "reg2", "--role", "regular"]) == 0
+    assert cli.main(["set-role", "--username", "nobody", "--role", "admin"]) == 1
+    assert cli.main(["list-users"]) == 0
+    out = capsys.readouterr().out
+    assert "nina" in out and "admin" in out
+    assert db.scalar(select(AuditEvent.id).where(AuditEvent.action == "cli.set_role")) is not None
+
+
+def test_cli_set_password_requires_username_once_users_exist(database, monkeypatch):
+    import io
+
+    from app import cli
+
+    monkeypatch.setattr("sys.stdin", io.StringIO("long enough password\n"))
+    assert cli.main(["set-password", "--password-stdin"]) == 1
+    monkeypatch.setattr("sys.stdin", io.StringIO("tooshort\n"))
+    assert cli.main(["set-password", "--username", "reg", "--password-stdin"]) == 1
+
+
+def test_cli_set_active_respects_last_admin(database, db):
+    from app import cli
+    from app.models import User
+
+    admins = db.scalars(select(User).where(User.role == "admin", User.is_active).order_by(User.id)).all()
+    for a in admins[1:]:
+        a.is_active = False
+    db.commit()
+    try:
+        assert cli.main(["set-active", "--username", admins[0].username, "--active", "false"]) == 1
+        db.expire_all()
+        assert db.get(User, admins[0].id).is_active is True
+    finally:
+        for a in admins[1:]:
+            a.is_active = True
+        db.commit()
