@@ -1,6 +1,7 @@
 """Role × ownership matrix for every mutating route, plus a guard that new routes are covered."""
 
 import pytest
+from fastapi.routing import APIRoute
 from sqlalchemy import func, select
 
 from tests.conftest import login_as
@@ -196,3 +197,39 @@ def test_question_detail_hides_soft_deleted_assessment_links(anon):
     assert aid in anon.get(f"/api/questions/{qid}").json()["assessment_ids"]
     anon.delete(f"/api/assessments/{aid}")
     assert aid not in anon.get(f"/api/questions/{qid}").json()["assessment_ids"]
+
+
+# ---- inventory ---------------------------------------------------------------------------------
+
+# Every non-GET /api route must be listed here with how the ownership policy covers it.
+POLICY_COVERED = {
+    ("POST", "/api/generate/preview"): "read-only preview",
+    ("POST", "/api/generate/save"): "creates; owner = caller",
+    ("POST", "/api/questions/{question_id}/versions"): "test_edit_question_matrix",
+    ("POST", "/api/questions/{question_id}/restore/{version_no}"): "test_restore_matrix",
+    ("POST", "/api/questions/{question_id}/status"): "test_status_matrix",
+    ("POST", "/api/questions/bulk-status"): "test_bulk_status_is_all_or_nothing_on_ownership",
+    ("POST", "/api/assessments"): "creates; owner = caller",
+    ("PATCH", "/api/assessments/{assessment_id}"): "test_assessment_mutation_matrix",
+    ("DELETE", "/api/assessments/{assessment_id}"): "test_assessment_mutation_matrix",
+    ("POST", "/api/assessments/{assessment_id}/restore"): "test_soft_deleted_assessment_is_hidden_and_restorable",
+    ("POST", "/api/assessments/{assessment_id}/items"): "test_assessment_mutation_matrix",
+    ("DELETE", "/api/assessments/{assessment_id}/items/{item_id}"): "test_item_mutation_matrix",
+    ("PUT", "/api/assessments/{assessment_id}/items/order"): "test_item_mutation_matrix",
+    ("POST", "/api/assessments/{assessment_id}/items/{item_id}/refresh"): "test_item_mutation_matrix",
+}
+
+
+def test_every_mutating_route_is_policy_covered():
+    from app.main import app
+
+    found = set()
+    for route in app.routes:
+        if not isinstance(route, APIRoute) or not route.path.startswith("/api/"):
+            continue
+        if route.path.startswith(("/api/auth/", "/api/admin/")) or route.path == "/api/{path:path}":
+            continue
+        for method in route.methods - {"GET", "HEAD", "OPTIONS"}:
+            found.add((method, route.path))
+    covered = set(POLICY_COVERED)
+    assert found == covered, f"uncovered: {found - covered}; stale: {covered - found}"
