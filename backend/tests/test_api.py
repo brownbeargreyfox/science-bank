@@ -144,6 +144,27 @@ def test_legacy_username_token_still_works(anon):
     anon.cookies.clear()
 
 
+
+def test_legacy_numeric_username_token_is_not_read_as_an_id(anon, db):
+    """Pre-0003 tokens carry sub=<username>; a digit-only username must not resolve as a user id."""
+    from datetime import UTC, datetime, timedelta
+
+    import jwt as pyjwt
+
+    from app.core.config import get_settings
+    from app.core.security import COOKIE_NAME, hash_password
+    from app.models import User
+
+    pat_id = db.scalar(select(User.id).where(User.username == "pat"))
+    db.add(User(username=str(pat_id), password_hash=hash_password("numeric name pw"), role="regular"))
+    db.commit()
+    s = get_settings()
+    claims = {"sub": str(pat_id), "exp": datetime.now(UTC) + timedelta(hours=1)}
+    anon.cookies.set(COOKIE_NAME, pyjwt.encode(claims, s.jwt_secret, algorithm=s.jwt_algorithm))
+    me = anon.get("/api/auth/me").json()
+    assert me["username"] == str(pat_id) and me["role"] == "regular"
+    anon.cookies.clear()
+
 def test_auth_events_are_audited(anon, db):
     from app.models import AuditEvent
 

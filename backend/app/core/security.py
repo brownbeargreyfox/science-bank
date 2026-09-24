@@ -32,7 +32,8 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 def create_access_token(user_id: int) -> str:
     settings = get_settings()
     expire = datetime.now(UTC) + timedelta(minutes=settings.jwt_expire_minutes)
-    return jwt.encode({"sub": str(user_id), "exp": expire}, settings.jwt_secret, algorithm=settings.jwt_algorithm)
+    claims = {"sub": str(user_id), "uid": user_id, "exp": expire}
+    return jwt.encode(claims, settings.jwt_secret, algorithm=settings.jwt_algorithm)
 
 
 def find_user(db: Session, username: str) -> User | None:
@@ -55,9 +56,13 @@ def get_current_user(
         payload = jwt.decode(session_token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
     except jwt.PyJWTError as exc:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid or expired session") from exc
-    subject = str(payload.get("sub") or "")
-    # Tokens issued before migration 0003 carry the username instead of the id.
-    user = db.get(User, int(subject)) if subject.isdigit() else (find_user(db, subject) if subject else None)
+    uid, subject = payload.get("uid"), str(payload.get("sub") or "")
+    if isinstance(uid, int):
+        user = db.get(User, uid)
+    else:
+        # Tokens issued before migration 0003 have no `uid` and carry the username in `sub`
+        # (which may itself be digits), so never interpret `sub` as an id.
+        user = find_user(db, subject) if subject else None
     if user is None or not user.is_active:
         raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid session")
     return user
