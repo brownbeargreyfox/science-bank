@@ -361,6 +361,9 @@ class AssessmentSummary(BaseModel):
     instructions: str
     item_count: int
     updated_at: datetime
+    owner: OwnerOut
+    can_modify: bool
+    deleted_at: datetime | None = None
 
 
 class AssessmentDetail(AssessmentSummary):

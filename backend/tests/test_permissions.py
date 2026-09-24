@@ -121,3 +121,78 @@ def test_failed_change_writes_no_audit_row(anon, db):
         .where(AuditEvent.id > before, AuditEvent.target_type == "question")
     )
     assert written == 0
+
+
+# ---- assessments -------------------------------------------------------------------------------
+
+
+def make_assessment(anon, who: str, title: str = "Perm quiz") -> int:
+    login_as(anon, who)
+    r = anon.post("/api/assessments", json={"title": title, "instructions": ""})
+    assert r.status_code == 201, r.text
+    return r.json()["id"]
+
+
+ASSESSMENT_MUTATIONS = [
+    ("patch", lambda a, aid, qid: a.patch(f"/api/assessments/{aid}", json={"title": "Renamed"})),
+    ("add", lambda a, aid, qid: a.post(f"/api/assessments/{aid}/items", json={"question_ids": [qid]})),
+    ("delete", lambda a, aid, qid: a.delete(f"/api/assessments/{aid}")),
+]
+
+
+@pytest.mark.parametrize(("who", "allowed"), [("regular", True), ("regular2", False), ("power", True), ("admin", True)])
+@pytest.mark.parametrize(("name", "call"), ASSESSMENT_MUTATIONS)
+def test_assessment_mutation_matrix(anon, who, allowed, name, call):
+    qid = make_question(anon, "power")  # someone else's question: adding it to your own assessment is allowed
+    aid = make_assessment(anon, "regular")
+    login_as(anon, who)
+    r = call(anon, aid, qid)
+    assert (r.status_code < 400) is allowed, f"{name} as {who}: {r.status_code} {r.text}"
+
+
+@pytest.mark.parametrize(("who", "allowed"), [("regular", True), ("regular2", False), ("power", True)])
+def test_item_mutation_matrix(anon, who, allowed):
+    q1, q2 = make_question(anon, "regular"), make_question(anon, "admin")
+    aid = make_assessment(anon, "regular")
+    assert anon.post(f"/api/assessments/{aid}/items", json={"question_ids": [q1, q2]}).status_code == 200
+    items = anon.get(f"/api/assessments/{aid}").json()["items"]
+    login_as(anon, who)
+    calls = [
+        anon.put(f"/api/assessments/{aid}/items/order", json={"item_ids": [items[1]["id"], items[0]["id"]]}),
+        anon.post(f"/api/assessments/{aid}/items/{items[0]['id']}/refresh"),
+        anon.delete(f"/api/assessments/{aid}/items/{items[1]['id']}"),
+    ]
+    assert all((r.status_code < 400) is allowed for r in calls), [r.status_code for r in calls]
+
+
+def test_soft_deleted_assessment_is_hidden_and_restorable(anon, db):
+    from app.models import Assessment, AuditEvent
+
+    aid = make_assessment(anon, "regular", "Soft delete me")
+    assert anon.delete(f"/api/assessments/{aid}").status_code == 204
+    assert all(a["id"] != aid for a in anon.get("/api/assessments").json())
+    assert anon.get(f"/api/assessments/{aid}").status_code == 404
+    assert anon.get(f"/api/assessments/{aid}/print").status_code == 404
+    login_as(anon, "regular2")
+    assert all(a["id"] != aid for a in anon.get("/api/assessments", params={"include_deleted": True}).json())
+    assert anon.post(f"/api/assessments/{aid}/restore").status_code == 403
+    login_as(anon, "regular")
+    deleted = anon.get("/api/assessments", params={"include_deleted": True}).json()
+    assert any(a["id"] == aid and a["deleted_at"] for a in deleted)
+    assert anon.post(f"/api/assessments/{aid}/restore").status_code == 200
+    assert anon.get(f"/api/assessments/{aid}").status_code == 200
+    db.expire_all()
+    assert db.get(Assessment, aid).deleted_at is None
+    actions = db.scalars(
+        select(AuditEvent.action).where(AuditEvent.target_type == "assessment", AuditEvent.target_id == str(aid))
+    ).all()
+    assert {"assessment.create", "assessment.delete", "assessment.restore"} <= set(actions)
+
+
+def test_question_detail_hides_soft_deleted_assessment_links(anon):
+    qid = make_question(anon, "regular")
+    aid = make_assessment(anon, "regular", "Linked then deleted")
+    anon.post(f"/api/assessments/{aid}/items", json={"question_ids": [qid]})
+    assert aid in anon.get(f"/api/questions/{qid}").json()["assessment_ids"]
+    anon.delete(f"/api/assessments/{aid}")
+    assert aid not in anon.get(f"/api/questions/{qid}").json()["assessment_ids"]
