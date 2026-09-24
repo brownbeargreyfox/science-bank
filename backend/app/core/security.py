@@ -14,6 +14,7 @@ from app.core.db import get_db
 from app.models import User
 
 COOKIE_NAME = "science_bank_session"
+PASSWORD_MIN = 12
 
 
 def hash_password(plain_password: str) -> str:

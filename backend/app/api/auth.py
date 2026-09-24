@@ -8,6 +8,7 @@ from app.core.config import get_settings
 from app.core.db import get_db
 from app.core.security import (
     COOKIE_NAME,
+    PASSWORD_MIN,
     Actor,
     client_ip,
     create_access_token,
@@ -35,7 +36,7 @@ class LoginRequest(BaseModel):
 
 class RegisterRequest(BaseModel):
     username: str = Field(min_length=3, max_length=64, pattern=r"^[A-Za-z0-9_.-]+$")
-    password: str = Field(min_length=12, max_length=128)
+    password: str = Field(min_length=PASSWORD_MIN, max_length=128)
 
 
 class SessionUser(BaseModel):

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-from app.api import assessments, auth, generate, health, questions, standards
+from app.api import admin, assessments, auth, generate, health, questions, standards
 from app.core.config import get_settings
 from app.core.security import get_current_user
 
@@ -43,7 +43,7 @@ app.include_router(health.router)
 app.include_router(auth.router, prefix="/api")
 
 protected = APIRouter(prefix="/api", dependencies=[Depends(get_current_user)])
-for module in (standards, generate, questions, assessments):
+for module in (standards, generate, questions, assessments, admin):
     protected.include_router(module.router)
 app.include_router(protected)
 
