@@ -37,11 +37,42 @@ regeneration.
 
 Full handoff, decisions, and roadmap: [`PROJECT_STATUS.md`](PROJECT_STATUS.md).
 
+## Roles and administration
+
+Every account has one of three roles. Content (questions and assessments) has an owner: whoever
+generated or created it. Everyone can see the whole bank; ownership decides who can **change** it.
+
+| Capability | Teacher (regular) | Power user | Admin |
+|---|:-:|:-:|:-:|
+| Browse standards, the bank, and all assessments; print | ✓ | ✓ | ✓ |
+| Generate and save questions (you become the owner) | ✓ | ✓ | ✓ |
+| Create assessments (you become the owner) | ✓ | ✓ | ✓ |
+| Edit, restore versions, change status of **your own** questions | ✓ | ✓ | ✓ |
+| Change, reorder, delete, restore **your own** assessments | ✓ | ✓ | ✓ |
+| Add anyone's question to your own assessment | ✓ | ✓ | ✓ |
+| Do the above to **other teachers'** content | — | ✓ | ✓ |
+| Manage accounts, roles, passwords, registration (Admin → Users) | — | — | ✓ |
+
+Deleting an assessment is reversible (Assessments → Show deleted → Restore). "Deleting" a question
+means archiving it, because it may be pinned in someone else's assessment. Logins, failed logins,
+content changes, and admin actions are recorded in the `audit_events` table.
+
+Break-glass commands (always available from the container, audited as `cli`):
+
+```sh
+docker compose exec app python -m app.cli list-users
+docker compose exec app python -m app.cli set-password --username <name>     # creates the account if missing
+docker compose exec app python -m app.cli set-role --username <name> --role admin|power|regular
+docker compose exec app python -m app.cli set-active --username <name> --active true|false
+```
+
+No change can leave the site without an active admin.
+
 ## Account and public-launch status
 
-The current local account system is suitable for a trusted private team. Registration is enabled
-by default and can be paused with `REGISTRATION_OPEN=false`; it is not an access-control boundary
-for a public service.
+The current local account system is suitable for a trusted private team. Self-service registration
+(a regular teacher account) can be paused by an admin under Admin → Users; it is not an
+access-control boundary for a public service.
 
 Before opening the product to public self-service signup, replace local passwords with a managed
 OpenID Connect provider (email verification, password recovery, MFA/passkeys) and add private
@@ -109,8 +140,9 @@ The current host endpoint is `https://jellyfin.tail4a63e4.ts.net:8443/`. Check i
 
 | Task | Command |
 |---|---|
-| Set / change password | `docker compose exec app python -m app.cli set-password` |
-| Add a teacher | Use **Create account** on the login page (set `REGISTRATION_OPEN=false` to pause self-service signup) |
+| Set / change password | Admin → Users → Reset password, or `docker compose exec app python -m app.cli set-password --username <name>` |
+| Add a teacher | Admin → Users → Add an account, or **Create account** on the login page while registration is open |
+| Change a role / disable an account | Admin → Users, or `app.cli set-role` / `app.cli set-active` |
 | Re-import standards after editing `data/standards` | rebuild the image (`docker compose up -d --build`); import runs on start |
 | Back up | `docker compose exec postgres pg_dump -U science_bank science_bank > backup.sql` |
 | Restore | `docker compose exec -T postgres psql -U science_bank science_bank < backup.sql` |
