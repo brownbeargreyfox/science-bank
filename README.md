@@ -101,7 +101,7 @@ Deploy:    Docker Compose (postgres + app), behind the existing Caddy reverse pr
 ```sh
 cp .env.example .env         # set POSTGRES_PASSWORD, JWT_SECRET (32+ random chars), APP_PORT
 docker compose up -d --build
-docker compose exec app python -m app.cli set-password    # create or reset a teacher login (prompts)
+docker compose exec app python -m app.cli set-password --username <name>   # create or reset a login (prompts); the first account is an admin
 ```
 
 On every start the container runs `alembic upgrade head`, then imports the standards JSON and
@@ -156,7 +156,7 @@ cd backend
 python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
 export DATABASE_URL=postgresql+psycopg://science_bank:<pw>@127.0.0.1:54329/science_bank
 .venv/bin/alembic upgrade head && .venv/bin/python -m app.cli bootstrap
-.venv/bin/python -m app.cli set-password
+.venv/bin/python -m app.cli set-password --username <name>
 .venv/bin/uvicorn app.main:app --reload --port 8000
 
 # Frontend
