@@ -7,7 +7,7 @@ from fastapi.staticfiles import StaticFiles
 
 from app.api import assessments, auth, generate, health, questions, standards
 from app.core.config import get_settings
-from app.core.security import get_current_teacher
+from app.core.security import get_current_user
 
 settings = get_settings()
 
@@ -42,7 +42,7 @@ async def security_headers(request: Request, call_next):
 app.include_router(health.router)
 app.include_router(auth.router, prefix="/api")
 
-protected = APIRouter(prefix="/api", dependencies=[Depends(get_current_teacher)])
+protected = APIRouter(prefix="/api", dependencies=[Depends(get_current_user)])
 for module in (standards, generate, questions, assessments):
     protected.include_router(module.router)
 app.include_router(protected)

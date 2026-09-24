@@ -4,7 +4,7 @@ import pytest
 from fastapi.routing import APIRoute
 from sqlalchemy import func, select
 
-from tests.conftest import TEACHER
+from tests.conftest import TEACHER, login_as
 
 PUBLIC = {
     "/healthz",
@@ -83,7 +83,8 @@ def test_login_logout_and_throttle(anon):
     assert r.status_code == 200
     cookie = r.headers["set-cookie"].lower()
     assert "httponly" in cookie and "samesite=strict" in cookie
-    assert anon.get("/api/auth/me").json() == {"username": "nina"}
+    me = anon.get("/api/auth/me").json()
+    assert me["username"] == "nina" and me["role"] == "admin"
     anon.post("/api/auth/logout")
     assert anon.get("/api/auth/me").status_code == 401
     for _ in range(8):
@@ -96,11 +97,71 @@ def test_registration_allows_multiple_teacher_accounts(anon):
     status = anon.get("/api/auth/registration-status")
     assert status.status_code == 200 and status.json() == {"registration_open": True}
     created = anon.post("/api/auth/register", json=alex)
-    assert created.status_code == 201 and created.json() == {"username": "alex"}
+    assert created.status_code == 201
+    assert created.json()["username"] == "alex" and created.json()["role"] == "regular"
     assert anon.post("/api/auth/register", json=alex).status_code == 409
     anon.post("/api/auth/logout")
     assert anon.post("/api/auth/login", json=alex).status_code == 200
 
+
+def test_usernames_are_case_insensitive(anon):
+    assert anon.post("/api/auth/login", json={"username": "NINA", "password": TEACHER["password"]}).status_code == 200
+    assert anon.get("/api/auth/me").json()["username"] == "nina"
+    anon.post("/api/auth/logout")
+    r = anon.post("/api/auth/register", json={"username": "Nina", "password": "long enough password"})
+    assert r.status_code == 409
+
+
+def test_disabled_user_session_stops_working_immediately(anon, db):
+    from app.core.security import hash_password
+    from app.models import User
+
+    creds = {"username": "temp-disable", "password": "temporary password"}
+    db.add(User(username=creds["username"], password_hash=hash_password(creds["password"]), role="regular"))
+    db.commit()
+    assert anon.post("/api/auth/login", json=creds).status_code == 200
+    assert anon.get("/api/auth/me").status_code == 200
+    user = db.scalar(select(User).where(User.username == "temp-disable"))
+    user.is_active = False
+    db.commit()
+    assert anon.get("/api/auth/me").status_code == 401
+    assert anon.post("/api/auth/login", json=creds).status_code == 401
+
+
+def test_legacy_username_token_still_works(anon):
+    from datetime import UTC, datetime, timedelta
+
+    import jwt as pyjwt
+
+    from app.core.config import get_settings
+    from app.core.security import COOKIE_NAME
+
+    s = get_settings()
+    claims = {"sub": "Pat", "exp": datetime.now(UTC) + timedelta(hours=1)}
+    anon.cookies.set(COOKIE_NAME, pyjwt.encode(claims, s.jwt_secret, algorithm=s.jwt_algorithm))
+    me = anon.get("/api/auth/me")
+    assert me.status_code == 200 and me.json()["username"] == "pat" and me.json()["role"] == "power"
+    anon.cookies.clear()
+
+
+def test_auth_events_are_audited(anon, db):
+    from app.models import AuditEvent
+
+    before = db.scalar(select(func.max(AuditEvent.id))) or 0
+    anon.post("/api/auth/login", json={"username": "reg", "password": "wrong password!"})
+    login_as(anon, "regular")
+    anon.post("/api/auth/logout")
+    db.expire_all()
+    rows = db.execute(
+        select(AuditEvent.action, AuditEvent.actor_username, AuditEvent.actor_id)
+        .where(AuditEvent.id > before)
+        .order_by(AuditEvent.id)
+    ).all()
+    actions = [r.action for r in rows]
+    assert actions[0] == "auth.login_failed" and rows[0].actor_id is None and rows[0].actor_username == "reg"
+    assert "auth.login" in actions and "auth.logout" in actions
+    details = " ".join(str(d) for d in db.scalars(select(AuditEvent.detail).where(AuditEvent.id > before)))
+    assert "wrong password!" not in details and TEACHER["password"] not in details and "$2b$" not in details
 
 def test_unknown_api_path_is_json_404(client):
     r = client.get("/api/does-not-exist")

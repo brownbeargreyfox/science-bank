@@ -4,6 +4,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 QuestionStatus = Literal["generated", "reviewed", "approved", "rejected", "archived"]
+Role = Literal["admin", "power", "regular"]
 QuestionType = Literal["multiple_choice", "constructed_response"]
 
 
