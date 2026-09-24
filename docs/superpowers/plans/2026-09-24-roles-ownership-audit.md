@@ -77,6 +77,53 @@ The fixtures drop/recreate `sb_test` per session. Stop it afterwards with `docke
 
 ---
 
+### Task 0: Green baseline against real Postgres
+
+The DB-backed tests had always been skipped. A baseline run at `b0e6c94` (2026-09-24) gave **2 failed, 36 passed**. Both failures already existed:
+
+- `test_import_counts_and_idempotency`: the importer report now includes `eocep_constraints: 2` (added by the EOCEP commit), but the test's expected `unchanged` dict does not.
+- `test_every_non_public_route_requires_auth`: `PUBLIC` lacks `/api/auth/registration-status` (anon 200) and `/api/auth/register` (anon 422).
+
+**Files:**
+- Modify: `backend/tests/test_api.py`, `backend/tests/conftest.py`
+
+- [ ] **Step 1: Fix the expectations**
+
+In `test_import_counts_and_idempotency`:
+```python
+    assert report.unchanged == {"source_documents": 6, "courses": 3, "standards": 38, "bundles": 15, "eocep_constraints": 2}
+```
+Update `PUBLIC`:
+```python
+PUBLIC = {
+    "/healthz", "/readyz", "/api/auth/login", "/api/auth/logout",
+    "/api/auth/register", "/api/auth/registration-status", "/api/{path:path}",
+}
+```
+
+- [ ] **Step 2: Make the skip hook cover tests that reach the DB only via `database`**
+
+In `conftest.py` `pytest_collection_modifyitems`:
+```python
+    for item in items:
+        if {"db", "client", "anon", "database"} & set(item.fixturenames):
+            item.add_marker(skip)
+```
+
+- [ ] **Step 3: Verify**
+
+Run: `cd backend && .venv/bin/python -m pytest -q` (with `TEST_DATABASE_URL` set), then `env -u TEST_DATABASE_URL .venv/bin/python -m pytest -q`.
+Expected: all pass, 0 skipped; without the URL, engine tests pass and DB tests are skipped (not errored).
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add backend/tests/test_api.py backend/tests/conftest.py
+git commit -m "test: fix stale expectations surfaced by running DB tests against Postgres"
+```
+
+---
+
 ### Task 1: Migration 0003 and models
 
 **Files:**
@@ -669,7 +716,8 @@ def test_auth_events_are_audited(anon, db):
     actions = [r.action for r in rows]
     assert actions[0] == "auth.login_failed" and rows[0].actor_id is None and rows[0].actor_username == "reg"
     assert "auth.login" in actions and "auth.logout" in actions
-    assert all("password" not in str(d) for d in db.scalars(select(AuditEvent.detail).where(AuditEvent.id > before)))
+    details = " ".join(str(d) for d in db.scalars(select(AuditEvent.detail).where(AuditEvent.id > before)))
+    assert "wrong password!" not in details and TEACHER["password"] not in details and "$2b$" not in details
 ```
 
 Add `from tests.conftest import TEACHER, login_as` at the top of `test_api.py` (replacing the existing `TEACHER` import).
@@ -1227,6 +1275,17 @@ def _load_for_change(db: Session, assessment_id: int, actor: Actor) -> Assessmen
 
 Imports: `or_, true` from sqlalchemy; `can_modify, is_moderator, require_modify`; `Actor, get_actor, get_current_user`; `User`; `OwnerOut`; `record_audit`.
 
+In `backend/app/api/questions.py` `_detail`, exclude soft-deleted assessments from `assessment_ids` (their links would 404):
+```python
+    assessment_ids = db.scalars(
+        select(AssessmentItem.assessment_id)
+        .join(Assessment, Assessment.id == AssessmentItem.assessment_id)
+        .where(AssessmentItem.question_id == q.id, Assessment.deleted_at.is_(None))
+        .distinct()
+    ).all()
+```
+(import `Assessment` from `app.models`.)
+
 In `test_api.py::test_assessment_builder_and_print`, if it asserts the hard-delete (e.g. a 404 after delete), it still holds. If it asserts summary dict equality, add the new keys.
 
 - [ ] **Step 4: Run full backend suite**
@@ -1354,8 +1413,8 @@ def test_create_update_and_reset_password(anon, db):
     assert anon.post("/api/auth/login", json={"username": "newteach", "password": "another long password"}).status_code == 200
     actions = set(db.scalars(select(AuditEvent.action).where(AuditEvent.target_id == str(uid))).all())
     assert {"admin.user_create", "admin.user_update", "admin.password_reset"} <= actions
-    details = db.scalars(select(AuditEvent.detail).where(AuditEvent.target_id == str(uid))).all()
-    assert all("password" not in str(d).lower() or "reset" in str(d).lower() for d in details)
+    details = " ".join(str(d) for d in db.scalars(select(AuditEvent.detail).where(AuditEvent.target_id == str(uid))))
+    assert "another long password" not in details and "a fine long password" not in details and "$2b$" not in details
 
 
 def test_demotion_applies_to_existing_session(anon, db):
@@ -1760,6 +1819,8 @@ git commit -m "feat: CLI list-users/set-role/set-active; set-password requires -
 
 ### Task 9: Frontend — role-aware session and Admin → Users page
 
+> Tasks 9–10 give the backend contract and exact behaviour, but leave the JSX to the implementer. They edit large existing pages (up to 580 lines) whose local conventions must be read first. Follow the conventions of the page being edited.
+
 **Files:**
 - Regenerate: `frontend/openapi.json`, `frontend/src/api/schema.d.ts`
 - Modify: `frontend/src/api/queries.ts`, `frontend/src/components/Layout.tsx`, `frontend/src/main.tsx`
@@ -1922,17 +1983,19 @@ git commit -m "docs: roles, ownership, audit and admin operations"
 
 This mutates the live database. **Stop and get explicit approval from Brandon before Step 2.**
 
-- [ ] **Step 1: Pre-flight** — confirm branch is clean and pushed; `docker compose ps` healthy.
+- [ ] **Step 1: Pre-flight** — working tree clean (`git status`), `docker compose ps` healthy. Do not push unless Brandon asks.
 
-- [ ] **Step 2: Backup**
+- [ ] **Step 2: Backup the database and tag the current image**
 
 ```bash
 cd /home/brandon/apps/science-bank
 mkdir -p backups && docker compose exec -T postgres pg_dump -U science_bank science_bank > backups/pre-0003-$(date +%F-%H%M).sql
 ls -l backups/
+IMG=$(docker compose images app --format json | python3 -c "import sys,json; d=json.load(sys.stdin); d=d[0] if isinstance(d,list) else d; print(d['Repository'])")
+docker tag "$IMG:latest" "$IMG:pre-0003" && docker image ls "$IMG"
 ```
 
-Expected: non-empty dump. (`backups/` must be in `.gitignore`; add it if missing.)
+Expected: non-empty dump; `$IMG:pre-0003` listed. (`backups/` must be in `.gitignore`; add it if missing.)
 
 - [ ] **Step 3: Deploy**
 
@@ -1952,13 +2015,26 @@ docker compose exec app python -m app.cli list-users
 docker compose exec -T postgres psql -U science_bank science_bank -c "select username, role, is_active from users order by id;" -c "select count(*) filter (where owner_id is null) as unowned from questions;"
 ```
 
-Expected: `brandon admin`, `Nina power`; `unowned = 0`. Then in the browser at `https://science.maefranklin.com`: brandon sees Admin → Users; Nina (existing session should still work) sees no Admin link and can archive a brandon-owned question; `select action, actor_username from audit_events order by id desc limit 10;` shows the logins/actions.
+Expected: `brandon admin`, `Nina power`; `unowned = 0`.
+
+Non-destructive permission check (don't change real content, don't use Nina's password): create a temporary power account, confirm `GET /api/questions/1` returns `"can_modify": true` for it and `/api/admin/users` returns 403, then disable it:
+
+```bash
+docker compose exec app python -m app.cli set-password --username deploycheck   # enter a throwaway password
+docker compose exec app python -m app.cli set-role --username deploycheck --role power
+# log in as deploycheck via curl with a cookie jar against http://127.0.0.1:8420 and check the two responses
+docker compose exec app python -m app.cli set-active --username deploycheck --active false
+```
+
+Ask Brandon to confirm in the browser at `https://science.maefranklin.com` that he sees Admin → Users, and that Nina's existing session still works. `select action, actor_username from audit_events order by id desc limit 10;` should show the logins.
 
 - [ ] **Step 5: Rollback path (only if verification fails)**
+
+Do not rebuild from the working tree: migration files added after `e5efd4b` would stay in the build context and re-apply 0003. Restore the dump and run the pre-0003 image:
 
 ```bash
 docker compose stop app
 docker compose exec -T postgres psql -U science_bank -d postgres -c "drop database science_bank with (force);" -c "create database science_bank owner science_bank;"
 docker compose exec -T postgres psql -U science_bank science_bank < backups/pre-0003-<stamp>.sql
-git checkout e5efd4b -- . && docker compose up -d --build   # previous app version
+docker tag "$IMG:pre-0003" "$IMG:latest" && docker compose up -d --no-build app
 ```
