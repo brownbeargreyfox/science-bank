@@ -217,9 +217,10 @@ that user an admin.
 ## Migration and rollout
 
 1. Migration `0003_roles_ownership_audit`: add columns/tables, lower-username index, backfill
-   `owner_id = 1`, set roles `brandon=admin`, `Nina=power` (matched case-insensitively; migration
-   fails loudly if `brandon` is missing, since it would otherwise leave no admin), seed
-   `site_settings` from env.
+   `owner_id` to the admin (brandon, id 1), set roles `brandon=admin`, `Nina=power` (matched
+   case-insensitively; if no admin results on a non-empty install, the lowest-id user is promoted so
+   an admin always exists — this also keeps fresh/test databases migratable), seed `site_settings`
+   from env.
 2. Take a `pg_dump` backup before deploying.
 3. `docker compose up -d --build`; entrypoint runs migration.
 4. Verify live: `/readyz`; log in as brandon → `/api/auth/me` shows `admin`; `/api/admin/users`
