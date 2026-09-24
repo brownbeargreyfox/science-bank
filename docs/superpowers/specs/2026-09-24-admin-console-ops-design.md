@@ -69,10 +69,16 @@ CI, `deploy.sh`). `docker-compose.yml` passes `build.args` from `${APP_COMMIT:-u
 
 - Only the `app` logger hierarchy is ingested (not `uvicorn.*`, `sqlalchemy.*`), so Uvicorn's own
   "Exception in ASGI application" line cannot create a duplicate.
-- The exception boundary marks the exception object as captured (`exc.__sb_captured__ = <public_id>`).
-  The log handler skips any record whose `exc_info` exception carries that marker. One exception → one
-  occurrence.
-- `logged` records without `exc_info` are captured with an empty stack; the message is the log message.
+- **First capture wins.** For anything carrying an exception (the request boundary, and log records
+  with `exc_info`), both paths check `exc.__sb_captured__` before recording. Whichever sees the
+  exception first records the occurrence and sets `exc.__sb_captured__ = <public_id>`. A path that later
+  sees the marker records nothing new and reuses that `public_id`. Example: app code calls
+  `log.error(..., exc_info=True)` and re-raises. The log handler records occurrence `7f3k2q9d` (source
+  `logged`); the request boundary then sees the marker, returns `error_id: "7f3k2q9d"` in the 500, and
+  best-effort sets `status_code = 500` on that same occurrence. One exception → exactly one occurrence,
+  in either order.
+- `logged` records without `exc_info` are always independent occurrences with an empty stack; the
+  message is the log message.
 
 #### Unhandled response
 
@@ -91,8 +97,10 @@ reference Nina reports and identifies the exact failed request. From it the admi
 
 `sha256(exception_type | route_template | method | app_frames)` where `app_frames` is the list of
 `module:function` for traceback frames inside the `app` package (no line numbers, so reformatting or
-unrelated edits do not split groups). For `logged` records without a traceback: `sha256(logger_name |
-route_template | message_template)` using the unformatted `record.msg`.
+unrelated edits do not split groups). This exception fingerprint is used for **every** capture that
+has an exception, including log records with `exc_info`, so a group does not change depending on whether
+code happened to log before re-raising. Only ERROR log records **without** a traceback use
+`sha256(logger_name | route_template | message_template)` with the unformatted `record.msg`.
 
 #### What is stored per occurrence
 
@@ -296,7 +304,10 @@ Backend (DB tests on the throwaway Postgres; zero skipped):
 - Unhandled exception (triggered via a test-only route or a monkeypatched service) → 500 with
   `error_id` + `request_id`; one group, one occurrence; the same error again → same group, count 2;
   same exception on a different route → a new group.
-- No duplicate: an unhandled exception that app code also logs yields exactly one occurrence.
+- No duplicate, both orders: (a) app code logs with `exc_info` then re-raises → one occurrence, the 500's
+  `error_id` equals that occurrence's `public_id`, and its `status_code` is 500; (b) an exception captured
+  at the boundary and logged afterwards → still one occurrence. Both land in the same group as the
+  unlogged version of the same exception.
 - `logged` source: `log.error(...)` inside a request creates an occurrence with user/route context.
 - Recording failure (recording service forced to raise) still returns the original 500 with
   `error_id: null`; nothing else breaks.
