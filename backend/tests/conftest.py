@@ -54,7 +54,7 @@ def database():
     with SessionLocal() as s:
         import_standards(s, get_settings().standards_dir)
         sync_families(s)
-        s.add(User(username=TEACHER["username"], password_hash=hash_password(TEACHER["password"])))
+        s.add(User(username=TEACHER["username"], password_hash=hash_password(TEACHER["password"]), role="admin"))
         s.commit()
     yield
 
