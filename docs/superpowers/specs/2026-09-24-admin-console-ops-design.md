@@ -44,8 +44,9 @@ Phase 2 is split:
 Middleware (outermost app middleware) runs for every request:
 
 - **Request ID.** Generate a fresh random ID (16 lowercase base32 chars). An inbound `X-Request-ID` is
-  used **only** if `TRUST_REQUEST_ID=true` (default `false`) **and** it matches `^[A-Za-z0-9-]{8,64}$`;
-  otherwise it is ignored. Never reflect an unvalidated header.
+  used **only** if `TRUST_REQUEST_ID=true` (default `false`) **and** it matches `^[A-Za-z0-9-]{8,64}$`.
+  Otherwise the supplied value is discarded, a fresh server-owned ID is used, and the request proceeds
+  normally; a malformed diagnostic header never fails a request. Never reflect an unvalidated header.
 - Stored in a `contextvars.ContextVar` together with, once auth resolves, the user id/username (set by
   `get_current_user`), plus method and matched route template.
 - Response header `X-Request-ID` on every response.
@@ -206,8 +207,10 @@ check contributes a one-line reason shown under the banner.
 
 **Data volume disk check.** The Postgres data volume is mounted in the app container read-only at
 `/mnt/pgdata` (compose: `postgres_data:/mnt/pgdata:ro`), used **only** for `statvfs`. Setting
-`DISK_CHECK_PATH` (default `/mnt/pgdata`, falling back to `/` with a Warning "data volume not mounted")
-chooses the path. The app never reads files there. Database size comes from `pg_database_size()`.
+`DISK_CHECK_PATH` (default `/mnt/pgdata`) chooses the path. There is **no automatic fallback**: if the
+configured path does not exist, the disk figure is `unavailable` and the check is a Warning ("data volume
+not mounted at /mnt/pgdata"), never a reading of some other filesystem. Local development can opt in with
+`DISK_CHECK_PATH=/`. The app never reads files there. Database size comes from `pg_database_size()`.
 
 **Counts:** users (active/total by role), questions (by status), assessments (active/deleted),
 audit events (last 24h).
@@ -288,7 +291,8 @@ interrupted), `started_at`, `finished_at` null, `app_commit`, `counts` jsonb, `e
 Backend (DB tests on the throwaway Postgres; zero skipped):
 
 - Request ID: generated when absent; inbound header ignored by default; accepted only when trusted and
-  valid; invalid/oversized inbound rejected; present on every response.
+  valid; an invalid or oversized inbound value is discarded and replaced by a fresh server ID while
+  the request itself is processed normally (never failed); present on every response.
 - Unhandled exception (triggered via a test-only route or a monkeypatched service) → 500 with
   `error_id` + `request_id`; one group, one occurrence; the same error again → same group, count 2;
   same exception on a different route → a new group.
