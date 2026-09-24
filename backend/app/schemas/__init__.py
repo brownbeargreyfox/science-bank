@@ -238,6 +238,13 @@ class StatusEventOut(ORM):
     created_at: datetime
 
 
+class OwnerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+
+
 class QuestionSummary(BaseModel):
     id: int
     status: QuestionStatus
@@ -255,6 +262,8 @@ class QuestionSummary(BaseModel):
     dok: int
     stem: str
     updated_at: datetime
+    owner: OwnerOut
+    can_modify: bool
 
 
 class QuestionPage(BaseModel):
@@ -280,6 +289,8 @@ class QuestionDetail(BaseModel):
     assessment_ids: list[int]
     created_at: datetime
     updated_at: datetime
+    owner: OwnerOut
+    can_modify: bool
 
 
 class ChoiceIn(BaseModel):
