@@ -45,7 +45,9 @@ function StatusPanel({ q, onChanged }: { q: QuestionDetail; onChanged: (q: Quest
       <p className="mb-3 flex items-center gap-2">
         Currently <StatusBadge status={q.status} />
       </p>
-      {q.allowed_transitions.length ? (
+      {!q.can_modify ? (
+        <p className="text-muted">Only {q.owner.username} or a power user can change this question's status.</p>
+      ) : q.allowed_transitions.length ? (
         <form onSubmit={(e: FormEvent) => e.preventDefault()} className="space-y-3">
           <div>
             <label htmlFor="st-note" className="field-label">
@@ -232,9 +234,18 @@ export default function QuestionDetailPage() {
             <StatusBadge status={d.status} />
             <DokBadge dok={d.current.dok} />
             <TypeBadge type={d.current.question_type} />
+            <span className="text-sm text-muted">Owned by {d.owner.username}</span>
           </span>
         }
       />
+      {!d.can_modify ? (
+        <div className="mb-4">
+          <Notice tone="info">
+            This question belongs to {d.owner.username}. Only its owner or a power user can edit it, change its
+            status, or restore an older version. You can still add it to your own assessments.
+          </Notice>
+        </div>
+      ) : null}
 
       <div aria-live="polite" className="mb-4">
         {message ? <Notice>{message}</Notice> : null}
@@ -256,7 +267,7 @@ export default function QuestionDetailPage() {
                 {isCurrent ? <span className="text-sm font-normal text-muted">(current)</span> : null}
                 <OriginBadge origin={viewing.origin} />
               </h2>
-              {isCurrent && !editing ? (
+              {isCurrent && !editing && d.can_modify ? (
                 <button type="button" className="btn btn-sm" onClick={() => setEditing(true)}>
                   Edit question
                 </button>
@@ -266,18 +277,20 @@ export default function QuestionDetailPage() {
               <div className="mb-4">
                 <Notice tone="info">
                   <p>
-                    You are viewing an older version. Restoring it saves a copy as the newest version; nothing is
-                    deleted.
+                    You are viewing an older version.
+                    {d.can_modify ? " Restoring it saves a copy as the newest version; nothing is deleted." : ""}
                   </p>
                   <div className="mt-2 flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
-                      disabled={restore.isPending}
-                      onClick={() => restore.mutate(viewing.version_no)}
-                    >
-                      {restore.isPending ? "Restoring…" : `Restore version ${viewing.version_no}`}
-                    </button>
+                    {d.can_modify ? (
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={restore.isPending}
+                        onClick={() => restore.mutate(viewing.version_no)}
+                      >
+                        {restore.isPending ? "Restoring…" : `Restore version ${viewing.version_no}`}
+                      </button>
+                    ) : null}
                     <button type="button" className="btn btn-sm" onClick={() => setViewNo(null)}>
                       Back to current version
                     </button>
@@ -285,7 +298,7 @@ export default function QuestionDetailPage() {
                 </Notice>
               </div>
             ) : null}
-            {editing && isCurrent ? (
+            {editing && isCurrent && d.can_modify ? (
               <EditQuestionForm
                 key={d.current.id}
                 questionId={d.id}
@@ -342,7 +355,7 @@ export default function QuestionDetailPage() {
                     >
                       View
                     </button>
-                    {v.version_no !== d.current.version_no ? (
+                    {v.version_no !== d.current.version_no && d.can_modify ? (
                       <button
                         type="button"
                         className="btn btn-sm"

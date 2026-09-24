@@ -4,6 +4,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 QuestionStatus = Literal["generated", "reviewed", "approved", "rejected", "archived"]
+Role = Literal["admin", "power", "regular"]
 QuestionType = Literal["multiple_choice", "constructed_response"]
 
 
@@ -237,6 +238,13 @@ class StatusEventOut(ORM):
     created_at: datetime
 
 
+class OwnerOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+
+
 class QuestionSummary(BaseModel):
     id: int
     status: QuestionStatus
@@ -254,6 +262,8 @@ class QuestionSummary(BaseModel):
     dok: int
     stem: str
     updated_at: datetime
+    owner: OwnerOut
+    can_modify: bool
 
 
 class QuestionPage(BaseModel):
@@ -279,6 +289,8 @@ class QuestionDetail(BaseModel):
     assessment_ids: list[int]
     created_at: datetime
     updated_at: datetime
+    owner: OwnerOut
+    can_modify: bool
 
 
 class ChoiceIn(BaseModel):
@@ -349,6 +361,9 @@ class AssessmentSummary(BaseModel):
     instructions: str
     item_count: int
     updated_at: datetime
+    owner: OwnerOut
+    can_modify: bool
+    deleted_at: datetime | None = None
 
 
 class AssessmentDetail(AssessmentSummary):
@@ -404,3 +419,40 @@ class PrintOut(BaseModel):
     question_count: int
     blocks: list[PrintBlock]
     standards: list[dict[str, Any]] | None = None
+
+
+# ---- admin -------------------------------------------------------------------------------------
+
+
+class AdminUserOut(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    username: str
+    role: Role
+    is_active: bool
+    created_at: datetime
+    last_login_at: datetime | None
+
+
+class AdminUserCreate(BaseModel):
+    username: str = Field(min_length=3, max_length=64, pattern=r"^[A-Za-z0-9_.-]+$")
+    password: str = Field(min_length=12, max_length=128)
+    role: Role = "regular"
+
+
+class AdminUserUpdate(BaseModel):
+    role: Role | None = None
+    is_active: bool | None = None
+
+
+class PasswordSet(BaseModel):
+    password: str = Field(min_length=12, max_length=128)
+
+
+class SiteSettingsOut(BaseModel):
+    registration_open: bool
+
+
+class SiteSettingsUpdate(BaseModel):
+    registration_open: bool

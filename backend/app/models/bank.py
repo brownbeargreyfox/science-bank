@@ -1,19 +1,41 @@
 from datetime import datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, UniqueConstraint, func
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+    func,
+    text,
+)
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
 from app.models.standards import Course, Standard
 
+ROLES = ("admin", "power", "regular")
+
 
 class User(Base):
     __tablename__ = "users"
+    __table_args__ = (
+        CheckConstraint("role in ('admin', 'power', 'regular')", name="ck_users_role"),
+        Index("uq_users_username_lower", text("lower(username)"), unique=True),
+    )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    username: Mapped[str] = mapped_column(String(64), unique=True)
+    username: Mapped[str] = mapped_column(String(64))
     password_hash: Mapped[str] = mapped_column(String(128))
+    role: Mapped[str] = mapped_column(String(16), default="regular", server_default="regular")
+    is_active: Mapped[bool] = mapped_column(Boolean, default=True, server_default=text("true"))
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -46,6 +68,7 @@ class GenerationRun(Base):
     seed: Mapped[str] = mapped_column(String(64))
     options: Mapped[dict] = mapped_column(JSONB)
     parameters: Mapped[dict] = mapped_column(JSONB)
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     standard: Mapped[Standard] = relationship()
@@ -74,12 +97,14 @@ class Question(Base):
     status: Mapped[str] = mapped_column(String(16), index=True, default="generated")
     provenance: Mapped[dict] = mapped_column(JSONB)
     current_version_no: Mapped[int] = mapped_column(Integer, default=1)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
     standard: Mapped[Standard] = relationship()
+    owner: Mapped[User] = relationship()
     stimulus: Mapped[Stimulus | None] = relationship()
     versions: Mapped[list["QuestionVersion"]] = relationship(
         back_populates="question", order_by="QuestionVersion.version_no", cascade="all, delete-orphan"
@@ -110,6 +135,7 @@ class QuestionVersion(Base):
     answer: Mapped[str] = mapped_column(Text)
     explanation: Mapped[str] = mapped_column(Text, default="")
     change_note: Mapped[str | None] = mapped_column(Text)
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     question: Mapped[Question] = relationship(back_populates="versions")
@@ -123,6 +149,7 @@ class QuestionStatusEvent(Base):
     from_status: Mapped[str | None] = mapped_column(String(16))
     to_status: Mapped[str] = mapped_column(String(16))
     note: Mapped[str | None] = mapped_column(Text)
+    actor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
@@ -133,12 +160,15 @@ class Assessment(Base):
     title: Mapped[str] = mapped_column(Text)
     course_id: Mapped[int | None] = mapped_column(ForeignKey("courses.id"))
     instructions: Mapped[str] = mapped_column(Text, default="")
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
     )
 
     course: Mapped[Course | None] = relationship()
+    owner: Mapped[User] = relationship()
     items: Mapped[list["AssessmentItem"]] = relationship(
         back_populates="assessment", order_by="AssessmentItem.position", cascade="all, delete-orphan"
     )
@@ -159,3 +189,32 @@ class AssessmentItem(Base):
     assessment: Mapped[Assessment] = relationship(back_populates="items")
     question: Mapped[Question] = relationship()
     question_version: Mapped[QuestionVersion] = relationship()
+
+
+class AuditEvent(Base):
+    """Append-only record of security-relevant and content-changing actions."""
+
+    __tablename__ = "audit_events"
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(), index=True)
+    actor_id: Mapped[int | None] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    actor_username: Mapped[str | None] = mapped_column(Text)
+    action: Mapped[str] = mapped_column(Text)
+    target_type: Mapped[str | None] = mapped_column(Text)
+    target_id: Mapped[str | None] = mapped_column(Text)
+    ip: Mapped[str | None] = mapped_column(Text)
+    detail: Mapped[dict] = mapped_column(JSONB, default=dict, server_default=text("'{}'::jsonb"))
+
+
+class SiteSettings(Base):
+    """Single row (id=1) of runtime-editable settings; seeded from env by migration 0003."""
+
+    __tablename__ = "site_settings"
+    __table_args__ = (CheckConstraint("id = 1", name="ck_site_settings_singleton"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True, default=1)
+    registration_open: Mapped[bool] = mapped_column(Boolean)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )

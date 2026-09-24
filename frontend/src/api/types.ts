@@ -31,6 +31,8 @@ export type PrintOut = S["PrintOut"];
 export type PrintBlock = S["PrintBlock"];
 export type PrintQuestion = S["PrintQuestion"];
 export type ObservableRef = S["ObservableRef"];
+export type Role = S["SessionUser"]["role"];
+export type AdminUser = S["AdminUserOut"];
 
 export const STATUSES: readonly Status[] = ["generated", "reviewed", "approved", "rejected", "archived"];
 
@@ -40,6 +42,14 @@ export const STATUS_LABEL: Record<Status, string> = {
   approved: "Approved",
   rejected: "Rejected",
   archived: "Archived",
+};
+
+export const ROLES: readonly Role[] = ["admin", "power", "regular"];
+
+export const ROLE_LABEL: Record<Role, string> = {
+  admin: "Admin",
+  power: "Power user",
+  regular: "Teacher",
 };
 
 export const TYPE_LABEL: Record<QuestionType, string> = {

@@ -14,6 +14,8 @@ os.environ.setdefault("JWT_SECRET", "test-secret-" + "x" * 32)
 
 BACKEND = Path(__file__).resolve().parents[1]
 TEACHER = {"username": "nina", "password": "correct horse battery"}
+# Seeded accounts by role; all share TEACHER["password"]. "nina" is TEACHER and an admin.
+USERS = {"admin": "nina", "power": "pat", "regular": "reg", "regular2": "reg2"}
 
 
 def pytest_collection_modifyitems(config, items):
@@ -21,7 +23,7 @@ def pytest_collection_modifyitems(config, items):
         return
     skip = pytest.mark.skip(reason="TEST_DATABASE_URL not set")
     for item in items:
-        if "db" in item.fixturenames or "client" in item.fixturenames or "anon" in item.fixturenames:
+        if {"db", "client", "anon", "database"} & set(item.fixturenames):
             item.add_marker(skip)
 
 
@@ -54,7 +56,9 @@ def database():
     with SessionLocal() as s:
         import_standards(s, get_settings().standards_dir)
         sync_families(s)
-        s.add(User(username=TEACHER["username"], password_hash=hash_password(TEACHER["password"])))
+        pw = hash_password(TEACHER["password"])
+        for key, name in USERS.items():
+            s.add(User(username=name, password_hash=pw, role=key.rstrip("2")))
         s.commit()
     yield
 
@@ -84,3 +88,11 @@ def client(anon):
     r = anon.post("/api/auth/login", json=TEACHER)
     assert r.status_code == 200, r.text
     return anon
+
+
+def login_as(anon, who: str) -> dict:
+    """Log the TestClient in as one of USERS' keys ('admin', 'power', 'regular', 'regular2')."""
+    anon.post("/api/auth/logout")
+    r = anon.post("/api/auth/login", json={"username": USERS[who], "password": TEACHER["password"]})
+    assert r.status_code == 200, r.text
+    return r.json()

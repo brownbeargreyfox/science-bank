@@ -116,9 +116,10 @@ def build_provenance(std: Standard, family: QuestionFamily, generated: dict, gro
 
 
 def save_generated(
-    db: Session, std: Standard, family: QuestionFamily, generated: dict
+    db: Session, std: Standard, family: QuestionFamily, generated: dict, *, owner_id: int
 ) -> tuple[GenerationRun, list[int]]:
     run = GenerationRun(
+        created_by=owner_id,
         family_key=family.key,
         family_version=family.version,
         standard_id=std.id,
@@ -144,6 +145,7 @@ def save_generated(
                 status="generated",
                 provenance=build_provenance(std, family, generated, group, q),
                 current_version_no=1,
+                owner_id=owner_id,
             )
             question.versions.append(
                 QuestionVersion(
@@ -156,16 +158,19 @@ def save_generated(
                     answer=q["answer"],
                     explanation=q["explanation"],
                     change_note=None,
+                    created_by=owner_id,
                 )
             )
-            question.status_events.append(QuestionStatusEvent(from_status=None, to_status="generated", note=None))
+            question.status_events.append(
+                QuestionStatusEvent(from_status=None, to_status="generated", note=None, actor_id=owner_id)
+            )
             db.add(question)
             db.flush()
             ids.append(question.id)
     return run, ids
 
 
-def add_version(question: Question, edit: QuestionEdit) -> QuestionVersion:
+def add_version(question: Question, edit: QuestionEdit, *, actor_id: int) -> QuestionVersion:
     current = question.current_version
     if current.question_type == "multiple_choice":
         if not 2 <= len(edit.choices) <= len(CHOICE_LABELS):
@@ -208,13 +213,14 @@ def add_version(question: Question, edit: QuestionEdit) -> QuestionVersion:
         answer=answer,
         explanation=edit.explanation.strip(),
         change_note=(edit.change_note or "").strip() or None,
+        created_by=actor_id,
     )
     question.versions.append(version)
     question.current_version_no = version.version_no
     return version
 
 
-def change_status(question: Question, to_status: str, note: str | None) -> None:
+def change_status(question: Question, to_status: str, note: str | None, *, actor_id: int) -> None:
     allowed = TRANSITIONS[question.status]
     if to_status not in allowed:
         raise HTTPException(
@@ -222,6 +228,11 @@ def change_status(question: Question, to_status: str, note: str | None) -> None:
             f"Cannot move a question from {question.status} to {to_status} (allowed: {', '.join(allowed)})",
         )
     question.status_events.append(
-        QuestionStatusEvent(from_status=question.status, to_status=to_status, note=(note or "").strip() or None)
+        QuestionStatusEvent(
+            from_status=question.status,
+            to_status=to_status,
+            note=(note or "").strip() or None,
+            actor_id=actor_id,
+        )
     )
     question.status = to_status

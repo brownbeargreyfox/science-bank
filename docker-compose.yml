@@ -27,6 +27,7 @@ services:
       JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
       TEACHER_USERNAME: ${TEACHER_USERNAME:-nina}
       TEACHER_PASSWORD_HASH: ${TEACHER_PASSWORD_HASH:-}
+      REGISTRATION_OPEN: ${REGISTRATION_OPEN:-true}
     depends_on:
       postgres:
         condition: service_healthy

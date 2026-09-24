@@ -12,7 +12,8 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter } from "react-router";
 import { RouterProvider } from "react-router/dom";
 import { queryClient } from "./api/queries";
-import { AppLayout, RequireAuth } from "./components/Layout";
+import { AppLayout, RequireAdmin, RequireAuth } from "./components/Layout";
+import AdminUsersPage from "./pages/AdminUsers";
 import AssessmentBuilderPage from "./pages/AssessmentBuilder";
 import AssessmentsPage from "./pages/Assessments";
 import BundlesPage from "./pages/Bundles";
@@ -45,6 +46,7 @@ const router = createBrowserRouter([
           { path: "/questions/:id", element: <QuestionDetailPage /> },
           { path: "/assessments", element: <AssessmentsPage /> },
           { path: "/assessments/:id", element: <AssessmentBuilderPage /> },
+          { element: <RequireAdmin />, children: [{ path: "/admin/users", element: <AdminUsersPage /> }] },
           { path: "*", element: <NotFoundPage /> },
         ],
       },

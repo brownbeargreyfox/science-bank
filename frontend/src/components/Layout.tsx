@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router";
 import { api, unwrap } from "../api/client";
 import { ME_KEY, queryClient, useMe } from "../api/queries";
+import { ROLE_LABEL } from "../api/types";
 import { ErrorNotice, Loading } from "./ui";
 
 const NAV = [
@@ -13,6 +14,7 @@ const NAV = [
   { to: "/questions", label: "Question bank" },
   { to: "/assessments", label: "Assessments" },
 ];
+const ADMIN_NAV: (typeof NAV)[number] = { to: "/admin/users", label: "Admin", end: false };
 
 /** Gate for every signed-in route. A 401 anywhere flips `me` to null and lands here. */
 export function RequireAuth() {
@@ -29,6 +31,13 @@ export function RequireAuth() {
     const next = location.pathname + location.search;
     return <Navigate to={`/login?next=${encodeURIComponent(next)}`} replace />;
   }
+  return <Outlet />;
+}
+
+/** Hides admin pages from non-admins; the API enforces the same rule. */
+export function RequireAdmin() {
+  const me = useMe();
+  if (me.data?.role !== "admin") return <Navigate to="/" replace />;
   return <Outlet />;
 }
 
@@ -64,7 +73,7 @@ export function AppLayout() {
 
   const nav = (
     <ul className="flex flex-col gap-0.5">
-      {NAV.map((n) => (
+      {(me.data?.role === "admin" ? [...NAV, ADMIN_NAV] : NAV).map((n) => (
         <li key={n.to}>
           <NavLink
             to={n.to}
@@ -89,6 +98,7 @@ export function AppLayout() {
     <div className="flex items-center justify-between gap-2 border-t border-line pt-3 text-sm">
       <span className="text-muted">
         Signed in as <strong className="text-ink">{me.data?.username}</strong>
+        {me.data ? <span className="block text-xs">{ROLE_LABEL[me.data.role]}</span> : null}
       </span>
       <button type="button" className="btn btn-sm" onClick={() => logout.mutate()} disabled={logout.isPending}>
         Log out

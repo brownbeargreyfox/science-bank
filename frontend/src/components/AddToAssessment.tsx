@@ -74,7 +74,7 @@ export function AddToAssessment({ questionIds, onDone }: { questionIds: number[]
         </label>
         <select id="ata-target" className="input" value={target} onChange={(e) => setTarget(e.target.value)}>
           <option value="">Choose an assessment…</option>
-          {assessments.data?.map((a) => (
+          {assessments.data?.filter((a) => a.can_modify).map((a) => (
             <option key={a.id} value={a.id}>
               {a.title} ({pluralize(a.item_count, "item")})
             </option>
