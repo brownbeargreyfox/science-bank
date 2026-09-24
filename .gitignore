@@ -17,3 +17,8 @@ frontend/dist/
 # tool caches
 **/.pytest_cache/
 **/.ruff_cache/
+
+# local tooling
+.claude/worktrees/
+.superpowers/
+backups/
