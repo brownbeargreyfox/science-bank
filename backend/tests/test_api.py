@@ -6,7 +6,15 @@ from sqlalchemy import func, select
 
 from tests.conftest import TEACHER
 
-PUBLIC = {"/healthz", "/readyz", "/api/auth/login", "/api/auth/logout", "/api/{path:path}"}
+PUBLIC = {
+    "/healthz",
+    "/readyz",
+    "/api/auth/login",
+    "/api/auth/logout",
+    "/api/auth/register",
+    "/api/auth/registration-status",
+    "/api/{path:path}",
+}
 
 
 # ---- importer --------------------------------------------------------------------------------
@@ -23,7 +31,13 @@ def test_import_counts_and_idempotency(db):
     report = import_standards(db, get_settings().standards_dir)
     db.commit()
     assert report.created == {} and report.updated == {}
-    assert report.unchanged == {"source_documents": 6, "courses": 3, "standards": 38, "bundles": 15}
+    assert report.unchanged == {
+        "source_documents": 6,
+        "courses": 3,
+        "standards": 38,
+        "bundles": 15,
+        "eocep_constraints": 2,
+    }
     assert sorted(db.execute(select(Standard.id, Standard.content_sha256)).all()) == before
     # PE codes shared by Biology 1 and 2 are distinct rows with their own boundaries
     rows = db.execute(

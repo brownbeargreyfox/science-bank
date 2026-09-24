@@ -21,7 +21,7 @@ def pytest_collection_modifyitems(config, items):
         return
     skip = pytest.mark.skip(reason="TEST_DATABASE_URL not set")
     for item in items:
-        if "db" in item.fixturenames or "client" in item.fixturenames or "anon" in item.fixturenames:
+        if {"db", "client", "anon", "database"} & set(item.fixturenames):
             item.add_marker(skip)
 
 
