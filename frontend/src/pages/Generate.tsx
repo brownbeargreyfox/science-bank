@@ -118,12 +118,18 @@ export default function GeneratePage() {
   const qtyValid = Number.isFinite(qty) && qty >= 1 && qty <= 40;
   const ready = standardId !== null && family !== null && qtyValid;
 
+  const eocep = generationMode === "eocep";
+  // EOCEP is entirely selected-response; keep the UI from offering choices the server will reject.
+  const eocepAllowedTypes: QuestionType[] = ["multiple_choice"];
+
   const buildRequest = (seedValue: string | null): GenerateRequest => ({
     standard_id: standardId ?? 0,
     family_key: familyKey,
     doks: [...doks].sort(),
-    question_types: types,
-    template_keys: templates.filter((k) => family?.templates.some((t) => t.key === k)),
+    question_types: eocep ? types.filter((t) => eocepAllowedTypes.includes(t)) : types,
+    template_keys: templates.filter(
+      (k) => family?.templates.some((t) => t.key === k && (!eocep || t.question_type !== "constructed_response")),
+    ),
     quantity: qty,
     seed: seedValue && seedValue.trim() ? seedValue.trim() : null,
     generation_mode: generationMode,
@@ -317,19 +323,27 @@ export default function GeneratePage() {
             <fieldset>
               <legend className="field-label">Question type</legend>
               <div className="flex flex-wrap gap-3">
-                {QTYPES.map((t) => (
-                  <label key={t} className="flex items-center gap-1.5">
-                    <input
-                      type="checkbox"
-                      className="check"
-                      checked={types.includes(t)}
-                      onChange={(e) => setTypes(toggle(types, t, e.target.checked))}
-                    />
-                    {TYPE_LABEL[t]}
-                  </label>
-                ))}
+                {QTYPES.map((t) => {
+                  const disabled = eocep && !eocepAllowedTypes.includes(t);
+                  return (
+                    <label key={t} className={`flex items-center gap-1.5 ${disabled ? "text-muted" : ""}`}>
+                      <input
+                        type="checkbox"
+                        className="check"
+                        checked={types.includes(t) && !disabled}
+                        disabled={disabled}
+                        onChange={(e) => setTypes(toggle(types, t, e.target.checked))}
+                      />
+                      {TYPE_LABEL[t]}
+                    </label>
+                  );
+                })}
               </div>
-              <p className="hint mt-1">None checked means both.</p>
+              <p className="hint mt-1">
+                {eocep
+                  ? "EOCEP practice is selected-response only; constructed-response items aren't offered."
+                  : "None checked means both."}
+              </p>
             </fieldset>
             <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
               <div>
@@ -380,28 +394,34 @@ export default function GeneratePage() {
                 </span>
               </summary>
               <ul className="divide-y divide-line-soft border-t border-line">
-                {family.templates.map((t) => (
-                  <li key={t.key}>
-                    <label className="flex cursor-pointer gap-3 px-3 py-2.5">
-                      <input
-                        type="checkbox"
-                        className="check mt-1"
-                        checked={templates.includes(t.key)}
-                        onChange={(e) => setTemplates(toggle(templates, t.key, e.target.checked))}
-                      />
-                      <span className="min-w-0">
-                        <span className="flex flex-wrap items-center gap-2">
-                          <span className="font-bold">{t.title}</span>
-                          <DokBadge dok={t.dok} />
-                          <TypeBadge type={t.question_type} short />
+                {family.templates.map((t) => {
+                  const disabled = eocep && t.question_type === "constructed_response";
+                  return (
+                    <li key={t.key}>
+                      <label className={`flex gap-3 px-3 py-2.5 ${disabled ? "text-muted" : "cursor-pointer"}`}>
+                        <input
+                          type="checkbox"
+                          className="check mt-1"
+                          checked={templates.includes(t.key) && !disabled}
+                          disabled={disabled}
+                          onChange={(e) => setTemplates(toggle(templates, t.key, e.target.checked))}
+                        />
+                        <span className="min-w-0">
+                          <span className="flex flex-wrap items-center gap-2">
+                            <span className="font-bold">{t.title}</span>
+                            <DokBadge dok={t.dok} />
+                            <TypeBadge type={t.question_type} short />
+                          </span>
+                          <span className="mt-0.5 block text-sm text-muted">
+                            {disabled
+                              ? "Not offered in EOCEP practice mode (selected-response only)."
+                              : `Cites ${humanize(t.observable_category)}: ${t.observable_text ?? `item ${t.observable_index + 1}`}`}
+                          </span>
                         </span>
-                        <span className="mt-0.5 block text-sm text-muted">
-                          Cites {humanize(t.observable_category)}: {t.observable_text ?? `item ${t.observable_index + 1}`}
-                        </span>
-                      </span>
-                    </label>
-                  </li>
-                ))}
+                      </label>
+                    </li>
+                  );
+                })}
               </ul>
             </details>
           ) : null}

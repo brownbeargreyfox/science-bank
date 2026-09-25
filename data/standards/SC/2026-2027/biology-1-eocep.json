@@ -8,13 +8,15 @@
       "source_pages": [11, 12],
       "allowed_terminology": ["biotic factor", "abiotic factor", "carrying capacity", "competition", "limiting factor", "population", "predation", "resource"],
       "prohibitions": ["population growth calculations", "specific nutrient cycles", "specific relationships among multiple populations"],
-      "requirements": ["use models communicating data or information on carrying capacity and limiting factors"]
+      "requirements": ["use models communicating data or information on carrying capacity and limiting factors"],
+      "excluded_templates": {}
     },
     "B-LS3-3": {
       "source_pages": [15, 16],
       "allowed_terminology": ["allele", "codominance", "complete dominance", "genotype", "phenotype", "probability", "Punnett square", "ratio"],
       "prohibitions": ["construct or complete a pedigree", "construct or complete a dihybrid cross", "specific genetic disorders", "Hardy-Weinberg", "Chi-square"],
-      "requirements": ["may calculate monohybrid ratios or probabilities", "may analyze a completed dihybrid cross"]
+      "requirements": ["may calculate monohybrid ratios or probabilities", "may analyze a completed dihybrid cross"],
+      "excluded_templates": {}
     }
   }
 }
