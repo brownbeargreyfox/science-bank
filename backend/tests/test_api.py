@@ -144,7 +144,6 @@ def test_legacy_username_token_still_works(anon):
     anon.cookies.clear()
 
 
-
 def test_legacy_numeric_username_token_is_not_read_as_an_id(anon, db):
     """Pre-0003 tokens carry sub=<username>; a digit-only username must not resolve as a user id."""
     from datetime import UTC, datetime, timedelta
@@ -165,6 +164,7 @@ def test_legacy_numeric_username_token_is_not_read_as_an_id(anon, db):
     assert me["username"] == str(pat_id) and me["role"] == "regular"
     anon.cookies.clear()
 
+
 def test_auth_events_are_audited(anon, db):
     from app.models import AuditEvent
 
@@ -183,6 +183,7 @@ def test_auth_events_are_audited(anon, db):
     assert "auth.login" in actions and "auth.logout" in actions
     details = " ".join(str(d) for d in db.scalars(select(AuditEvent.detail).where(AuditEvent.id > before)))
     assert "wrong password!" not in details and TEACHER["password"] not in details and "$2b$" not in details
+
 
 def test_unknown_api_path_is_json_404(client):
     r = client.get("/api/does-not-exist")
@@ -229,6 +230,7 @@ def test_standards_browse_and_detail(client):
         ("biology-1", "B-LS2-1"),
         ("biology-1", "B-LS3-3"),
         ("chemistry", "C-PS1-5"),
+        ("chemistry", "C-PS1-7"),
     ]
 
     detail = client.get(f"/api/standards/{_std(client, 'biology-1', 'B-LS3-3')['id']}").json()
@@ -259,6 +261,7 @@ def _generate(client, course_slug, code, family, **kw):
         ("biology-1", "B-LS2-1", "population-carrying-capacity"),
         ("biology-1", "B-LS3-3", "trait-probability"),
         ("chemistry", "C-PS1-5", "reaction-rate"),
+        ("chemistry", "C-PS1-7", "quantitative-conservation"),
     ],
 )
 def test_preview_is_reproducible(client, course, code, family):

@@ -145,7 +145,7 @@ nonpolar covalent, network solid), which property is compared. Question shapes: 
 by relative particle-attraction strength using the property data; explain a property difference
 in terms of "stronger/weaker forces between particles" language only.
 
-### 9. `mole-stoichiometry` — serves C-PS1-7 (Chemistry)
+### 9. `quantitative-conservation` (Mole Stoichiometry) — serves C-PS1-7 (Chemistry)
 Stimulus: a balanced chemical equation (simple, per the boundary — no complex reactions) plus a
 given quantity (mass or moles) of one species. Parameters: which species is given, which is
 asked for, molar masses (pull from a small periodic-table-derived lookup, not invented).

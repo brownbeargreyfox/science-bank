@@ -6,10 +6,11 @@ from app.models import QuestionFamily as QuestionFamilyRow
 from app.services.engine.family import QuestionFamily
 from app.services.families.genetics import TraitProbability
 from app.services.families.population import PopulationCarryingCapacity
+from app.services.families.quantitative_conservation import QuantitativeConservation
 from app.services.families.reaction_rate import ReactionRate
 
 FAMILIES: dict[str, QuestionFamily] = {
-    f.key: f for f in (PopulationCarryingCapacity(), TraitProbability(), ReactionRate())
+    f.key: f for f in (PopulationCarryingCapacity(), TraitProbability(), ReactionRate(), QuantitativeConservation())
 }
 
 

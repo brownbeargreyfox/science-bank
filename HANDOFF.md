@@ -25,9 +25,11 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `claude/amazing-cray-apalq2`
-- Latest feature commit: `e5efd4b feat: add Biology 1 EOCEP practice mode`
-- Roles/ownership/audit/admin (migration 0003) is built on branch `feat/roles-admin`; it is live only
-  once that branch is merged and deployed (backup first; see the plan's Task 12).
+- Latest deployed feature commit: `22f5d30` (roles, ownership, audit log, and account administration;
+  migration 0003).
+- Roles/ownership/audit/admin is live. The deployment backup is
+  `backups/pre-0003-2026-09-24-1519.sql`; the previous app image is tagged
+  `science-bank-app:pre-0003` for rollback. Nothing has been pushed to GitHub.
 - The branch includes the SCDE source-document merge (`84c8d9c`).
 - Deployment: Docker Compose, Postgres 16, FastAPI/Uvicorn, React/Vite SPA.
 - Application service: `science-bank-app-1`
@@ -215,10 +217,11 @@ the three original conceptual family shapes; their production keys are the names
 
 ### Next family work
 
-The next intended family is `mole-stoichiometry` for Chemistry C-PS1-7. Use the catalog’s curated
-reaction/molar-mass/quantity approach; do not randomly invent reactions or molar masses. The next
-Chemistry bundle target is **Stability & Change in Chemical Systems**, where a future shared
-reaction stimulus can support C-PS1-5 reaction-rate items and C-PS1-7 stoichiometry items.
+`quantitative-conservation` (displayed as Mole stoichiometry) is implemented for Chemistry C-PS1-7.
+It uses only the reviewed reaction/molar-mass catalog and makes conservation reasoning—not a bare
+conversion—the required default endpoint. The next Chemistry bundle target is **Stability & Change
+in Chemical Systems**, where a future shared reaction stimulus can support C-PS1-5 reaction-rate
+items and C-PS1-7 quantitative-conservation items.
 
 Bundle-driven generation is **not implemented**. Current bundle browsing is implemented, but there
 is no multi-standard shared-stimulus generation API, schema, persistence model, or UI yet.
@@ -294,17 +297,16 @@ The acceptance bar is zero skipped DB tests.
 
 ## Immediate recommended work
 
-0. Administration phases 2 and 3 (see the design spec's intro):
-   - Phase 2, admin console: diagnostics page (needs an image build-arg for app version/commit and
-     an in-app error log), audit-log viewer, moderation UI.
-   - Phase 3, change requests: regular teachers propose edits/deletes on content they don't own;
-     the owner approves or rejects. Reuses `policy.can_modify` and `audit_events`.
-1. Nina should use the current families in an actual unit and record edits; revise templates only
+1. Use `quantitative-conservation` (Mole stoichiometry) for C-PS1-7 in a classroom unit, then use it
+   to design the first bundle-driven shared Chemistry stimulus set. This is classroom Chemistry work
+   and does not extend Biology EOCEP coverage.
+2. Nina should use the current families in an actual unit and record edits; revise templates only
    with a family version bump and updated deterministic tests.
-2. Implement `mole-stoichiometry` (C-PS1-7), then use it to design the first bundle-driven shared
-   Chemistry stimulus set.
-3. Expand `biology-1-eocep.json` progressively as each Biology 1 family is added. Treat the EOCEP
+3. Administration: Phase 2a operational visibility (Overview, Errors, Jobs, Audit) is being designed
+   in parallel. Follow with Phase 2b content management, then Phase 3 change requests; both reuse
+   `policy.can_modify` and `audit_events`.
+4. Expand `biology-1-eocep.json` progressively as each Biology 1 family is added. Treat the EOCEP
    Assessment Specifications as item-writer constraints, not merely display text.
-4. Add scheduled off-host Postgres backups and a Uptime Kuma `/readyz` monitor.
-5. If moving toward a public product, do identity/workspaces before opening registration to
+5. Add scheduled off-host Postgres backups and a Uptime Kuma `/readyz` monitor.
+6. If moving toward a public product, do identity/workspaces before opening registration to
    strangers; do not postpone data isolation until after content has accumulated.

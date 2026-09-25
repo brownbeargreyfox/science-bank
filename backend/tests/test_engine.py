@@ -13,7 +13,7 @@ import pytest
 from app.core.config import REPO_ROOT
 from app.services.engine.core import GenerationError, Rng, derive_seed
 from app.services.engine.family import generate_set
-from app.services.families import genetics, population, reaction_rate
+from app.services.families import genetics, population, quantitative_conservation, reaction_rate
 from app.services.families.registry import FAMILIES
 
 BACKEND = Path(__file__).resolve().parents[1]
@@ -26,6 +26,7 @@ GOLDEN = {
     "population-carrying-capacity": "0c8ee45939b20ce51b7dca113cea1742cf4ca9aaad92086d30df1e8e685860db",
     "trait-probability": "ff980b3df37a613d7f891355941547eb80306d08e2be9dde702114c2b114571a",
     "reaction-rate": "5693b0d4e23823f2e880e2d017eafbeedef5f25fe869982a63eea3cfca75acea",
+    "quantitative-conservation": "62a6a3d4b7bd8415599d8a290082819a6de9147a76f145569e259c4d1d55cc45",
 }
 
 
@@ -261,6 +262,33 @@ def test_genetics_stays_inside_assessment_boundary():
 
 
 # ---- scientific validity: C-PS1-5 -----------------------------------------------------------
+
+
+def test_quantitative_conservation_representation_and_evidence_path():
+    fam = FAMILIES["quantitative-conservation"]
+    seen = set()
+    for seed in SEEDS:
+        out = generate_set(fam, seed, len(fam.templates))
+        p = out["groups"][0]["parameters"]
+        seen.add(p["reaction"])
+        assert p["atom_totals"]["reactants"] == p["atom_totals"]["products"]
+        assert p["side_masses"]["reactants"] == p["side_masses"]["products"]
+        assert "→ mol" in p["unit_path"] and "→ g" in p["unit_path"]
+        assert p["dimensional_analysis"] == p["unit_path"].split(" → ")
+        assert set(p["misconceptions"]) == {
+            "read_coefficients",
+            "mole_mass_conversion",
+            "particle_scale",
+            "mass_of_product",
+            "conservation_check",
+        }
+        assert all(len(classes) == 3 and len(set(classes)) == 3 for classes in p["misconceptions"].values())
+        assert {"conservation_check", "explain_conservation"} <= {q["template_key"] for _, q in _all_questions(out)}
+        for row in p["species"]:
+            assert row["molar_mass"] == float(quantitative_conservation.molar_mass(row["atoms"]))
+        text = " ".join(q["stem"] + " " + q["answer"] for _, q in _all_questions(out)).lower()
+        assert all(term not in text for term in ("limiting reactant", "percent yield", "molarity", "gas law"))
+    assert seen == set(quantitative_conservation.REACTIONS)
 
 
 def test_reaction_rate_data_and_keys():

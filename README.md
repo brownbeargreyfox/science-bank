@@ -7,7 +7,7 @@ A self-hosted question bank and assessment builder for South Carolina high schoo
 
 Science Bank is **not** an AI question writer. Questions come from **deterministic question
 families**: seeded generators that draw scientifically valid datasets (population surveys,
-Punnett crosses, reaction-rate experiments) and compute every answer and distractor from the same
+Punnett crosses, reaction-rate experiments, quantitative conservation models) and compute every answer and distractor from the same
 parameters the student sees. Each family is bound to one exact Performance Expectation in the
 official SCDE standards data under [`data/standards/`](data/standards/), and every template cites
 the SCDE "observable feature of student performance" it targets. The same seed and family version
@@ -20,13 +20,14 @@ regeneration.
   filters, the state assessment boundary, SEP/DCI/CCC, observable performances, and source-document
   provenance.
 - **Generate** — pick course → standard → family → DOK / question type / templates → quantity,
-  preview with the answer key, then save to the bank. Three families:
+  preview with the answer key, then save to the bank. Four families:
 
   | Family | Standard | What students do |
   |---|---|---|
   | Carrying capacity: population survey data | Biology 1 **B-LS2-1** | Read logistic survey data, estimate K, identify and classify the limiting factor that shifted it, predict effects, reason about scale |
   | Trait probability and distribution | Biology 1 **B-LS3-3** | Punnett probabilities and ratios (complete/incomplete/codominance), compare observed offspring to expected (qualitatively — no chi-square), environment × genotype data |
   | Reaction rate: temperature and concentration | Chemistry **C-PS1-5** | Interpret two-reactant rate experiments, explain with collision theory, make qualitative predictions |
+  | Mole stoichiometry: quantitative conservation | Chemistry **C-PS1-7** | Use balanced equations, coefficients, moles, particles, and mass as mathematical evidence that atoms and mass are conserved |
 
 - **Question bank** — filter/search, review workflow (generated → reviewed → approved, or rejected /
   archived) with history, editing that appends versions (originals are never overwritten), restore.
