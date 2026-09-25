@@ -26,7 +26,8 @@ GOLDEN = {
     "population-carrying-capacity": "0c8ee45939b20ce51b7dca113cea1742cf4ca9aaad92086d30df1e8e685860db",
     "trait-probability": "ff980b3df37a613d7f891355941547eb80306d08e2be9dde702114c2b114571a",
     "reaction-rate": "5693b0d4e23823f2e880e2d017eafbeedef5f25fe869982a63eea3cfca75acea",
-    "quantitative-conservation": "62a6a3d4b7bd8415599d8a290082819a6de9147a76f145569e259c4d1d55cc45",
+    "quantitative-conservation": "9535ce78f745e6e146410d1aff037790f1b0b4d26104e2d98b0a5be907934ff3",
+    "chemical-system-stability": "9cb9b999a7cd607847ea9c8c2adfc64bf29f6d91b378d3371d3348160d3537ff",
 }
 
 
@@ -109,6 +110,8 @@ def test_template_citations_exist_in_scde_data(key):
         std = _load_standard(files[b.course_slug], b.code)
         assert std.get("question_family_candidate") is True
         for t in fam.templates:
+            if t.standard_code is not None and t.standard_code != b.code:
+                continue
             bullets = std["observable_performances"][t.observable_category]
             assert t.observable_index < len(bullets), (t.key, t.observable_category)
 
@@ -289,6 +292,23 @@ def test_quantitative_conservation_representation_and_evidence_path():
         text = " ".join(q["stem"] + " " + q["answer"] for _, q in _all_questions(out)).lower()
         assert all(term not in text for term in ("limiting reactant", "percent yield", "molarity", "gas law"))
     assert seen == set(quantitative_conservation.REACTIONS)
+
+
+def test_chemical_systems_shared_stimulus_keeps_rate_and_conservation_paths_distinct():
+    fam = FAMILIES["chemical-system-stability"]
+    for seed in SEEDS:
+        out = generate_set(fam, seed, len(fam.templates))
+        params = out["groups"][0]["parameters"]
+        assert params["reaction"] == "magnesium_hcl"
+        assert params["atom_totals"]["reactants"] == params["atom_totals"]["products"]
+        assert params["side_masses"]["reactants"] == params["side_masses"]["products"] == 97.0
+        assert params["asked_mass"] == params["asked_moles"] * 2
+        questions = list(_all_questions(out))
+        assert {question["standard_code"] for _, question in questions} == {"C-PS1-5", "C-PS1-7"}
+        rate_questions = [question for _, question in questions if question["standard_code"] == "C-PS1-5"]
+        conservation_questions = [question for _, question in questions if question["standard_code"] == "C-PS1-7"]
+        assert all("mass are conserved" not in question["stem"].lower() for question in rate_questions)
+        assert any("conservation" in question["stem"].lower() for question in conservation_questions)
 
 
 def test_reaction_rate_data_and_keys():

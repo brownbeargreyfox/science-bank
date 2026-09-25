@@ -17,6 +17,11 @@ def _manual_side_atoms(species):
     return totals
 
 
+def test_reviewed_atomic_mass_lookup_uses_standard_classroom_values():
+    assert ATOMIC_MASS["Cl"] == Fraction(71, 2)
+    assert molar_mass({"H": 1, "Cl": 1}) == Fraction(73, 2)
+
+
 @pytest.mark.parametrize("reaction", sorted(REACTIONS))
 def test_curated_catalog_conserves_atoms_and_mass(reaction):
     species = REACTIONS[reaction]["species"]

@@ -205,6 +205,8 @@ def test_question_detail_hides_soft_deleted_assessment_links(anon):
 POLICY_COVERED = {
     ("POST", "/api/generate/preview"): "read-only preview",
     ("POST", "/api/generate/save"): "creates; owner = caller",
+    ("POST", "/api/generate/bundle/preview"): "read-only preview",
+    ("POST", "/api/generate/bundle/save"): "creates; owner = caller",
     ("POST", "/api/questions/{question_id}/versions"): "test_edit_question_matrix",
     ("POST", "/api/questions/{question_id}/restore/{version_no}"): "test_restore_matrix",
     ("POST", "/api/questions/{question_id}/status"): "test_status_matrix",

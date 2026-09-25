@@ -25,8 +25,8 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `claude/amazing-cray-apalq2`
-- Latest deployed feature commit: `22f5d30` (roles, ownership, audit log, and account administration;
-  migration 0003).
+- Latest deployed feature commit: `842b4ca` (C-PS1-7 quantitative conservation; pending an immediate
+  `1.0.1` chlorine-molar-mass correction and the first bundle-generator release).
 - Roles/ownership/audit/admin is live. The deployment backup is
   `backups/pre-0003-2026-09-24-1519.sql`; the previous app image is tagged
   `science-bank-app:pre-0003` for rollback. Nothing has been pushed to GitHub.
@@ -223,8 +223,11 @@ conversion—the required default endpoint. The next Chemistry bundle target is 
 in Chemical Systems**, where a future shared reaction stimulus can support C-PS1-5 reaction-rate
 items and C-PS1-7 quantitative-conservation items.
 
-Bundle-driven generation is **not implemented**. Current bundle browsing is implemented, but there
-is no multi-standard shared-stimulus generation API, schema, persistence model, or UI yet.
+The first bundle-driven generator, `chemical-system-stability`, is in implementation for the
+**Stability & Change in Chemical Systems** bundle. It uses a single Mg + HCl investigation to
+generate C-PS1-5 rate questions and C-PS1-7 quantitative-conservation questions with one shared
+stimulus and per-question standard provenance. It is classroom-only and needs its `0004` migration,
+full validation, and deployment before it is live.
 
 ## EOCEP practice mode
 
@@ -238,6 +241,13 @@ EOCEP mode was completed for the currently EOCEP-eligible implemented Biology 1 
   stores constraints on their matching Biology 1 standard.
 - The Generate API accepts `generation_mode: "classroom" | "eocep"`.
 - EOCEP requests are accepted only for Biology 1 standards with imported EOCEP constraints.
+- EOCEP mode now enforces the constraints instead of only displaying them: it always excludes
+  constructed-response templates (the EOCEP is entirely selected-response), and it excludes any
+  template keys listed under a standard's `excluded_templates` map in `biology-1-eocep.json` (keyed
+  by family key; empty today because no implemented template currently constructs a pedigree,
+  dihybrid cross, or growth-rate calculation — add entries there if a future template does). An
+  explicit request for a blocked type or template is rejected with 422 rather than silently dropped.
+  The Generate UI disables the same options when EOCEP mode is selected.
 - EOCEP selection is stored in generation options/provenance.
 - Generate UI has Classroom and EOCEP Practice choices.
 - Classroom mode is the default and is unchanged.

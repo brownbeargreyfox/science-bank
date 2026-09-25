@@ -18,7 +18,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.core.db import Base
-from app.models.standards import Course, Standard
+from app.models.standards import Bundle, Course, Standard
 
 ROLES = ("admin", "power", "regular")
 
@@ -65,6 +65,7 @@ class GenerationRun(Base):
     family_key: Mapped[str] = mapped_column(ForeignKey("question_families.key"))
     family_version: Mapped[str] = mapped_column(String(16))
     standard_id: Mapped[int] = mapped_column(ForeignKey("standards.id"))
+    bundle_id: Mapped[int | None] = mapped_column(ForeignKey("bundles.id"), index=True)
     seed: Mapped[str] = mapped_column(String(64))
     options: Mapped[dict] = mapped_column(JSONB)
     parameters: Mapped[dict] = mapped_column(JSONB)
@@ -72,6 +73,7 @@ class GenerationRun(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     standard: Mapped[Standard] = relationship()
+    bundle: Mapped["Bundle | None"] = relationship()
 
 
 class Stimulus(Base):

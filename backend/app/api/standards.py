@@ -180,7 +180,7 @@ def list_sources(db: Session = Depends(get_db)) -> list[SourceDocumentOut]:
 def list_families(db: Session = Depends(get_db)) -> list[FamilyOut]:
     out = []
     for family in FAMILIES.values():
-        bindings, first_std = [], None
+        bindings, standards_by_code = [], {}
         for b in family.bindings:
             stds = db.scalars(
                 select(Standard)
@@ -188,7 +188,8 @@ def list_families(db: Session = Depends(get_db)) -> list[FamilyOut]:
                 .where(Course.state == b.state, Course.slug == b.course_slug, Standard.code == b.code)
                 .order_by(Course.use_year.desc())
             ).all()
-            first_std = first_std or (stds[0] if stds else None)
+            if stds:
+                standards_by_code[b.code] = stds[0]
             bindings.append(
                 FamilyBindingOut(
                     state=b.state, course_slug=b.course_slug, code=b.code, standard_ids=[s.id for s in stds]
@@ -205,8 +206,12 @@ def list_families(db: Session = Depends(get_db)) -> list[FamilyOut]:
                 templates=[
                     TemplateOut(
                         **t.__dict__,
-                        observable_text=observable_text(first_std, t.observable_category, t.observable_index)
-                        if first_std
+                        observable_text=observable_text(
+                            standards_by_code.get(family.binding_for_template(t).code),
+                            t.observable_category,
+                            t.observable_index,
+                        )
+                        if standards_by_code.get(family.binding_for_template(t).code)
                         else None,
                     )
                     for t in family.templates

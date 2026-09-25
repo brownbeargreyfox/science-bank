@@ -207,6 +207,63 @@ def test_eocep_mode_uses_imported_biology_1_constraints(client):
     assert denied.status_code == 422
 
 
+def test_eocep_mode_excludes_constructed_response(client):
+    standards = client.get("/api/standards").json()
+    bio1 = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS3-3")
+
+    # No constructed-response template is ever selected in EOCEP mode, even without an explicit filter.
+    response = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": bio1["id"],
+            "family_key": "trait-probability",
+            "quantity": 6,
+            "generation_mode": "eocep",
+        },
+    )
+    assert response.status_code == 200
+    types = {q["question_type"] for g in response.json()["groups"] for q in g["questions"]}
+    assert types == {"multiple_choice"}
+
+    # Explicitly requesting the constructed-response type is rejected, not silently ignored.
+    rejected_type = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": bio1["id"],
+            "family_key": "trait-probability",
+            "quantity": 1,
+            "generation_mode": "eocep",
+            "question_types": ["constructed_response"],
+        },
+    )
+    assert rejected_type.status_code == 422
+
+    # Explicitly requesting the constructed-response template by key is also rejected.
+    rejected_template = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": bio1["id"],
+            "family_key": "trait-probability",
+            "quantity": 1,
+            "generation_mode": "eocep",
+            "template_keys": ["explain_variation"],
+        },
+    )
+    assert rejected_template.status_code == 422
+
+    # Classroom mode is unaffected and can still generate the constructed-response item.
+    classroom = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": bio1["id"],
+            "family_key": "trait-probability",
+            "quantity": 1,
+            "template_keys": ["explain_variation"],
+        },
+    )
+    assert classroom.status_code == 200
+
+
 # ---- standards -------------------------------------------------------------------------------
 
 
@@ -282,6 +339,35 @@ def test_family_must_match_exact_standard(client):
     assert client.post("/api/generate/preview", json=body).status_code == 422
     _, body = _generate(client, "biology-1", "B-LS2-1", "population-carrying-capacity")
     assert client.post("/api/generate/save", json=body).status_code == 422  # seed required
+
+
+def test_bundle_preview_and_save_share_one_stimulus_with_per_standard_provenance(client, db):
+    from app.models import GenerationRun, Question
+
+    chemistry = next(course for course in client.get("/api/courses").json() if course["slug"] == "chemistry")
+    bundle = next(
+        item
+        for item in client.get("/api/bundles", params={"course_id": chemistry["id"]}).json()
+        if item["name"] == "Stability & Change in Chemical Systems"
+    )
+    body = {"bundle_id": bundle["id"], "family_key": "chemical-system-stability", "quantity": 5, "seed": "bundle"}
+    preview = client.post("/api/generate/bundle/preview", json=body)
+    assert preview.status_code == 200, preview.text
+    generated = preview.json()
+    assert [standard["code"] for standard in generated["standards"]] == ["C-PS1-5", "C-PS1-7"]
+    questions = generated["groups"][0]["questions"]
+    assert {question["standard_code"] for question in questions} == {"C-PS1-5", "C-PS1-7"}
+    assert all(question["observable"]["text"] for question in questions)
+
+    saved = client.post("/api/generate/bundle/save", json=body)
+    assert saved.status_code == 201, saved.text
+    ids = saved.json()["question_ids"]
+    run = db.get(GenerationRun, saved.json()["run_id"])
+    stored = list(db.scalars(select(Question).where(Question.id.in_(ids))))
+    assert run.bundle_id == bundle["id"]
+    assert len({question.stimulus_id for question in stored}) == 1
+    assert {question.standard.code for question in stored} == {"C-PS1-5", "C-PS1-7"}
+    assert {question.provenance["standard"]["code"] for question in stored} == {"C-PS1-5", "C-PS1-7"}
 
 
 def _save(client, course="biology-1", code="B-LS2-1", family="population-carrying-capacity", seed="api-1", **kw):

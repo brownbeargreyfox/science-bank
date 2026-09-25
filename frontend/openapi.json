@@ -589,6 +589,120 @@
         "title": "BulkStatusOut",
         "type": "object"
       },
+      "BundleGeneratePreviewOut": {
+        "properties": {
+          "bundle": {
+            "$ref": "#/components/schemas/BundleOut"
+          },
+          "family_key": {
+            "title": "Family Key",
+            "type": "string"
+          },
+          "family_version": {
+            "title": "Family Version",
+            "type": "string"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/GeneratedGroupOut"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "options": {
+            "title": "Options",
+            "type": "object"
+          },
+          "seed": {
+            "title": "Seed",
+            "type": "string"
+          },
+          "standards": {
+            "items": {
+              "$ref": "#/components/schemas/StandardSummary"
+            },
+            "title": "Standards",
+            "type": "array"
+          }
+        },
+        "required": [
+          "family_key",
+          "family_version",
+          "seed",
+          "options",
+          "bundle",
+          "standards",
+          "groups"
+        ],
+        "title": "BundleGeneratePreviewOut",
+        "type": "object"
+      },
+      "BundleGenerateRequest": {
+        "properties": {
+          "bundle_id": {
+            "title": "Bundle Id",
+            "type": "integer"
+          },
+          "doks": {
+            "default": [],
+            "items": {
+              "type": "integer"
+            },
+            "title": "Doks",
+            "type": "array"
+          },
+          "family_key": {
+            "title": "Family Key",
+            "type": "string"
+          },
+          "quantity": {
+            "default": 5,
+            "maximum": 40.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "question_types": {
+            "default": [],
+            "items": {
+              "enum": [
+                "multiple_choice",
+                "constructed_response"
+              ],
+              "type": "string"
+            },
+            "title": "Question Types",
+            "type": "array"
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "maxLength": 64,
+                "pattern": "^[A-Za-z0-9._-]*$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed"
+          },
+          "template_keys": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Template Keys",
+            "type": "array"
+          }
+        },
+        "required": [
+          "bundle_id",
+          "family_key"
+        ],
+        "title": "BundleGenerateRequest",
+        "type": "object"
+      },
       "BundleOut": {
         "properties": {
           "aligned": {
@@ -1165,6 +1279,17 @@
             ],
             "title": "Question Type",
             "type": "string"
+          },
+          "standard_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standard Code"
           },
           "stem": {
             "title": "Stem",
@@ -2602,6 +2727,17 @@
             ],
             "title": "Question Type",
             "type": "string"
+          },
+          "standard_code": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Standard Code"
           },
           "title": {
             "title": "Title",
@@ -4051,6 +4187,126 @@
         "summary": "List Families",
         "tags": [
           "standards"
+        ]
+      }
+    },
+    "/api/generate/bundle/preview": {
+      "post": {
+        "description": "Preview one shared, classroom-only stimulus aligned to a complete imported SCDE bundle.",
+        "operationId": "preview_bundle_api_generate_bundle_preview_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BundleGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BundleGeneratePreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview Bundle",
+        "tags": [
+          "generate"
+        ]
+      }
+    },
+    "/api/generate/bundle/save": {
+      "post": {
+        "description": "Regenerate and persist one shared bundle stimulus, never trusting preview payload content.",
+        "operationId": "save_bundle_api_generate_bundle_save_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BundleGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GenerateSaveOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Bundle",
+        "tags": [
+          "generate"
         ]
       }
     },

@@ -73,6 +73,9 @@ class TemplateSpec:
     # Cites the SCDE "observable features of student performance" bullet this template elicits.
     observable_category: str
     observable_index: int
+    # Multi-standard bundle families declare the exact PE this template targets. Ordinary
+    # single-standard families inherit their sole family binding.
+    standard_code: str | None = None
 
 
 @dataclass

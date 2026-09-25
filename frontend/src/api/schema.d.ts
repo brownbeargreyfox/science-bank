@@ -370,6 +370,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/generate/bundle/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Preview Bundle
+         * @description Preview one shared, classroom-only stimulus aligned to a complete imported SCDE bundle.
+         */
+        post: operations["preview_bundle_api_generate_bundle_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/generate/bundle/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Save Bundle
+         * @description Regenerate and persist one shared bundle stimulus, never trusting preview payload content.
+         */
+        post: operations["save_bundle_api_generate_bundle_save_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/generate/preview": {
         parameters: {
             query?: never;
@@ -821,6 +861,51 @@ export interface components {
             /** Updated */
             updated: number[];
         };
+        /** BundleGeneratePreviewOut */
+        BundleGeneratePreviewOut: {
+            bundle: components["schemas"]["BundleOut"];
+            /** Family Key */
+            family_key: string;
+            /** Family Version */
+            family_version: string;
+            /** Groups */
+            groups: components["schemas"]["GeneratedGroupOut"][];
+            /** Options */
+            options: Record<string, never>;
+            /** Seed */
+            seed: string;
+            /** Standards */
+            standards: components["schemas"]["StandardSummary"][];
+        };
+        /** BundleGenerateRequest */
+        BundleGenerateRequest: {
+            /** Bundle Id */
+            bundle_id: number;
+            /**
+             * Doks
+             * @default []
+             */
+            doks: number[];
+            /** Family Key */
+            family_key: string;
+            /**
+             * Quantity
+             * @default 5
+             */
+            quantity: number;
+            /**
+             * Question Types
+             * @default []
+             */
+            question_types: ("multiple_choice" | "constructed_response")[];
+            /** Seed */
+            seed?: string | null;
+            /**
+             * Template Keys
+             * @default []
+             */
+            template_keys: string[];
+        };
         /** BundleOut */
         BundleOut: {
             /** Aligned */
@@ -1042,6 +1127,8 @@ export interface components {
              * @enum {string}
              */
             question_type: "multiple_choice" | "constructed_response";
+            /** Standard Code */
+            standard_code?: string | null;
             /** Stem */
             stem: string;
             /** Template Key */
@@ -1519,6 +1606,8 @@ export interface components {
              * @enum {string}
              */
             question_type: "multiple_choice" | "constructed_response";
+            /** Standard Code */
+            standard_code?: string | null;
             /** Title */
             title: string;
         };
@@ -2342,6 +2431,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["FamilyOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    preview_bundle_api_generate_bundle_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BundleGenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BundleGeneratePreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_bundle_api_generate_bundle_save_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["BundleGenerateRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GenerateSaveOut"];
                 };
             };
             /** @description Validation Error */

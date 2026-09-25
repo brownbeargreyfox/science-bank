@@ -2,13 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Link, useLocation, useSearchParams } from "react-router";
 import { api, unwrap } from "../api/client";
-import { useCourses } from "../api/queries";
+import { useCourses, useFamilies } from "../api/queries";
 import { CodeTag, Empty, ErrorNotice, Loading, PageHeader } from "../components/ui";
 
 export default function BundlesPage() {
   const [params, setParams] = useSearchParams();
   const { hash } = useLocation();
   const courses = useCourses();
+  const families = useFamilies();
   const courseId = Number(params.get("course")) || courses.data?.[0]?.id || null;
   const bundles = useQuery({
     queryKey: ["bundles", courseId],
@@ -106,6 +107,16 @@ export default function BundlesPage() {
                   ) : null}
                 </div>
               </div>
+              {families.data
+                ?.filter((family) => {
+                  const codes = new Set(b.aligned.filter((alignment) => !alignment.partial).map((alignment) => alignment.code));
+                  return family.bindings.every((binding) => codes.has(binding.code));
+                })
+                .map((family) => (
+                  <Link key={family.key} className="btn btn-primary mt-5" to={`/generate/bundle?bundle=${b.id}&family=${family.key}`}>
+                    Generate shared stimulus: {family.title}
+                  </Link>
+                ))}
             </li>
           ))}
         </ol>

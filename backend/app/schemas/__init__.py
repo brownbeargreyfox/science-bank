@@ -127,6 +127,7 @@ class TemplateOut(BaseModel):
     question_type: QuestionType
     observable_category: str
     observable_index: int
+    standard_code: str | None = None
     observable_text: str | None = None
 
 
@@ -158,6 +159,16 @@ class GenerateRequest(BaseModel):
     generation_mode: Literal["classroom", "eocep"] = "classroom"
 
 
+class BundleGenerateRequest(BaseModel):
+    bundle_id: int
+    family_key: str
+    seed: str | None = Field(default=None, max_length=64, pattern=r"^[A-Za-z0-9._-]*$")
+    quantity: int = Field(default=5, ge=1, le=40)
+    doks: list[int] = []
+    question_types: list[QuestionType] = []
+    template_keys: list[str] = []
+
+
 class ChoiceOut(BaseModel):
     label: str
     text: str
@@ -181,6 +192,7 @@ class GeneratedQuestionOut(BaseModel):
     answer: str
     explanation: str
     observable: ObservableRef
+    standard_code: str | None = None
     attempt: int
 
 
@@ -197,6 +209,16 @@ class GeneratePreviewOut(BaseModel):
     seed: str
     options: dict[str, Any]
     standard: StandardSummary
+    groups: list[GeneratedGroupOut]
+
+
+class BundleGeneratePreviewOut(BaseModel):
+    family_key: str
+    family_version: str
+    seed: str
+    options: dict[str, Any]
+    bundle: BundleOut
+    standards: list[StandardSummary]
     groups: list[GeneratedGroupOut]
 
 

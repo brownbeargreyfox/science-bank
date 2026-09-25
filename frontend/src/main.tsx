@@ -17,6 +17,7 @@ import AdminUsersPage from "./pages/AdminUsers";
 import AssessmentBuilderPage from "./pages/AssessmentBuilder";
 import AssessmentsPage from "./pages/Assessments";
 import BundlesPage from "./pages/Bundles";
+import BundleGeneratePage from "./pages/BundleGenerate";
 import GeneratePage from "./pages/Generate";
 import HomePage from "./pages/Home";
 import LoginPage from "./pages/Login";
@@ -41,6 +42,7 @@ const router = createBrowserRouter([
           { path: "/standards", element: <StandardsPage /> },
           { path: "/standards/:id", element: <StandardDetailPage /> },
           { path: "/bundles", element: <BundlesPage /> },
+          { path: "/generate/bundle", element: <BundleGeneratePage /> },
           { path: "/generate", element: <GeneratePage /> },
           { path: "/questions", element: <QuestionsPage /> },
           { path: "/questions/:id", element: <QuestionDetailPage /> },

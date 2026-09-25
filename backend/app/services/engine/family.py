@@ -44,6 +44,18 @@ class QuestionFamily(ABC):
                 return t
         raise KeyError(key)
 
+    def binding_for_template(self, template: TemplateSpec) -> Binding:
+        if template.standard_code is None:
+            if len(self.bindings) != 1:
+                raise GenerationError(f"{self.key}/{template.key}: multi-standard template needs a standard code")
+            return self.bindings[0]
+        matches = [binding for binding in self.bindings if binding.code == template.standard_code]
+        if len(matches) != 1:
+            raise GenerationError(
+                f"{self.key}/{template.key}: unknown or ambiguous standard code {template.standard_code}"
+            )
+        return matches[0]
+
     def catalog(self) -> dict[str, Any]:
         return {
             "key": self.key,
@@ -95,6 +107,9 @@ def generate_set(
         chosen_keys = {t.key for t in Rng(*base, "select").sample(eligible, take)}
         chosen = [t for t in eligible if t.key in chosen_keys]
         questions = [_build_one(family, t, params, base) for t in chosen]
+        for question, template in zip(questions, chosen, strict=True):
+            if template.standard_code is not None:
+                question["standard_code"] = family.binding_for_template(template).code
         groups.append(
             {
                 "index": group_index,

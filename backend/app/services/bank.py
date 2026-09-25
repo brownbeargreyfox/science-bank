@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session, selectinload
 
 from app.models import (
+    Bundle,
     Course,
     GenerationRun,
     Question,
@@ -116,13 +117,21 @@ def build_provenance(std: Standard, family: QuestionFamily, generated: dict, gro
 
 
 def save_generated(
-    db: Session, std: Standard, family: QuestionFamily, generated: dict, *, owner_id: int
+    db: Session,
+    std: Standard,
+    family: QuestionFamily,
+    generated: dict,
+    *,
+    owner_id: int,
+    bundle: Bundle | None = None,
+    standards_by_code: dict[str, Standard] | None = None,
 ) -> tuple[GenerationRun, list[int]]:
     run = GenerationRun(
         created_by=owner_id,
         family_key=family.key,
         family_version=family.version,
         standard_id=std.id,
+        bundle_id=bundle.id if bundle else None,
         seed=generated["seed"],
         options=generated["options"],
         parameters={"groups": [g["parameters"] for g in generated["groups"]]},
@@ -136,14 +145,15 @@ def save_generated(
         db.add(stimulus)
         db.flush()
         for q in group["questions"]:
+            question_standard = (standards_by_code or {}).get(q.get("standard_code"), std)
             question = Question(
-                standard_id=std.id,
+                standard_id=question_standard.id,
                 run_id=run.id,
                 stimulus_id=stimulus.id,
                 family_key=family.key,
                 template_key=q["template_key"],
                 status="generated",
-                provenance=build_provenance(std, family, generated, group, q),
+                provenance=build_provenance(question_standard, family, generated, group, q),
                 current_version_no=1,
                 owner_id=owner_id,
             )

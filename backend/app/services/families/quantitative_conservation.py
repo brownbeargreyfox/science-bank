@@ -20,7 +20,7 @@ ATOMIC_MASS: dict[str, Fraction] = {
     "Al": Fraction(27),
     "C": Fraction(12),
     "Na": Fraction(23),
-    "Cl": Fraction(35, 2),
+    "Cl": Fraction(71, 2),
 }
 
 # (formula, classroom name, balanced coefficient, atoms per formula unit)
@@ -119,7 +119,7 @@ def _number(value: Fraction) -> float:
 
 class QuantitativeConservation(QuestionFamily):
     key = "quantitative-conservation"
-    version = "1.0.0"
+    version = "1.0.1"
     title = "Mole stoichiometry: quantitative conservation"
     description = (
         "Use balanced equations, moles, particles, and mass as quantitative evidence that matter is conserved."
