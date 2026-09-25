@@ -25,8 +25,9 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `claude/amazing-cray-apalq2`
-- Latest deployed feature commit: `842b4ca` (C-PS1-7 quantitative conservation; pending an immediate
-  `1.0.1` chlorine-molar-mass correction and the first bundle-generator release).
+- Latest deployed feature commit: `451ef0a` (C-PS1-7 quantitative conservation `1.0.1` chlorine-molar-mass
+  correction and the first shared Chemistry bundle generator; migration `0004`). The previous image is tagged
+  `science-bank-app:pre-bundle-451ef0a` for rollback.
 - Roles/ownership/audit/admin is live. The deployment backup is
   `backups/pre-0003-2026-09-24-1519.sql`; the previous app image is tagged
   `science-bank-app:pre-0003` for rollback. Nothing has been pushed to GitHub.
@@ -202,6 +203,8 @@ in `backend/app/services/engine/`.
 | `population-carrying-capacity` | Biology 1 B-LS2-1 | 1.0.0 | Logistic survey data, carrying capacity, limiting factors, scale. |
 | `trait-probability` | Biology 1 B-LS3-3 | 1.1.0 | Monohybrid genetics, complete/incomplete/codominance, qualitative observed-vs-expected data, genotype/environment effects. |
 | `reaction-rate` | Chemistry C-PS1-5 | 1.0.0 | Simple two-reactant concentration/temperature experiments and collision-theory reasoning. |
+| `chemical-system-stability` | Chemistry C-PS1-5 + C-PS1-7 | 1.0.0 | One magnesium + hydrochloric-acid shared stimulus: rate evidence and quantitative conservation. |
+| `quantitative-conservation` | Chemistry C-PS1-7 | 1.0.1 | Curated reactions, moles/particles/mass as evidence for conservation. |
 
 Engine invariants are tested in `backend/tests/test_engine.py`:
 
@@ -223,11 +226,11 @@ conversion—the required default endpoint. The next Chemistry bundle target is 
 in Chemical Systems**, where a future shared reaction stimulus can support C-PS1-5 reaction-rate
 items and C-PS1-7 quantitative-conservation items.
 
-The first bundle-driven generator, `chemical-system-stability`, is in implementation for the
+The first bundle-driven generator, `chemical-system-stability`, is live for the
 **Stability & Change in Chemical Systems** bundle. It uses a single Mg + HCl investigation to
 generate C-PS1-5 rate questions and C-PS1-7 quantitative-conservation questions with one shared
-stimulus and per-question standard provenance. It is classroom-only and needs its `0004` migration,
-full validation, and deployment before it is live.
+stimulus and per-question standard provenance. It is classroom-only. `0004` adds the nullable
+generation-run bundle link; every saved question still records its own standard and provenance.
 
 ## EOCEP practice mode
 
