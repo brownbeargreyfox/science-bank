@@ -13,6 +13,7 @@ const NAV = [
   { to: "/generate", label: "Generate" },
   { to: "/questions", label: "Question bank" },
   { to: "/assessments", label: "Assessments" },
+  { to: "/results", label: "Results" },
 ];
 const ADMIN_NAV: (typeof NAV)[number] = { to: "/admin/users", label: "Admin", end: false };
 

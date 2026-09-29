@@ -15,6 +15,7 @@ import { queryClient } from "./api/queries";
 import { AppLayout, RequireAdmin, RequireAuth } from "./components/Layout";
 import AdminUsersPage from "./pages/AdminUsers";
 import AssessmentBuilderPage from "./pages/AssessmentBuilder";
+import AdministrationPage from "./pages/AdministrationPage";
 import AssessmentsPage from "./pages/Assessments";
 import BundlesPage from "./pages/Bundles";
 import BundleGeneratePage from "./pages/BundleGenerate";
@@ -25,6 +26,7 @@ import NotFoundPage from "./pages/NotFound";
 import PrintPage from "./pages/Print";
 import QuestionDetailPage from "./pages/QuestionDetail";
 import QuestionsPage from "./pages/Questions";
+import ResultsPage from "./pages/ResultsPage";
 import StandardDetailPage from "./pages/StandardDetail";
 import StandardsPage from "./pages/Standards";
 
@@ -48,6 +50,8 @@ const router = createBrowserRouter([
           { path: "/questions/:id", element: <QuestionDetailPage /> },
           { path: "/assessments", element: <AssessmentsPage /> },
           { path: "/assessments/:id", element: <AssessmentBuilderPage /> },
+          { path: "/administrations/:id", element: <AdministrationPage /> },
+          { path: "/results", element: <ResultsPage /> },
           { element: <RequireAdmin />, children: [{ path: "/admin/users", element: <AdminUsersPage /> }] },
           { path: "*", element: <NotFoundPage /> },
         ],

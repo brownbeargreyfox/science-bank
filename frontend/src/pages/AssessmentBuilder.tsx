@@ -12,6 +12,7 @@ import {
   type Status,
 } from "../api/types";
 import { SkippedList } from "../components/AddToAssessment";
+import RecordUse from "../components/RecordUse";
 import {
   CodeTag,
   DokBadge,
@@ -574,6 +575,7 @@ export default function AssessmentBuilderPage() {
 
         <aside className="min-w-0 space-y-5">
           <Summary a={a} />
+          <RecordUse a={a} />
           {a.can_modify ? (
             <Section title="Delete" id="del-h">
               <p className="mb-2 text-sm text-muted">
