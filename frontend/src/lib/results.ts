@@ -8,9 +8,7 @@ export interface CellInput {
 }
 
 export type CellState =
-  | { kind: "empty" }
-  | { kind: "invalid"; message: string }
-  | { kind: "valid"; correct: number; attempted: number };
+  { kind: "empty" } | { kind: "invalid"; message: string } | { kind: "valid"; correct: number; attempted: number };
 
 const WHOLE_NUMBER = /^\d+$/;
 
