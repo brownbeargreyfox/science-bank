@@ -1,0 +1,24 @@
+.env
+.env.local
+
+# backend
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.venv/
+backend/*.egg-info/
+
+# frontend
+frontend/node_modules/
+frontend/dist/
+
+# editors / OS
+.DS_Store
+
+# tool caches
+**/.pytest_cache/
+**/.ruff_cache/
+
+# local tooling
+.claude/worktrees/
+.superpowers/
+backups/
