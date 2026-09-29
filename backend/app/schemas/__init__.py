@@ -599,3 +599,57 @@ class AdministrationDetail(AdministrationSummary):
     sections: list[SectionOut]
     items: list[AdministrationItemOut]
     results: list[ResultOut]
+
+
+class SummaryRow(BaseModel):
+    question_id: int
+    standard_id: int
+    standard_code: str
+    course_name: str
+    family_key: str | None
+    template_key: str | None
+    stem: str
+    dok: int
+    question_type: QuestionType
+    times_used: int
+    last_used: date | None
+    correct: int
+    attempted: int
+    accuracy: float | None
+    limited_responses: bool
+
+
+class ResultsSummaryPage(BaseModel):
+    items: list[SummaryRow]
+    total: int
+    limit: int
+    offset: int
+
+
+class QuestionRef(BaseModel):
+    id: int
+    status: QuestionStatus
+    standard_code: str
+
+
+class UsageEntry(BaseModel):
+    administration_id: int
+    label: str
+    administered_on: date
+    assessment_id: int
+    assessment_title: str
+    pinned_version_no: int
+    is_current_version: bool
+    correct: int
+    attempted: int
+    accuracy: float | None
+    limited_responses: bool
+
+
+class UsagePage(BaseModel):
+    items: list[UsageEntry]
+    total: int
+    limit: int
+    offset: int
+    parent: QuestionRef | None
+    variants: list[QuestionRef]
