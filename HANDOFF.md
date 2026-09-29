@@ -25,12 +25,16 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `claude/amazing-cray-apalq2`
-- Latest deployed feature commit: `451ef0a` (C-PS1-7 quantitative conservation `1.0.1` chlorine-molar-mass
-  correction and the first shared Chemistry bundle generator; migration `0004`). The previous image is tagged
+- Latest deployed feature commit: `0d6756e` (2026-09-29; adds the standalone `reaction-outcome` family for
+  Chemistry C-PS1-2 and flags C-PS1-2 as a family candidate; no migration). Deployed from the working branch, not
+  `main`. Rollback: image `science-bank-app:pre-reaction-outcome-0d6756e`, database backup
+  `backups/pre-reaction-outcome-2026-09-29-1229.sql`.
+- Earlier deployed feature commit: `451ef0a` (C-PS1-7 quantitative conservation `1.0.1` chlorine-molar-mass
+  correction and the first shared Chemistry bundle generator; migration `0004`). Its previous image is tagged
   `science-bank-app:pre-bundle-451ef0a` for rollback.
 - Roles/ownership/audit/admin is live. The deployment backup is
   `backups/pre-0003-2026-09-24-1519.sql`; the previous app image is tagged
-  `science-bank-app:pre-0003` for rollback. Nothing has been pushed to GitHub.
+  `science-bank-app:pre-0003` for rollback. The branch is pushed to GitHub (PR #1).
 - The branch includes the SCDE source-document merge (`84c8d9c`).
 - Deployment: Docker Compose, Postgres 16, FastAPI/Uvicorn, React/Vite SPA.
 - Application service: `science-bank-app-1`
