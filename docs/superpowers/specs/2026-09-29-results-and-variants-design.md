@@ -54,8 +54,14 @@ assessment. Results reuse `can_modify` for both viewing and editing:
 | `administrations` | An assessment actually given | `id`, `assessment_id` FK, `label`, `administered_on` date, `notes`, `owner_id` FK users, `created_at`, `updated_at`, `deleted_at` (soft delete, as assessments) |
 | `administration_items` | Snapshot of the assessment's items when the use was recorded | `id`, `administration_id` FK cascade, `source_assessment_item_id` (plain integer, no cascading FK, so removing an item from the assessment later cannot erase the record), `question_id` FK, `question_version_id` FK, `position`; unique (`administration_id`, `position`) |
 | `administration_sections` | Groups tested, e.g. "Period 2" | `id`, `administration_id` FK cascade, `name`; unique (`administration_id`, `name`) |
-| `item_results` | Totals for one section on one item | `id`, `section_id` FK cascade, `administration_item_id` FK cascade, `correct`, `attempted`, `note`; unique (`section_id`, `administration_item_id`); check `attempted >= 1` and `0 <= correct <= attempted` |
+| `item_results` | Totals for one section on one item | `id`, `section_id` FK cascade, `administration_item_id` FK cascade, `correct`, `attempted`; unique (`section_id`, `administration_item_id`); check `attempted >= 1` and `0 <= correct <= attempted` |
 | `questions.variant_of_id` | Parent link (new nullable column) | self-referencing FK, indexed |
+
+Indexes (foreign keys alone do not create them in Postgres): `administrations (owner_id, administered_on)`
+and `administrations (assessment_id)` with the deleted state in the filter; `administration_items
+(question_id)` and `(question_version_id)`; `administration_sections (administration_id)`; `item_results
+(administration_item_id)` and `(section_id)`; `questions (variant_of_id)`. The summary and usage queries
+join along these paths.
 
 Rules:
 
@@ -78,7 +84,9 @@ fails on an uncovered mutating route must pass). Hidden or missing records retur
 
 - `POST /api/assessments/{id}/administrations` — body: `label`, `administered_on`, `notes?`,
   `sections: [name, ...]` (at least one). Rejects an assessment with no items (422). Creates the
-  administration and its snapshot in one transaction. Returns the detail.
+  administration and its snapshot in one transaction. The transaction first takes a row lock on the
+  assessment (`SELECT ... FOR UPDATE`), then reads all items and their pinned versions in a single
+  statement, so the snapshot is one coherent assessment state. Returns the detail.
 - `GET /api/assessments/{id}/administrations` — list (filtered by the access rule).
 - `GET /api/administrations/{id}` — snapshot items, sections, results, computed accuracy per item (per
   section and overall), and how many items have data.
@@ -90,6 +98,10 @@ fails on an uncovered mutating route must pass). Hidden or missing records retur
   item id not belonging to this administration; totals that violate `attempted >= 1` and
   `0 <= correct <= attempted`; a row with only one of the two counts null. `{correct: null, attempted:
   null}` clears that row (restores "no data").
+- **Assessment locking:** the existing assessment mutators (`PATCH`, add items, remove item, reorder,
+  refresh — everything that goes through `_load_for_change`) do not lock the assessment row today. As part
+  of this work `_load_for_change` takes the same `FOR UPDATE` lock, so item changes and snapshots serialise.
+  This is a small change to existing code and is covered by a test.
 - **Locking:** the results batch, section add/rename/delete, and administration edits/deletes all take the
   same row lock on the administration (`SELECT ... FOR UPDATE`) before validating, so a batch cannot
   validate against a section that is removed a moment later.
@@ -100,12 +112,14 @@ fails on an uncovered mutating route must pass). Hidden or missing records retur
 - `GET /api/results/summary?course_id&standard_id&family_key&limit&offset` — one row per question that
   appears in at least one **visible, non-deleted** administration (including an administration where no
   results are entered yet, which shows `accuracy: null`). Questions never used are not listed. Soft-deleted
-  administrations are excluded from summary and usage; restoring one returns it to both. Each row has:
-  `attempted`, `correct`, `accuracy` (`null` when no data), `times_used`, `last_used`, plus
-  per-administration figures, all computed only over administrations the viewer may see. Sorted lowest
+  administrations are excluded from summary and usage; restoring one returns it to both. **Aggregate only:**
+  no per-administration figures here, so a page has a bounded size. Each row has:
+  `attempted`, `correct`, `accuracy` (`null` when no data), `times_used`, `last_used`, all computed only
+  over administrations the viewer may see. Sorted lowest
   accuracy first, no-data rows last. `limit` default 50, max 200; returns `total`. No verdict or mastery
   field.
-- `GET /api/questions/{id}/usage` — every visible, non-deleted administration the question appeared in, identifying the
+- `GET /api/questions/{id}/usage?limit&offset` — (default 25, max 100, returns `total`) the visible,
+  non-deleted administrations the question appeared in, newest first, identifying the
   **pinned question version** used in each (not just the current version), with that use's accuracy; plus the
   question's parent and variants (question links are as visible as the questions themselves).
 
@@ -118,7 +132,7 @@ Two operations, matching the existing `generate/preview` and `generate/save` pat
   id does not exist) before any generation. Otherwise it returns 200 with one record per parent:
   `{parent_id, status: "candidate", candidate, candidate_token}` or
   `{parent_id, status: "unavailable", reason}`. A mixed selection therefore yields usable candidates plus
-  inline reasons. A 422 for an unavailable parent is used only when the client asked about a single parent.
+  inline reasons. Batch size never changes the status: a valid body with existing parents always returns 200.
 - `POST /api/questions/variants/save` — body `{tokens: [...]}` only; never client-supplied content, seeds, or
   EOCEP settings. One transaction for the whole batch. Only selected candidates are saved; unselected ones
   never exist in the bank.
@@ -142,7 +156,9 @@ version changes between preview and save, the token no longer verifies and save 
 this candidate").
 
 `candidate_token` is an HMAC-signed payload (server secret) containing a token id, an expiry (30 minutes),
-the requesting user id, parent question id, **parent version id**, seed, and family version. The browser
+the requesting user id, parent question id, the parent's current **version id at preview time**
+(informational, signed so it cannot be altered, and used only to fill provenance; save does not compare it
+to the parent's current version, so an unrelated edit never makes a token stale), seed, and family version. The browser
 cannot build or alter it. On save the server verifies signature, expiry and user binding; re-checks the
 viewing rule for each parent; re-derives the question through the shared generation service using the
 parent's **saved provenance options** (generation mode), never browser input; and re-checks the fingerprint.
@@ -207,7 +223,7 @@ Route-by-route contract:
 | Record use on an assessment that does not exist or is deleted | 404 |
 | Record use on an empty assessment; invalid results; malformed bodies | 422, nothing saved |
 | Variant preview: malformed body, more than 20 ids | 422; an id that does not exist: 404 |
-| Variant preview: viewable parent that is unsupported | 200 with an `unavailable` record |
+| Variant preview: viewable parent that is unsupported (alone or in a batch) | 200 with an `unavailable` record |
 | Variant save: bad signature, expired, wrong user, or family version changed | 422 for bad signature/expired/wrong user; 409 for family version changed |
 | Variant save: fingerprint collision or replay | 409 naming the parent; whole batch rolls back |
 | Variant save: lineage ceiling reached | 422 |
@@ -232,7 +248,9 @@ Backend, pure functions first (no database), then database-backed:
 - Access: a regular teacher cannot view or modify another teacher's administration or results, even when
   they can view the underlying question; summary and usage never include hidden totals; power and admin see
   all.
-- Summary and usage: pagination and filters; usage lists every pinned version; results stay attached to the
+- Snapshot concurrency: an item add, remove, reorder or refresh racing a record-use call yields either the
+  state before or the state after, never a mixture; `_load_for_change` takes the lock.
+- Summary and usage: aggregate-only rows; pagination and filters on both; usage lists every pinned version; results stay attached to the
   version used after a question is edited.
 - Variants: preview creates no rows and saving only selected tokens creates rows; tampered, expired, and
   other-user tokens are rejected; a replayed token returns 409 and creates nothing; whole-request failures
