@@ -2401,7 +2401,6 @@ Create `backend/tests/test_variants_api.py`:
 import time
 from types import SimpleNamespace
 
-import pytest
 from sqlalchemy import func, select, update
 
 from app.models import AuditEvent, GenerationRun, Question
@@ -2653,6 +2652,7 @@ def test_audit_event_names_ids_and_counts_but_no_content(anon, db):
 
 
 def test_save_batch_is_capped(anon):
+    login_as(anon, "regular")
     assert save(anon, ["x"] * 21).status_code == 422
 ```
 

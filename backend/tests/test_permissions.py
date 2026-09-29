@@ -209,6 +209,8 @@ POLICY_COVERED = {
     ("POST", "/api/questions/{question_id}/restore/{version_no}"): "test_restore_matrix",
     ("POST", "/api/questions/{question_id}/status"): "test_status_matrix",
     ("POST", "/api/questions/bulk-status"): "test_bulk_status_is_all_or_nothing_on_ownership",
+    ("POST", "/api/questions/variants/preview"): "read-only preview",
+    ("POST", "/api/questions/variants/save"): "creates; owner = caller",
     ("POST", "/api/assessments"): "creates; owner = caller",
     ("PATCH", "/api/assessments/{assessment_id}"): "test_assessment_mutation_matrix",
     ("DELETE", "/api/assessments/{assessment_id}"): "test_assessment_mutation_matrix",

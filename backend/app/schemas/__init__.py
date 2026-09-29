@@ -653,3 +653,38 @@ class UsagePage(BaseModel):
     offset: int
     parent: QuestionRef | None
     variants: list[QuestionRef]
+
+
+class VariantPreviewRequest(BaseModel):
+    question_ids: list[int] = Field(min_length=1, max_length=100)
+
+
+class VariantCandidate(BaseModel):
+    question_type: QuestionType
+    dok: int
+    stem: str
+    choices: list[dict[str, Any]]
+    answer: str
+    explanation: str
+    stimulus: dict[str, Any] | None
+
+
+class VariantRecord(BaseModel):
+    parent_id: int
+    status: Literal["candidate", "unavailable"]
+    reason: str | None = None
+    candidate: VariantCandidate | None = None
+    candidate_token: str | None = None
+
+
+class VariantPreviewOut(BaseModel):
+    records: list[VariantRecord]
+
+
+class VariantSaveRequest(BaseModel):
+    tokens: list[str] = Field(min_length=1, max_length=100)
+
+
+class VariantSaveOut(BaseModel):
+    question_ids: list[int]
+    parent_ids: list[int]
