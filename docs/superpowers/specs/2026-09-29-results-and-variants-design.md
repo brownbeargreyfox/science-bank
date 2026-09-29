@@ -35,7 +35,10 @@ code: **results tracking** and **linked variants**. Either can be built and test
 ## Access rule
 
 Existing policy: `core/policy.py` `can_modify(user, owner_id)` is true for the owner or a moderator
-(`admin`, `power`). Results reuse it for both viewing and editing:
+(`admin`, `power`). Assessments are viewable by every signed-in user, so any teacher can give a colleague's
+assessment to their own classes. An administration is therefore **owned by the user who records it** (the
+assessment's owner is irrelevant to ownership), and recording requires only that the user can view the
+assessment. Results reuse `can_modify` for both viewing and editing:
 
 - A **regular** teacher sees and manages only their own administrations, results, and usage totals.
 - A **power user or admin** sees and manages all of them (department-wide, matching Nina's role).
@@ -94,12 +97,15 @@ fails on an uncovered mutating route must pass). Hidden or missing records retur
 
 ### Review and usage
 
-- `GET /api/results/summary?course_id&standard_id&family_key&limit&offset` — one row per question:
+- `GET /api/results/summary?course_id&standard_id&family_key&limit&offset` — one row per question that
+  appears in at least one **visible, non-deleted** administration (including an administration where no
+  results are entered yet, which shows `accuracy: null`). Questions never used are not listed. Soft-deleted
+  administrations are excluded from summary and usage; restoring one returns it to both. Each row has:
   `attempted`, `correct`, `accuracy` (`null` when no data), `times_used`, `last_used`, plus
   per-administration figures, all computed only over administrations the viewer may see. Sorted lowest
   accuracy first, no-data rows last. `limit` default 50, max 200; returns `total`. No verdict or mastery
   field.
-- `GET /api/questions/{id}/usage` — every visible administration the question appeared in, identifying the
+- `GET /api/questions/{id}/usage` — every visible, non-deleted administration the question appeared in, identifying the
   **pinned question version** used in each (not just the current version), with that use's accuracy; plus the
   question's parent and variants (question links are as visible as the questions themselves).
 
@@ -108,8 +114,11 @@ fails on an uncovered mutating route must pass). Hidden or missing records retur
 Two operations, matching the existing `generate/preview` and `generate/save` pattern.
 
 - `POST /api/questions/variants/preview` — body `{question_ids: [...]}`, at most 20 after removing
-  duplicates. **Persists nothing.** Every parent is validated for viewing before any generation. For each
-  parent returns the candidate content and an opaque `candidate_token`.
+  duplicates. **Persists nothing.** The whole request fails (422 malformed body or too many ids; 404 if any
+  id does not exist) before any generation. Otherwise it returns 200 with one record per parent:
+  `{parent_id, status: "candidate", candidate, candidate_token}` or
+  `{parent_id, status: "unavailable", reason}`. A mixed selection therefore yields usable candidates plus
+  inline reasons. A 422 for an unavailable parent is used only when the client asked about a single parent.
 - `POST /api/questions/variants/save` — body `{tokens: [...]}` only; never client-supplied content, seeds, or
   EOCEP settings. One transaction for the whole batch. Only selected candidates are saved; unselected ones
   never exist in the bank.
@@ -118,10 +127,19 @@ Who may create a variant: any user who can view the parent question. The variant
 the person saving it. The parent, its versions, and its results are never modified; provenance and the
 audit event record the source.
 
-**Supported parents (v1):** engine-generated questions from an ordinary single-standard family that is still
-registered. Anything else — hand-written or orphaned questions, retired families, and **bundle-family
-questions** — returns 422 naming the reason. Bundle support waits on a proof of concept showing a one-item
-variant keeps the shared stimulus and per-standard alignment.
+**Supported parents (v1):** the question row records a `family_key` and `template_key` (engine origin), the
+family is still registered, it is an ordinary single-standard family, and the template still exists in the
+current family and is bound to the question's standard. Anything else — hand-written or orphaned questions,
+retired families or templates, and **bundle-family questions** — is "unavailable" with a plain reason. Bundle
+support waits on a proof of concept showing a one-item variant keeps the shared stimulus and per-standard
+alignment.
+
+A variant is generated from the **current family code** with a new seed and the parent's saved
+`generation_mode`; it never re-derives the parent, so the parent's family version need not match. A
+teacher-edited parent is supported: the variant comes from the family template, not the edited wording, and
+the UI says so. The variant's own provenance records the family version that produced it. If the family
+version changes between preview and save, the token no longer verifies and save returns 409 ("regenerate
+this candidate").
 
 `candidate_token` is an HMAC-signed payload (server secret) containing a token id, an expiry (30 minutes),
 the requesting user id, parent question id, **parent version id**, seed, and family version. The browser
@@ -143,10 +161,11 @@ Generation:
   all siblings and descendants) and from candidates already accepted in the same preview batch. A different
   scenario with the same correct answer is valid. The fingerprint proves the output differs structurally; it
   says nothing about difficulty or novelty of the idea assessed.
-- **Lineage ceiling:** 50 variants per root question; past it the API returns 422. Ancestry and descendant
+- **Lineage ceiling:** 50 variants per root question; past it preview marks that parent "unavailable" and
+  save returns 422. Ancestry and descendant
   lookups use the `variant_of_id` index. Saving locks the root question row so sibling saves serialise.
-- A family with a small parameter space can run out of distinct variants; the API then returns 422 naming
-  the parent ("no distinct variant available").
+- A family with a small parameter space can run out of distinct variants; preview then returns an
+  "unavailable" record for that parent ("no distinct variant available").
 - Saved variant: `variant_of_id` set, status `generated`. Provenance keeps `variant_of`, `parent_version_id`,
   seed and family version. It stays valid if the parent is later edited, archived, or restored.
 - Save-time collision (another user saved a fingerprint-identical sibling first, or a replay) returns 409
@@ -156,9 +175,10 @@ Generation:
 
 ## UI
 
-- **Assessment detail page:** "Record use" (label, date, section names, at least one). Available after an
-  assessment is finalized or printed; also reachable from the builder. Lists past uses (only those the
-  viewer may see) linking to results.
+- **Assessment detail page:** "Record use" (label, date given, section names, at least one). The app has no
+  "finalized" or "printed" state, so it is available for any non-empty assessment the user can view; choosing
+  the date given and clicking Record is the teacher's confirmation that it was administered. Also reachable
+  from the builder. Lists past uses (only those the viewer may see) linking to results.
 - **Results grid (`/administrations/:id`):** frozen items by section columns; each cell has correct and
   attempted inputs with accessible labels such as "Period 2, Question 4, correct". Blank stays "no data" and
   item accuracy shows `—`, never 0%. Overall accuracy and `correct / attempted` update locally while typing
@@ -172,15 +192,26 @@ Generation:
   ambiguity. No mastery label.
 - **Make practice:** tick rows, "Make practice variants" runs the preview and shows each parent beside its
   candidate. The final action is **"Save selected variants"**; unchecked candidates are never persisted.
-  Items that cannot have a variant show their 422 reason inline. Copy calls a candidate "a new generated
+  Items that cannot have a variant show their "unavailable" reason inline. Copy calls a candidate "a new generated
   item from the same family and template," with results tracked separately from the original's.
 - **Question detail:** usage panel (each visible use with date, accuracy, and the pinned version number) and
   links to parent and variants.
 
 ## Error handling and concurrency
 
-- 404 hidden/missing/not accessible; 422 invalid input or unsupported parent (nothing saved); 409 save
-  conflict; 403 where the existing policy returns it for an owned resource.
+Route-by-route contract:
+
+| Situation | Response |
+|---|---|
+| Administration, section, results, or restore on an administration the caller may not access, or that does not exist | 404 `Not found` (so colleagues' administrations cannot be enumerated) |
+| Record use on an assessment that does not exist or is deleted | 404 |
+| Record use on an empty assessment; invalid results; malformed bodies | 422, nothing saved |
+| Variant preview: malformed body, more than 20 ids | 422; an id that does not exist: 404 |
+| Variant preview: viewable parent that is unsupported | 200 with an `unavailable` record |
+| Variant save: bad signature, expired, wrong user, or family version changed | 422 for bad signature/expired/wrong user; 409 for family version changed |
+| Variant save: fingerprint collision or replay | 409 naming the parent; whole batch rolls back |
+| Variant save: lineage ceiling reached | 422 |
+| Mutating shared content the caller can view but not modify (existing behavior) | 403, unchanged |
 - The administration row lock above covers every write to an administration's sections and results.
 - The migration downgrade drops the new tables and column; a migration test in the style of
   `test_migration_0003.py` covers upgrade and downgrade.
@@ -204,10 +235,12 @@ Backend, pure functions first (no database), then database-backed:
 - Summary and usage: pagination and filters; usage lists every pinned version; results stay attached to the
   version used after a question is edited.
 - Variants: preview creates no rows and saving only selected tokens creates rows; tampered, expired, and
-  other-user tokens are rejected; a replayed token returns 409 and creates nothing; viewing is checked
-  before any generation; batch cap and duplicate ids; collision returns 409 and rolls back the whole batch;
+  other-user tokens are rejected; a replayed token returns 409 and creates nothing; whole-request failures
+  happen before any generation and a mixed selection returns candidates plus "unavailable" records; batch cap and duplicate ids; collision returns 409 and rolls back the whole batch;
   the lineage ceiling; parent and its results untouched; a saved variant stays valid after the parent is
-  edited, archived, or restored; a bundle-family parent returns the planned 422; an EOCEP parent stays
+  edited, archived, or restored; a bundle-family, hand-written, retired-family, or missing-template parent is "unavailable" with a reason;
+  a teacher-edited parent still produces a variant from the family template; a family-version change
+  between preview and save returns 409; an EOCEP parent stays
   EOCEP; audit detail contains no stems or answers.
 - Policy: every new mutating route is covered by the ownership policy.
 - Full backend suite against a throwaway Postgres with zero skips; backend lint.
@@ -223,3 +256,6 @@ usable for the app, a small smoke test of the grid may be added without introduc
 2. "Limited response count" threshold of fewer than 10 aggregate attempts.
 3. Any user who can view a question may create a variant that they own (alternative: owner, power, admin
    only).
+4. Administration owner = the user who records it (chosen so a teacher can record her own classes on a
+   colleague's assessment). The alternative, owner = assessment owner, would stop that teacher from seeing
+   her own results and would make a power user recording on someone's behalf the record's owner in name only.
