@@ -562,7 +562,7 @@ def _alembic(url: str, target: str, monkeypatch, *, down: bool = False) -> None:
         get_settings.cache_clear()
 
 
-def test_upgrade_adds_tables_and_column_and_downgrade_removes_them(scratch_url, monkeypatch):
+def test_upgrade_adds_tables_and_column_and_downgrade_removes_them(scratch_url, monkeypatch):  # noqa: F811  (fixture imported above)
     _alembic(scratch_url, "0004_bundle_generation_runs", monkeypatch)
     eng = create_engine(scratch_url)
     assert not NEW_TABLES & set(inspect(eng).get_table_names())

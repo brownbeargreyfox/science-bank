@@ -1,10 +1,14 @@
 from app.core.db import Base
 from app.models.bank import (
     ROLES,
+    Administration,
+    AdministrationItem,
+    AdministrationSection,
     Assessment,
     AssessmentItem,
     AuditEvent,
     GenerationRun,
+    ItemResult,
     Question,
     QuestionFamily,
     QuestionStatusEvent,
@@ -17,6 +21,9 @@ from app.models.standards import Bundle, BundleStandard, Course, SourceDocument,
 
 __all__ = [
     "ROLES",
+    "Administration",
+    "AdministrationItem",
+    "AdministrationSection",
     "Assessment",
     "AssessmentItem",
     "AuditEvent",
@@ -25,6 +32,7 @@ __all__ = [
     "BundleStandard",
     "Course",
     "GenerationRun",
+    "ItemResult",
     "Question",
     "QuestionFamily",
     "QuestionStatusEvent",
