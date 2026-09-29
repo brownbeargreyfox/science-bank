@@ -205,6 +205,7 @@ in `backend/app/services/engine/`.
 | `reaction-rate` | Chemistry C-PS1-5 | 1.0.0 | Simple two-reactant concentration/temperature experiments and collision-theory reasoning. |
 | `chemical-system-stability` | Chemistry C-PS1-5 + C-PS1-7 | 1.0.0 | One magnesium + hydrochloric-acid shared stimulus: rate evidence and quantitative conservation. |
 | `quantitative-conservation` | Chemistry C-PS1-7 | 1.0.1 | Curated reactions, moles/particles/mass as evidence for conservation. |
+| `reaction-outcome` | Chemistry C-PS1-2 | 1.0.0 | Curated main-group/combustion reactions: bond type, electrons lost/gained/shared, product formula, same-family reactivity trends. Classroom-only. |
 
 Engine invariants are tested in `backend/tests/test_engine.py`:
 
@@ -225,6 +226,10 @@ It uses only the reviewed reaction/molar-mass catalog and makes conservation rea
 conversion—the required default endpoint. The next Chemistry bundle target is **Stability & Change
 in Chemical Systems**, where a future shared reaction stimulus can support C-PS1-5 reaction-rate
 items and C-PS1-7 quantitative-conservation items.
+
+C-PS1-2 now has the standalone `reaction-outcome` family. The `chemical-system-stability` bundle
+still serves only C-PS1-5/C-PS1-7; wiring `reaction-outcome` into that bundle is a separate,
+unplanned step.
 
 The first bundle-driven generator, `chemical-system-stability`, is live for the
 **Stability & Change in Chemical Systems** bundle. It uses a single Mg + HCl investigation to

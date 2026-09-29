@@ -205,6 +205,17 @@ def test_eocep_mode_uses_imported_biology_1_constraints(client):
         json={"standard_id": chemistry["id"], "family_key": "reaction-rate", "quantity": 1, "generation_mode": "eocep"},
     )
     assert denied.status_code == 422
+    chemistry_2 = next(s for s in standards if s["course_slug"] == "chemistry" and s["code"] == "C-PS1-2")
+    denied_2 = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": chemistry_2["id"],
+            "family_key": "reaction-outcome",
+            "quantity": 1,
+            "generation_mode": "eocep",
+        },
+    )
+    assert denied_2.status_code == 422
 
 
 def test_eocep_mode_excludes_constructed_response(client):
@@ -286,6 +297,7 @@ def test_standards_browse_and_detail(client):
     assert sorted((s["course_slug"], s["code"]) for s in with_family) == [
         ("biology-1", "B-LS2-1"),
         ("biology-1", "B-LS3-3"),
+        ("chemistry", "C-PS1-2"),
         ("chemistry", "C-PS1-5"),
         ("chemistry", "C-PS1-7"),
     ]
@@ -319,6 +331,7 @@ def _generate(client, course_slug, code, family, **kw):
         ("biology-1", "B-LS3-3", "trait-probability"),
         ("chemistry", "C-PS1-5", "reaction-rate"),
         ("chemistry", "C-PS1-7", "quantitative-conservation"),
+        ("chemistry", "C-PS1-2", "reaction-outcome"),
     ],
 )
 def test_preview_is_reproducible(client, course, code, family):
