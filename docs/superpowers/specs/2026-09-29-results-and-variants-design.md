@@ -51,7 +51,7 @@ assessment. Results reuse `can_modify` for both viewing and editing:
 
 | Table | Purpose | Key columns |
 |---|---|---|
-| `administrations` | An assessment actually given | `id`, `assessment_id` FK, `label`, `administered_on` date, `notes`, `owner_id` FK users, `created_at`, `updated_at`, `deleted_at` (soft delete, as assessments) |
+| `administrations` | An assessment actually given | `id`, `assessment_id` FK, `label`, `administered_on` date, `owner_id` FK users, `created_at`, `updated_at`, `deleted_at` (soft delete, as assessments) |
 | `administration_items` | Snapshot of the assessment's items when the use was recorded | `id`, `administration_id` FK cascade, `source_assessment_item_id` (plain integer, no cascading FK, so removing an item from the assessment later cannot erase the record), `question_id` FK, `question_version_id` FK, `position`; unique (`administration_id`, `position`) |
 | `administration_sections` | Groups tested, e.g. "Period 2" | `id`, `administration_id` FK cascade, `name`; unique (`administration_id`, `name`) |
 | `item_results` | Totals for one section on one item | `id`, `section_id` FK cascade, `administration_item_id` FK cascade, `correct`, `attempted`; unique (`section_id`, `administration_item_id`); check `attempted >= 1` and `0 <= correct <= attempted` |
@@ -82,7 +82,7 @@ fails on an uncovered mutating route must pass). Hidden or missing records retur
 
 ### Administrations and results
 
-- `POST /api/assessments/{id}/administrations` — body: `label`, `administered_on`, `notes?`,
+- `POST /api/assessments/{id}/administrations` — body: `label`, `administered_on`,
   `sections: [name, ...]` (at least one). Rejects an assessment with no items (422). Creates the
   administration and its snapshot in one transaction. The transaction first takes a row lock on the
   assessment (`SELECT ... FOR UPDATE`), then reads all items and their pinned versions in a single
@@ -90,7 +90,7 @@ fails on an uncovered mutating route must pass). Hidden or missing records retur
 - `GET /api/assessments/{id}/administrations` — list (filtered by the access rule).
 - `GET /api/administrations/{id}` — snapshot items, sections, results, computed accuracy per item (per
   section and overall), and how many items have data.
-- `PATCH /api/administrations/{id}` — `label`, `administered_on`, `notes`.
+- `PATCH /api/administrations/{id}` — `label`, `administered_on`.
 - `POST /api/administrations/{id}/sections`; `PATCH` / `DELETE /api/administrations/{id}/sections/{sid}`
   — add, rename, remove (removal deletes that section's results). At least one section must remain.
 - `PUT /api/administrations/{id}/results` — atomic batch upsert of `{section_id, item_id, correct,
