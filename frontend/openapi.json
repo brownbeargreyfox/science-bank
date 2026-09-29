@@ -1,6 +1,41 @@
 {
   "components": {
     "schemas": {
+      "AccuracyOut": {
+        "properties": {
+          "accuracy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy"
+          },
+          "attempted": {
+            "title": "Attempted",
+            "type": "integer"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "limited_responses": {
+            "title": "Limited Responses",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "correct",
+          "attempted",
+          "accuracy",
+          "limited_responses"
+        ],
+        "title": "AccuracyOut",
+        "type": "object"
+      },
       "AddItems": {
         "properties": {
           "question_ids": {
@@ -159,6 +194,314 @@
           }
         },
         "title": "AdminUserUpdate",
+        "type": "object"
+      },
+      "AdministrationCreate": {
+        "properties": {
+          "administered_on": {
+            "format": "date",
+            "title": "Administered On",
+            "type": "string"
+          },
+          "label": {
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Label",
+            "type": "string"
+          },
+          "sections": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 12,
+            "minItems": 1,
+            "title": "Sections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "label",
+          "administered_on",
+          "sections"
+        ],
+        "title": "AdministrationCreate",
+        "type": "object"
+      },
+      "AdministrationDetail": {
+        "properties": {
+          "administered_on": {
+            "format": "date",
+            "title": "Administered On",
+            "type": "string"
+          },
+          "assessment_id": {
+            "title": "Assessment Id",
+            "type": "integer"
+          },
+          "assessment_title": {
+            "title": "Assessment Title",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "item_count": {
+            "title": "Item Count",
+            "type": "integer"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/AdministrationItemOut"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "items_with_data": {
+            "title": "Items With Data",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerOut"
+          },
+          "results": {
+            "items": {
+              "$ref": "#/components/schemas/ResultOut"
+            },
+            "title": "Results",
+            "type": "array"
+          },
+          "section_count": {
+            "title": "Section Count",
+            "type": "integer"
+          },
+          "sections": {
+            "items": {
+              "$ref": "#/components/schemas/SectionOut"
+            },
+            "title": "Sections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "assessment_id",
+          "assessment_title",
+          "label",
+          "administered_on",
+          "owner",
+          "section_count",
+          "item_count",
+          "items_with_data",
+          "created_at",
+          "deleted_at",
+          "sections",
+          "items",
+          "results"
+        ],
+        "title": "AdministrationDetail",
+        "type": "object"
+      },
+      "AdministrationItemOut": {
+        "properties": {
+          "course_name": {
+            "title": "Course Name",
+            "type": "string"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "pinned_version_no": {
+            "title": "Pinned Version No",
+            "type": "integer"
+          },
+          "position": {
+            "title": "Position",
+            "type": "integer"
+          },
+          "question_id": {
+            "title": "Question Id",
+            "type": "integer"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "question_version_id": {
+            "title": "Question Version Id",
+            "type": "integer"
+          },
+          "standard_code": {
+            "title": "Standard Code",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "stimulus_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus Title"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/AccuracyOut"
+          }
+        },
+        "required": [
+          "id",
+          "position",
+          "question_id",
+          "question_version_id",
+          "pinned_version_no",
+          "standard_code",
+          "course_name",
+          "dok",
+          "question_type",
+          "stem",
+          "stimulus_title",
+          "totals"
+        ],
+        "title": "AdministrationItemOut",
+        "type": "object"
+      },
+      "AdministrationSummary": {
+        "properties": {
+          "administered_on": {
+            "format": "date",
+            "title": "Administered On",
+            "type": "string"
+          },
+          "assessment_id": {
+            "title": "Assessment Id",
+            "type": "integer"
+          },
+          "assessment_title": {
+            "title": "Assessment Title",
+            "type": "string"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "deleted_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deleted At"
+          },
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "item_count": {
+            "title": "Item Count",
+            "type": "integer"
+          },
+          "items_with_data": {
+            "title": "Items With Data",
+            "type": "integer"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/OwnerOut"
+          },
+          "section_count": {
+            "title": "Section Count",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "assessment_id",
+          "assessment_title",
+          "label",
+          "administered_on",
+          "owner",
+          "section_count",
+          "item_count",
+          "items_with_data",
+          "created_at",
+          "deleted_at"
+        ],
+        "title": "AdministrationSummary",
+        "type": "object"
+      },
+      "AdministrationUpdate": {
+        "properties": {
+          "administered_on": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Administered On"
+          },
+          "label": {
+            "anyOf": [
+              {
+                "maxLength": 200,
+                "minLength": 1,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Label"
+          }
+        },
+        "title": "AdministrationUpdate",
         "type": "object"
       },
       "AssessmentCreate": {
@@ -1886,6 +2229,36 @@
         "title": "QuestionPage",
         "type": "object"
       },
+      "QuestionRef": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "standard_code": {
+            "title": "Standard Code",
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "generated",
+              "reviewed",
+              "approved",
+              "rejected",
+              "archived"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "standard_code"
+        ],
+        "title": "QuestionRef",
+        "type": "object"
+      },
       "QuestionSummary": {
         "properties": {
           "can_modify": {
@@ -2159,6 +2532,156 @@
           "item_ids"
         ],
         "title": "ReorderItems",
+        "type": "object"
+      },
+      "ResultOut": {
+        "properties": {
+          "attempted": {
+            "title": "Attempted",
+            "type": "integer"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "section_id",
+          "item_id",
+          "correct",
+          "attempted"
+        ],
+        "title": "ResultOut",
+        "type": "object"
+      },
+      "ResultRowIn": {
+        "properties": {
+          "attempted": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Attempted"
+          },
+          "correct": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Correct"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "section_id": {
+            "title": "Section Id",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "section_id",
+          "item_id"
+        ],
+        "title": "ResultRowIn",
+        "type": "object"
+      },
+      "ResultsBatch": {
+        "properties": {
+          "rows": {
+            "items": {
+              "$ref": "#/components/schemas/ResultRowIn"
+            },
+            "maxItems": 500,
+            "minItems": 1,
+            "title": "Rows",
+            "type": "array"
+          }
+        },
+        "required": [
+          "rows"
+        ],
+        "title": "ResultsBatch",
+        "type": "object"
+      },
+      "ResultsSummaryPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SummaryRow"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset"
+        ],
+        "title": "ResultsSummaryPage",
+        "type": "object"
+      },
+      "SectionName": {
+        "properties": {
+          "name": {
+            "maxLength": 60,
+            "minLength": 1,
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "SectionName",
+        "type": "object"
+      },
+      "SectionOut": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "SectionOut",
         "type": "object"
       },
       "SessionUser": {
@@ -2691,6 +3214,122 @@
         "title": "StimulusOut",
         "type": "object"
       },
+      "SummaryRow": {
+        "properties": {
+          "accuracy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy"
+          },
+          "attempted": {
+            "title": "Attempted",
+            "type": "integer"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "course_name": {
+            "title": "Course Name",
+            "type": "string"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "family_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Family Key"
+          },
+          "last_used": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Used"
+          },
+          "limited_responses": {
+            "title": "Limited Responses",
+            "type": "boolean"
+          },
+          "question_id": {
+            "title": "Question Id",
+            "type": "integer"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "standard_code": {
+            "title": "Standard Code",
+            "type": "string"
+          },
+          "standard_id": {
+            "title": "Standard Id",
+            "type": "integer"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "template_key": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Template Key"
+          },
+          "times_used": {
+            "title": "Times Used",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "question_id",
+          "standard_id",
+          "standard_code",
+          "course_name",
+          "family_key",
+          "template_key",
+          "stem",
+          "dok",
+          "question_type",
+          "times_used",
+          "last_used",
+          "correct",
+          "attempted",
+          "accuracy",
+          "limited_responses"
+        ],
+        "title": "SummaryRow",
+        "type": "object"
+      },
       "TemplateOut": {
         "properties": {
           "dok": {
@@ -2755,6 +3394,127 @@
         "title": "TemplateOut",
         "type": "object"
       },
+      "UsageEntry": {
+        "properties": {
+          "accuracy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy"
+          },
+          "administered_on": {
+            "format": "date",
+            "title": "Administered On",
+            "type": "string"
+          },
+          "administration_id": {
+            "title": "Administration Id",
+            "type": "integer"
+          },
+          "assessment_id": {
+            "title": "Assessment Id",
+            "type": "integer"
+          },
+          "assessment_title": {
+            "title": "Assessment Title",
+            "type": "string"
+          },
+          "attempted": {
+            "title": "Attempted",
+            "type": "integer"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "is_current_version": {
+            "title": "Is Current Version",
+            "type": "boolean"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "limited_responses": {
+            "title": "Limited Responses",
+            "type": "boolean"
+          },
+          "pinned_version_no": {
+            "title": "Pinned Version No",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "administration_id",
+          "label",
+          "administered_on",
+          "assessment_id",
+          "assessment_title",
+          "pinned_version_no",
+          "is_current_version",
+          "correct",
+          "attempted",
+          "accuracy",
+          "limited_responses"
+        ],
+        "title": "UsageEntry",
+        "type": "object"
+      },
+      "UsagePage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/UsageEntry"
+            },
+            "title": "Items",
+            "type": "array"
+          },
+          "limit": {
+            "title": "Limit",
+            "type": "integer"
+          },
+          "offset": {
+            "title": "Offset",
+            "type": "integer"
+          },
+          "parent": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/QuestionRef"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          },
+          "variants": {
+            "items": {
+              "$ref": "#/components/schemas/QuestionRef"
+            },
+            "title": "Variants",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "limit",
+          "offset",
+          "parent",
+          "variants"
+        ],
+        "title": "UsagePage",
+        "type": "object"
+      },
       "ValidationError": {
         "properties": {
           "loc": {
@@ -2786,6 +3546,193 @@
           "type"
         ],
         "title": "ValidationError",
+        "type": "object"
+      },
+      "VariantCandidate": {
+        "properties": {
+          "answer": {
+            "title": "Answer",
+            "type": "string"
+          },
+          "choices": {
+            "items": {
+              "type": "object"
+            },
+            "title": "Choices",
+            "type": "array"
+          },
+          "dok": {
+            "title": "Dok",
+            "type": "integer"
+          },
+          "explanation": {
+            "title": "Explanation",
+            "type": "string"
+          },
+          "question_type": {
+            "enum": [
+              "multiple_choice",
+              "constructed_response"
+            ],
+            "title": "Question Type",
+            "type": "string"
+          },
+          "stem": {
+            "title": "Stem",
+            "type": "string"
+          },
+          "stimulus": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Stimulus"
+          }
+        },
+        "required": [
+          "question_type",
+          "dok",
+          "stem",
+          "choices",
+          "answer",
+          "explanation",
+          "stimulus"
+        ],
+        "title": "VariantCandidate",
+        "type": "object"
+      },
+      "VariantPreviewOut": {
+        "properties": {
+          "records": {
+            "items": {
+              "$ref": "#/components/schemas/VariantRecord"
+            },
+            "title": "Records",
+            "type": "array"
+          }
+        },
+        "required": [
+          "records"
+        ],
+        "title": "VariantPreviewOut",
+        "type": "object"
+      },
+      "VariantPreviewRequest": {
+        "properties": {
+          "question_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Question Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "question_ids"
+        ],
+        "title": "VariantPreviewRequest",
+        "type": "object"
+      },
+      "VariantRecord": {
+        "properties": {
+          "candidate": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/VariantCandidate"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "candidate_token": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Token"
+          },
+          "parent_id": {
+            "title": "Parent Id",
+            "type": "integer"
+          },
+          "reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reason"
+          },
+          "status": {
+            "enum": [
+              "candidate",
+              "unavailable"
+            ],
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "parent_id",
+          "status"
+        ],
+        "title": "VariantRecord",
+        "type": "object"
+      },
+      "VariantSaveOut": {
+        "properties": {
+          "parent_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Parent Ids",
+            "type": "array"
+          },
+          "question_ids": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Question Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "question_ids",
+          "parent_ids"
+        ],
+        "title": "VariantSaveOut",
+        "type": "object"
+      },
+      "VariantSaveRequest": {
+        "properties": {
+          "tokens": {
+            "items": {
+              "type": "string"
+            },
+            "maxItems": 100,
+            "minItems": 1,
+            "title": "Tokens",
+            "type": "array"
+          }
+        },
+        "required": [
+          "tokens"
+        ],
+        "title": "VariantSaveRequest",
         "type": "object"
       }
     }
@@ -3141,6 +4088,516 @@
         ]
       }
     },
+    "/api/administrations/{administration_id}": {
+      "delete": {
+        "operationId": "delete_administration_api_administrations__administration_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Administration",
+        "tags": [
+          "administrations"
+        ]
+      },
+      "get": {
+        "operationId": "get_detail_api_administrations__administration_id__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Detail",
+        "tags": [
+          "administrations"
+        ]
+      },
+      "patch": {
+        "operationId": "update_administration_api_administrations__administration_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdministrationUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Update Administration",
+        "tags": [
+          "administrations"
+        ]
+      }
+    },
+    "/api/administrations/{administration_id}/restore": {
+      "post": {
+        "operationId": "restore_administration_api_administrations__administration_id__restore_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Restore Administration",
+        "tags": [
+          "administrations"
+        ]
+      }
+    },
+    "/api/administrations/{administration_id}/results": {
+      "put": {
+        "description": "Atomic batch: every row is validated before anything is written. A null pair clears a cell.",
+        "operationId": "save_results_api_administrations__administration_id__results_put",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResultsBatch"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save Results",
+        "tags": [
+          "administrations"
+        ]
+      }
+    },
+    "/api/administrations/{administration_id}/sections": {
+      "post": {
+        "operationId": "add_section_api_administrations__administration_id__sections_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SectionName"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Add Section",
+        "tags": [
+          "administrations"
+        ]
+      }
+    },
+    "/api/administrations/{administration_id}/sections/{section_id}": {
+      "delete": {
+        "operationId": "delete_section_api_administrations__administration_id__sections__section_id__delete",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "section_id",
+            "required": true,
+            "schema": {
+              "title": "Section Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Delete Section",
+        "tags": [
+          "administrations"
+        ]
+      },
+      "patch": {
+        "operationId": "rename_section_api_administrations__administration_id__sections__section_id__patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "administration_id",
+            "required": true,
+            "schema": {
+              "title": "Administration Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "path",
+            "name": "section_id",
+            "required": true,
+            "schema": {
+              "title": "Section Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SectionName"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Rename Section",
+        "tags": [
+          "administrations"
+        ]
+      }
+    },
     "/api/assessments": {
       "get": {
         "description": "Deleted assessments are listed only on request, and only those the caller could restore.",
@@ -3433,6 +4890,135 @@
         "summary": "Update Assessment",
         "tags": [
           "assessments"
+        ]
+      }
+    },
+    "/api/assessments/{assessment_id}/administrations": {
+      "get": {
+        "operationId": "list_administrations_api_assessments__assessment_id__administrations_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/AdministrationSummary"
+                  },
+                  "title": "Response List Administrations Api Assessments  Assessment Id  Administrations Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "List Administrations",
+        "tags": [
+          "administrations"
+        ]
+      },
+      "post": {
+        "description": "Freeze the assessment's current items and record that it was given. Owned by the caller.",
+        "operationId": "record_use_api_assessments__assessment_id__administrations_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "assessment_id",
+            "required": true,
+            "schema": {
+              "title": "Assessment Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdministrationCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdministrationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Record Use",
+        "tags": [
+          "administrations"
         ]
       }
     },
@@ -4695,6 +6281,124 @@
         ]
       }
     },
+    "/api/questions/variants/preview": {
+      "post": {
+        "operationId": "preview_api_questions_variants_preview_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VariantPreviewRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantPreviewOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Preview",
+        "tags": [
+          "variants"
+        ]
+      }
+    },
+    "/api/questions/variants/save": {
+      "post": {
+        "operationId": "save_api_questions_variants_save_post",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VariantSaveRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VariantSaveOut"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Save",
+        "tags": [
+          "variants"
+        ]
+      }
+    },
     "/api/questions/{question_id}": {
       "get": {
         "operationId": "get_question_api_questions__question_id__get",
@@ -4889,6 +6593,88 @@
         ]
       }
     },
+    "/api/questions/{question_id}/usage": {
+      "get": {
+        "description": "Every visible, non-deleted administration a question appeared in, with the pinned version used.",
+        "operationId": "question_usage_api_questions__question_id__usage_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "question_id",
+            "required": true,
+            "schema": {
+              "title": "Question Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 25,
+              "maximum": 100,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsagePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Question Usage",
+        "tags": [
+          "results"
+        ]
+      }
+    },
     "/api/questions/{question_id}/versions": {
       "post": {
         "operationId": "edit_question_api_questions__question_id__versions_post",
@@ -4954,6 +6740,127 @@
         "summary": "Edit Question",
         "tags": [
           "questions"
+        ]
+      }
+    },
+    "/api/results/summary": {
+      "get": {
+        "description": "Questions appearing in at least one visible, non-deleted administration. Aggregate figures only.",
+        "operationId": "results_summary_api_results_summary_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "course_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Course Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "standard_id",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Standard Id"
+            }
+          },
+          {
+            "in": "query",
+            "name": "family_key",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Family Key"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "required": false,
+            "schema": {
+              "default": 50,
+              "maximum": 200,
+              "minimum": 1,
+              "title": "Limit",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "offset",
+            "required": false,
+            "schema": {
+              "default": 0,
+              "minimum": 0,
+              "title": "Offset",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultsSummaryPage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Results Summary",
+        "tags": [
+          "results"
         ]
       }
     },

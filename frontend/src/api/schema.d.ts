@@ -74,6 +74,97 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/administrations/{administration_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Get Detail */
+        get: operations["get_detail_api_administrations__administration_id__get"];
+        put?: never;
+        post?: never;
+        /** Delete Administration */
+        delete: operations["delete_administration_api_administrations__administration_id__delete"];
+        options?: never;
+        head?: never;
+        /** Update Administration */
+        patch: operations["update_administration_api_administrations__administration_id__patch"];
+        trace?: never;
+    };
+    "/api/administrations/{administration_id}/restore": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Restore Administration */
+        post: operations["restore_administration_api_administrations__administration_id__restore_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/administrations/{administration_id}/results": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /**
+         * Save Results
+         * @description Atomic batch: every row is validated before anything is written. A null pair clears a cell.
+         */
+        put: operations["save_results_api_administrations__administration_id__results_put"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/administrations/{administration_id}/sections": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Add Section */
+        post: operations["add_section_api_administrations__administration_id__sections_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/administrations/{administration_id}/sections/{section_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete Section */
+        delete: operations["delete_section_api_administrations__administration_id__sections__section_id__delete"];
+        options?: never;
+        head?: never;
+        /** Rename Section */
+        patch: operations["rename_section_api_administrations__administration_id__sections__section_id__patch"];
+        trace?: never;
+    };
     "/api/assessments": {
         parameters: {
             query?: never;
@@ -115,6 +206,27 @@ export interface paths {
         head?: never;
         /** Update Assessment */
         patch: operations["update_assessment_api_assessments__assessment_id__patch"];
+        trace?: never;
+    };
+    "/api/assessments/{assessment_id}/administrations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List Administrations */
+        get: operations["list_administrations_api_assessments__assessment_id__administrations_get"];
+        put?: never;
+        /**
+         * Record Use
+         * @description Freeze the assessment's current items and record that it was given. Owned by the caller.
+         */
+        post: operations["record_use_api_assessments__assessment_id__administrations_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/assessments/{assessment_id}/items": {
@@ -484,6 +596,40 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/questions/variants/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Preview */
+        post: operations["preview_api_questions_variants_preview_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/questions/variants/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Save */
+        post: operations["save_api_questions_variants_save_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/questions/{question_id}": {
         parameters: {
             query?: never;
@@ -538,6 +684,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/questions/{question_id}/usage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Question Usage
+         * @description Every visible, non-deleted administration a question appeared in, with the pinned version used.
+         */
+        get: operations["question_usage_api_questions__question_id__usage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/questions/{question_id}/versions": {
         parameters: {
             query?: never;
@@ -549,6 +715,26 @@ export interface paths {
         put?: never;
         /** Edit Question */
         post: operations["edit_question_api_questions__question_id__versions_post"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/results/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Results Summary
+         * @description Questions appearing in at least one visible, non-deleted administration. Aggregate figures only.
+         */
+        get: operations["results_summary_api_results_summary_get"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -667,6 +853,17 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        /** AccuracyOut */
+        AccuracyOut: {
+            /** Accuracy */
+            accuracy: number | null;
+            /** Attempted */
+            attempted: number;
+            /** Correct */
+            correct: number;
+            /** Limited Responses */
+            limited_responses: boolean;
+        };
         /** AddItems */
         AddItems: {
             /** Question Ids */
@@ -721,6 +918,120 @@ export interface components {
             is_active?: boolean | null;
             /** Role */
             role?: ("admin" | "power" | "regular") | null;
+        };
+        /** AdministrationCreate */
+        AdministrationCreate: {
+            /**
+             * Administered On
+             * Format: date
+             */
+            administered_on: string;
+            /** Label */
+            label: string;
+            /** Sections */
+            sections: string[];
+        };
+        /** AdministrationDetail */
+        AdministrationDetail: {
+            /**
+             * Administered On
+             * Format: date
+             */
+            administered_on: string;
+            /** Assessment Id */
+            assessment_id: number;
+            /** Assessment Title */
+            assessment_title: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Deleted At */
+            deleted_at: string | null;
+            /** Id */
+            id: number;
+            /** Item Count */
+            item_count: number;
+            /** Items */
+            items: components["schemas"]["AdministrationItemOut"][];
+            /** Items With Data */
+            items_with_data: number;
+            /** Label */
+            label: string;
+            owner: components["schemas"]["OwnerOut"];
+            /** Results */
+            results: components["schemas"]["ResultOut"][];
+            /** Section Count */
+            section_count: number;
+            /** Sections */
+            sections: components["schemas"]["SectionOut"][];
+        };
+        /** AdministrationItemOut */
+        AdministrationItemOut: {
+            /** Course Name */
+            course_name: string;
+            /** Dok */
+            dok: number;
+            /** Id */
+            id: number;
+            /** Pinned Version No */
+            pinned_version_no: number;
+            /** Position */
+            position: number;
+            /** Question Id */
+            question_id: number;
+            /**
+             * Question Type
+             * @enum {string}
+             */
+            question_type: "multiple_choice" | "constructed_response";
+            /** Question Version Id */
+            question_version_id: number;
+            /** Standard Code */
+            standard_code: string;
+            /** Stem */
+            stem: string;
+            /** Stimulus Title */
+            stimulus_title: string | null;
+            totals: components["schemas"]["AccuracyOut"];
+        };
+        /** AdministrationSummary */
+        AdministrationSummary: {
+            /**
+             * Administered On
+             * Format: date
+             */
+            administered_on: string;
+            /** Assessment Id */
+            assessment_id: number;
+            /** Assessment Title */
+            assessment_title: string;
+            /**
+             * Created At
+             * Format: date-time
+             */
+            created_at: string;
+            /** Deleted At */
+            deleted_at: string | null;
+            /** Id */
+            id: number;
+            /** Item Count */
+            item_count: number;
+            /** Items With Data */
+            items_with_data: number;
+            /** Label */
+            label: string;
+            owner: components["schemas"]["OwnerOut"];
+            /** Section Count */
+            section_count: number;
+        };
+        /** AdministrationUpdate */
+        AdministrationUpdate: {
+            /** Administered On */
+            administered_on?: string | null;
+            /** Label */
+            label?: string | null;
         };
         /** AssessmentCreate */
         AssessmentCreate: {
@@ -1316,6 +1627,18 @@ export interface components {
             /** Total */
             total: number;
         };
+        /** QuestionRef */
+        QuestionRef: {
+            /** Id */
+            id: number;
+            /** Standard Code */
+            standard_code: string;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "generated" | "reviewed" | "approved" | "rejected" | "archived";
+        };
         /** QuestionSummary */
         QuestionSummary: {
             /** Can Modify */
@@ -1416,6 +1739,56 @@ export interface components {
         ReorderItems: {
             /** Item Ids */
             item_ids: number[];
+        };
+        /** ResultOut */
+        ResultOut: {
+            /** Attempted */
+            attempted: number;
+            /** Correct */
+            correct: number;
+            /** Item Id */
+            item_id: number;
+            /** Section Id */
+            section_id: number;
+        };
+        /** ResultRowIn */
+        ResultRowIn: {
+            /** Attempted */
+            attempted?: number | null;
+            /** Correct */
+            correct?: number | null;
+            /** Item Id */
+            item_id: number;
+            /** Section Id */
+            section_id: number;
+        };
+        /** ResultsBatch */
+        ResultsBatch: {
+            /** Rows */
+            rows: components["schemas"]["ResultRowIn"][];
+        };
+        /** ResultsSummaryPage */
+        ResultsSummaryPage: {
+            /** Items */
+            items: components["schemas"]["SummaryRow"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            /** Total */
+            total: number;
+        };
+        /** SectionName */
+        SectionName: {
+            /** Name */
+            name: string;
+        };
+        /** SectionOut */
+        SectionOut: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
         };
         /** SessionUser */
         SessionUser: {
@@ -1589,6 +1962,42 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** SummaryRow */
+        SummaryRow: {
+            /** Accuracy */
+            accuracy: number | null;
+            /** Attempted */
+            attempted: number;
+            /** Correct */
+            correct: number;
+            /** Course Name */
+            course_name: string;
+            /** Dok */
+            dok: number;
+            /** Family Key */
+            family_key: string | null;
+            /** Last Used */
+            last_used: string | null;
+            /** Limited Responses */
+            limited_responses: boolean;
+            /** Question Id */
+            question_id: number;
+            /**
+             * Question Type
+             * @enum {string}
+             */
+            question_type: "multiple_choice" | "constructed_response";
+            /** Standard Code */
+            standard_code: string;
+            /** Standard Id */
+            standard_id: number;
+            /** Stem */
+            stem: string;
+            /** Template Key */
+            template_key: string | null;
+            /** Times Used */
+            times_used: number;
+        };
         /** TemplateOut */
         TemplateOut: {
             /** Dok */
@@ -1611,6 +2020,48 @@ export interface components {
             /** Title */
             title: string;
         };
+        /** UsageEntry */
+        UsageEntry: {
+            /** Accuracy */
+            accuracy: number | null;
+            /**
+             * Administered On
+             * Format: date
+             */
+            administered_on: string;
+            /** Administration Id */
+            administration_id: number;
+            /** Assessment Id */
+            assessment_id: number;
+            /** Assessment Title */
+            assessment_title: string;
+            /** Attempted */
+            attempted: number;
+            /** Correct */
+            correct: number;
+            /** Is Current Version */
+            is_current_version: boolean;
+            /** Label */
+            label: string;
+            /** Limited Responses */
+            limited_responses: boolean;
+            /** Pinned Version No */
+            pinned_version_no: number;
+        };
+        /** UsagePage */
+        UsagePage: {
+            /** Items */
+            items: components["schemas"]["UsageEntry"][];
+            /** Limit */
+            limit: number;
+            /** Offset */
+            offset: number;
+            parent: components["schemas"]["QuestionRef"] | null;
+            /** Total */
+            total: number;
+            /** Variants */
+            variants: components["schemas"]["QuestionRef"][];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -1619,6 +2070,63 @@ export interface components {
             msg: string;
             /** Error Type */
             type: string;
+        };
+        /** VariantCandidate */
+        VariantCandidate: {
+            /** Answer */
+            answer: string;
+            /** Choices */
+            choices: Record<string, never>[];
+            /** Dok */
+            dok: number;
+            /** Explanation */
+            explanation: string;
+            /**
+             * Question Type
+             * @enum {string}
+             */
+            question_type: "multiple_choice" | "constructed_response";
+            /** Stem */
+            stem: string;
+            /** Stimulus */
+            stimulus: Record<string, never> | null;
+        };
+        /** VariantPreviewOut */
+        VariantPreviewOut: {
+            /** Records */
+            records: components["schemas"]["VariantRecord"][];
+        };
+        /** VariantPreviewRequest */
+        VariantPreviewRequest: {
+            /** Question Ids */
+            question_ids: number[];
+        };
+        /** VariantRecord */
+        VariantRecord: {
+            candidate?: components["schemas"]["VariantCandidate"] | null;
+            /** Candidate Token */
+            candidate_token?: string | null;
+            /** Parent Id */
+            parent_id: number;
+            /** Reason */
+            reason?: string | null;
+            /**
+             * Status
+             * @enum {string}
+             */
+            status: "candidate" | "unavailable";
+        };
+        /** VariantSaveOut */
+        VariantSaveOut: {
+            /** Parent Ids */
+            parent_ids: number[];
+            /** Question Ids */
+            question_ids: number[];
+        };
+        /** VariantSaveRequest */
+        VariantSaveRequest: {
+            /** Tokens */
+            tokens: string[];
         };
     };
     responses: never;
@@ -1833,6 +2341,286 @@ export interface operations {
             };
         };
     };
+    get_detail_api_administrations__administration_id__get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_administration_api_administrations__administration_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    update_administration_api_administrations__administration_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdministrationUpdate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    restore_administration_api_administrations__administration_id__restore_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_results_api_administrations__administration_id__results_put: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResultsBatch"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    add_section_api_administrations__administration_id__sections_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SectionName"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    delete_section_api_administrations__administration_id__sections__section_id__delete: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+                section_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    rename_section_api_administrations__administration_id__sections__section_id__patch: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                administration_id: number;
+                section_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SectionName"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     list_assessments_api_assessments_get: {
         parameters: {
             query?: {
@@ -1989,6 +2777,76 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AssessmentDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    list_administrations_api_assessments__assessment_id__administrations_get: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assessment_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationSummary"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    record_use_api_assessments__assessment_id__administrations_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assessment_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdministrationCreate"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdministrationDetail"];
                 };
             };
             /** @description Validation Error */
@@ -2661,6 +3519,76 @@ export interface operations {
             };
         };
     };
+    preview_api_questions_variants_preview_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VariantPreviewRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VariantPreviewOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    save_api_questions_variants_save_post: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VariantSaveRequest"];
+            };
+        };
+        responses: {
+            /** @description Successful Response */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VariantSaveOut"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     get_question_api_questions__question_id__get: {
         parameters: {
             query?: never;
@@ -2765,6 +3693,42 @@ export interface operations {
             };
         };
     };
+    question_usage_api_questions__question_id__usage_get: {
+        parameters: {
+            query?: {
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path: {
+                question_id: number;
+            };
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UsagePage"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
     edit_question_api_questions__question_id__versions_post: {
         parameters: {
             query?: never;
@@ -2789,6 +3753,43 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["QuestionDetail"];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    results_summary_api_results_summary_get: {
+        parameters: {
+            query?: {
+                course_id?: number | null;
+                standard_id?: number | null;
+                family_key?: string | null;
+                limit?: number;
+                offset?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ResultsSummaryPage"];
                 };
             };
             /** @description Validation Error */
