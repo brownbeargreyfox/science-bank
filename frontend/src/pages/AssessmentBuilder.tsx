@@ -15,6 +15,7 @@ import { SkippedList } from "../components/AddToAssessment";
 import RecordUse from "../components/RecordUse";
 import {
   CodeTag,
+  ConfirmDialog,
   DokBadge,
   Empty,
   ErrorNotice,
@@ -400,6 +401,7 @@ export default function AssessmentBuilderPage() {
       setLive("Now using the latest version.");
     },
   });
+  const [confirmingDelete, setConfirmingDelete] = useState(false);
   const del = useMutation({
     mutationFn: () => unwrap(api.DELETE("/api/assessments/{assessment_id}", { params: { path: { assessment_id: id } } })),
     onSuccess: () => {
@@ -586,14 +588,21 @@ export default function AssessmentBuilderPage() {
                 type="button"
                 className="btn btn-sm btn-danger"
                 disabled={del.isPending}
-                onClick={() => {
-                  if (window.confirm(`Delete “${a.title}”? You can restore it later from Assessments → Show deleted.`))
-                    del.mutate();
-                }}
+                onClick={() => setConfirmingDelete(true)}
               >
                 Delete assessment
               </button>
               <ErrorNotice error={del.error} />
+              <ConfirmDialog
+                open={confirmingDelete}
+                title={`Delete “${a.title}”?`}
+                confirmLabel="Delete assessment"
+                pending={del.isPending}
+                onCancel={() => setConfirmingDelete(false)}
+                onConfirm={() => del.mutate(undefined, { onSettled: () => setConfirmingDelete(false) })}
+              >
+                <p>You can restore it later from Assessments → Show deleted.</p>
+              </ConfirmDialog>
             </Section>
           ) : null}
         </aside>
