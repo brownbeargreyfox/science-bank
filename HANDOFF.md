@@ -25,15 +25,29 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
-- Latest deploy: `a0669db` (2026-09-29; PR #3, frontend-only: strips Pydantic's "Value error, " prefix from
-  validation messages; no migration). Verified live. Rollback: image `science-bank-app:pre-pr3-a0669db`
-  (the image from before this deploy).
-- Live click-test of results/variants done 2026-09-29 as a regular teacher: record-use, grid validation,
-  zero-vs-blank, cross-use aggregation, variants (single and multi, distinct lineage), print views, filters all
-  passed. Not covered: owner/power/admin visibility with a second account, signed-token expiry, adding a
-  variant to an assessment and recording its results, the 20-at-a-time cap. Test rows still on the live DB
-  (assessments 1-2, administrations 1-2, questions 6-12 under `clicktest`; `zz-clicktest` user is disabled);
-  hard delete is left to the owner. Open question: soft-deleted assessments still count in Results.
+- Latest deploy: `9f063c9` (2026-09-29; PR #4, frontend-only: in-page `ConfirmDialog` replaces the two native
+  `window.confirm` boxes, for deleting an assessment and removing a section; no migration). Verified live.
+  Rollback: image `science-bank-app:pre-pr4-9f063c9` (the image from before this deploy).
+- Earlier deploy: `a0669db` (PR #3, frontend-only: strips Pydantic's "Value error, " prefix from validation
+  messages). Rollback image `science-bank-app:pre-pr3-a0669db`.
+- Live tests of results/variants done 2026-09-29 (browser sessions as `clicktest` regular, `brandon` admin,
+  `clicktest2` regular):
+  - Passed as a regular teacher: record-use, grid validation, zero-vs-blank, cross-use aggregation, variants
+    (single and multi, lineage distinct), print views, filters.
+  - Passed as admin: reads and writes another teacher's administration (ownership unchanged), department-wide
+    Results and per-question usage.
+  - Passed as a second regular teacher (`clicktest2`): another teacher's administrations return 404 (UI and API
+    GET, section add, delete, results PUT), Results, summary and question usage show none of it, and the other
+    teacher's assessment is view/print-only. Note the results PUT validates the body before checking ownership,
+    so an invalid body gets 422 rather than 404.
+  - New dialogs: Escape, backdrop, Cancel and Confirm all behave for both delete-assessment and remove-section.
+  - Not covered: signed-token expiry, a power-role account (only admin tried), adding a variant to an assessment
+    and recording its results, the 20-at-a-time cap, and real mouse clicks on the dialogs (the browser
+    automation dropped clicks, so some steps used page-level click handlers).
+  - Test rows still on the live DB, hard delete left to the owner: assessments 1-4, administrations 1-3,
+    questions 6-12 (under `clicktest` / `clicktest2`); `zz-clicktest` is disabled. Open question: an assessment
+    soft-delete does not remove its administrations from Results, which matches the spec (only soft-deleted
+    administrations are excluded).
 - Latest deployed feature commit: `c24ead0` (2026-09-29; PR #2: results recording/review and linked variants;
   migration `0005_results_and_variants`; backend 268 tests on Postgres, Playwright e2e 26/26). Deployed from
   `main`. Rollback needs both: image `science-bank-app:pre-0005-c24ead0` and database backup
