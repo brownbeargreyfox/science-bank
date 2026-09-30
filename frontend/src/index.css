@@ -114,6 +114,16 @@
     border-color: var(--color-danger);
     color: var(--color-danger);
   }
+  .btn-danger-solid {
+    background: var(--color-danger);
+    border-color: var(--color-danger);
+    color: #fff;
+  }
+  .btn-danger-solid:hover {
+    background: #831c18;
+    border-color: #831c18;
+    color: #fff;
+  }
   .btn-sm {
     min-height: 2.25rem;
     padding: 0.25rem 0.65rem;

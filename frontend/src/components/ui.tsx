@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
 import { Link } from "react-router";
 import { errorText } from "../api/client";
 import { STATUS_LABEL, TYPE_LABEL, type QuestionType, type Status } from "../api/types";
@@ -156,4 +156,66 @@ export function FamilyBadge() {
 
 export function RepeatBadge() {
   return <span className="badge border-line bg-paper text-muted">Repeat of Biology 1</span>;
+}
+
+/** In-page replacement for window.confirm: a modal <dialog> (focus trap, Esc, backdrop) that defaults focus to Cancel. */
+export function ConfirmDialog({
+  open,
+  title,
+  children,
+  confirmLabel,
+  pending = false,
+  onConfirm,
+  onCancel,
+}: {
+  open: boolean;
+  title: string;
+  children?: ReactNode;
+  confirmLabel: string;
+  pending?: boolean;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  useEffect(() => {
+    const dialog = ref.current;
+    if (!dialog) return;
+    if (open && !dialog.open) dialog.showModal();
+    if (!open && dialog.open) dialog.close();
+  }, [open]);
+  const cancel = () => {
+    if (!pending) onCancel();
+  };
+  return (
+    <dialog
+      ref={ref}
+      aria-labelledby={titleId}
+      className="m-auto w-[min(28rem,calc(100vw-2rem))] rounded-lg border border-line bg-surface p-0 text-ink shadow-xl backdrop:bg-ink/50"
+      onCancel={(event) => {
+        event.preventDefault();
+        cancel();
+      }}
+      onClick={(event) => {
+        if (event.target === event.currentTarget) cancel();
+      }}
+    >
+      {open ? (
+        <div className="space-y-3 p-5">
+          <h2 id={titleId} className="text-lg font-bold">
+            {title}
+          </h2>
+          {children ? <div className="text-muted">{children}</div> : null}
+          <div className="flex justify-end gap-2 pt-1">
+            <button type="button" className="btn" autoFocus onClick={cancel} disabled={pending}>
+              Cancel
+            </button>
+            <button type="button" className="btn btn-danger-solid" onClick={onConfirm} disabled={pending}>
+              {confirmLabel}
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </dialog>
+  );
 }

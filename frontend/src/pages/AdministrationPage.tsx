@@ -4,7 +4,7 @@ import { Link, useParams } from "react-router";
 import { api, unwrap } from "../api/client";
 import { queryClient } from "../api/queries";
 import type { AdministrationDetail } from "../api/types";
-import { ErrorNotice, Loading, Notice, PageHeader, Pill, Section } from "../components/ui";
+import { ConfirmDialog, ErrorNotice, Loading, Notice, PageHeader, Pill, Section } from "../components/ui";
 import { formatDate } from "../lib/format";
 import { accuracyText, limitedResponses, parseCell, sumCells, type CellInput, type CellState } from "../lib/results";
 
@@ -36,6 +36,7 @@ function Grid({ detail }: { detail: AdministrationDetail }) {
   const saved = useMemo(() => savedCells(detail), [detail]);
   const [cells, setCells] = useState<Record<string, CellInput>>(saved);
   const [newSection, setNewSection] = useState("");
+  const [removing, setRemoving] = useState<{ id: number; name: string } | null>(null);
   const cell = (sectionId: number, itemId: number): CellInput => cells[cellKey(sectionId, itemId)] ?? EMPTY;
   const setField = (sectionId: number, itemId: number, field: keyof CellInput, value: string) =>
     setCells((previous) => ({
@@ -218,11 +219,7 @@ function Grid({ detail }: { detail: AdministrationDetail }) {
                   type="button"
                   className="btn btn-sm btn-danger"
                   disabled={removeSection.isPending}
-                  onClick={() => {
-                    const warning = changed.length ? " Unsaved changes on this page will be lost." : "";
-                    if (window.confirm(`Remove “${section.name}” and its results?${warning}`))
-                      removeSection.mutate(section.id);
-                  }}
+                  onClick={() => setRemoving({ id: section.id, name: section.name })}
                 >
                   Remove
                 </button>
@@ -248,6 +245,19 @@ function Grid({ detail }: { detail: AdministrationDetail }) {
           </button>
         </form>
       </Section>
+      <ConfirmDialog
+        open={removing !== null}
+        title={removing ? `Remove “${removing.name}”?` : ""}
+        confirmLabel="Remove section"
+        pending={removeSection.isPending}
+        onCancel={() => setRemoving(null)}
+        onConfirm={() => {
+          if (removing) removeSection.mutate(removing.id, { onSettled: () => setRemoving(null) });
+        }}
+      >
+        <p>This also deletes every result entered for this section.</p>
+        {changed.length ? <p className="mt-2">Unsaved changes on this page will be lost.</p> : null}
+      </ConfirmDialog>
     </>
   );
 }
