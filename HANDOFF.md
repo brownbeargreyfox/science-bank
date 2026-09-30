@@ -24,10 +24,14 @@ paths.
 
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
-- Working branch: `claude/amazing-cray-apalq2`
-- Latest deployed feature commit: `0d6756e` (2026-09-29; adds the standalone `reaction-outcome` family for
-  Chemistry C-PS1-2 and flags C-PS1-2 as a family candidate; no migration). Deployed from the working branch, not
-  `main`. Rollback: image `science-bank-app:pre-reaction-outcome-0d6756e`, database backup
+- Working branch: `main` (PR #2 merged as `c24ead0`)
+- Latest deployed feature commit: `c24ead0` (2026-09-29; PR #2: results recording/review and linked variants;
+  migration `0005_results_and_variants`; backend 268 tests on Postgres, Playwright e2e 26/26). Deployed from
+  `main`. Rollback needs both: image `science-bank-app:pre-0005-c24ead0` and database backup
+  `backups/pre-0005-2026-09-29-2039.sql` (the backup alone does not undo the schema change). The live
+  record-use and variants flows have not been click-tested yet; only `/readyz` and the SPA were smoke-tested.
+- Earlier deployed feature commit: `0d6756e` (adds the standalone `reaction-outcome` family for
+  Chemistry C-PS1-2 and flags C-PS1-2 as a family candidate; no migration). Rollback: image `science-bank-app:pre-reaction-outcome-0d6756e`, database backup
   `backups/pre-reaction-outcome-2026-09-29-1229.sql`.
 - Earlier deployed feature commit: `451ef0a` (C-PS1-7 quantitative conservation `1.0.1` chlorine-molar-mass
   correction and the first shared Chemistry bundle generator; migration `0004`). Its previous image is tagged
