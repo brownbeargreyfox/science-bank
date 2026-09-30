@@ -50,13 +50,20 @@ paths.
     saved (V1 4/8, V2 6/10). The variant has its own results (10/18, 1 use, usage lists only its own
     administration) and the original is unchanged (q4 22/40, 2 uses); parent/variants links are correct both
     ways. Rows reference the variant's own question and version.
+  - 20-at-a-time cap (read-only, no rows created): preview returns 200 for existing ids, and 422 "Choose at
+    most 20 questions at a time" at 21 distinct ids (checked before any lookup, so it beats the 404 for missing
+    ids); 20 distinct ids pass the cap (reach the existence check, 404 for missing). Duplicates are removed
+    before counting (24 items / 3 distinct is 200). Empty list and >100 ids are schema 422s. Save rejects >20
+    tokens with 422 "Save at most 20 variants at a time" (20 pass the cap and fail token validation). UI sets
+    `MAX_SELECTION = 20` and disables extra checkboxes (read from code, not exercised: only 4 rows are listed).
+    Not proven: a preview of 20 real existing questions returning 200 (the DB has only 13).
   - New dialogs: Escape, backdrop, Cancel and Confirm all behave for both delete-assessment and remove-section.
   - Passed as power (`Nina`): reads and writes another teacher's administrations (results, sections, label),
     edits another teacher's assessment, changes question status (status rules still apply: reviewed cannot go
     back to generated, 409); ownership unchanged; no Admin nav link; `/api/admin/*` returns 403. The dialogs
     appear for another teacher's assessment and administration.
-  - Not covered: the 20-at-a-time cap, and real mouse clicks on the dialogs (the browser automation dropped
-    clicks, so some steps used page-level click handlers).
+  - Not covered: real mouse clicks on the dialogs (the browser automation dropped clicks, so some steps used
+    page-level click handlers), the UI expiry message, and a 20-real-question preview.
   - Test rows still on the live DB, hard delete left to the owner: assessments 1-5, administrations 1-4,
     questions 6-13 (under `clicktest` / `clicktest2` / `Nina`; question 7 is now `reviewed` from the power test; 13 was saved by accident during the token test); `zz-clicktest` is disabled. Open question: an assessment
     soft-delete does not remove its administrations from Results, which matches the spec (only soft-deleted
