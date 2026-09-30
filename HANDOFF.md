@@ -31,7 +31,7 @@ paths.
 - Earlier deploy: `a0669db` (PR #3, frontend-only: strips Pydantic's "Value error, " prefix from validation
   messages). Rollback image `science-bank-app:pre-pr3-a0669db`.
 - Live tests of results/variants done 2026-09-29 (browser sessions as `clicktest` regular, `brandon` admin,
-  `clicktest2` regular):
+  `clicktest2` regular, `Nina` power):
   - Passed as a regular teacher: record-use, grid validation, zero-vs-blank, cross-use aggregation, variants
     (single and multi, lineage distinct), print views, filters.
   - Passed as admin: reads and writes another teacher's administration (ownership unchanged), department-wide
@@ -41,11 +41,15 @@ paths.
     teacher's assessment is view/print-only. Note the results PUT validates the body before checking ownership,
     so an invalid body gets 422 rather than 404.
   - New dialogs: Escape, backdrop, Cancel and Confirm all behave for both delete-assessment and remove-section.
-  - Not covered: signed-token expiry, a power-role account (only admin tried), adding a variant to an assessment
+  - Passed as power (`Nina`): reads and writes another teacher's administrations (results, sections, label),
+    edits another teacher's assessment, changes question status (status rules still apply: reviewed cannot go
+    back to generated, 409); ownership unchanged; no Admin nav link; `/api/admin/*` returns 403. The dialogs
+    appear for another teacher's assessment and administration.
+  - Not covered: signed-token expiry, adding a variant to an assessment
     and recording its results, the 20-at-a-time cap, and real mouse clicks on the dialogs (the browser
     automation dropped clicks, so some steps used page-level click handlers).
   - Test rows still on the live DB, hard delete left to the owner: assessments 1-4, administrations 1-3,
-    questions 6-12 (under `clicktest` / `clicktest2`); `zz-clicktest` is disabled. Open question: an assessment
+    questions 6-12 (under `clicktest` / `clicktest2`; question 7 is now `reviewed` from the power test); `zz-clicktest` is disabled. Open question: an assessment
     soft-delete does not remove its administrations from Results, which matches the spec (only soft-deleted
     administrations are excluded).
 - Latest deployed feature commit: `c24ead0` (2026-09-29; PR #2: results recording/review and linked variants;
