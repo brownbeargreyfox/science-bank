@@ -7,6 +7,7 @@ import { STATUS_LABEL, TYPE_LABEL, type QuestionDetail, type Status } from "../a
 import { EditQuestionForm } from "../components/EditQuestionForm";
 import { QuestionBody } from "../components/QuestionBody";
 import { Stimulus } from "../components/Stimulus";
+import UsagePanel from "../components/UsagePanel";
 import {
   CodeTag,
   DokBadge,
@@ -388,6 +389,7 @@ export default function QuestionDetailPage() {
               </ul>
             )}
           </Section>
+          <UsagePanel questionId={d.id} />
         </aside>
       </div>
     </>

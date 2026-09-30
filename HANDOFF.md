@@ -241,6 +241,38 @@ generate C-PS1-5 rate questions and C-PS1-7 quantitative-conservation questions 
 stimulus and per-question standard provenance. It is classroom-only. `0004` adds the nullable
 generation-run bundle link; every saved question still records its own standard and provenance.
 
+## Results tracking and linked variants
+
+Design: `docs/superpowers/specs/2026-09-29-results-and-variants-design.md`. Plan:
+`docs/superpowers/plans/2026-09-29-results-and-variants-plan.md`. Schema: migration `0005`.
+
+- **Record use.** An *administration* records that an assessment was given (label, date, one or more sections such
+  as "Period 2"). Its items are a snapshot of the assessment's items at that moment (exact question version and
+  position), so later edits, reorders, refreshes, or removals never change it. Owner = the user who records it.
+- **Results.** Teachers enter correct/attempted totals per question per section. No row means no data (accuracy
+  is `null`, shown as `—`); 0 of 30 is 0%. "Correct" means full credit; partial credit is not supported. Batch
+  saves are atomic and validated (no duplicates, ids must belong to the administration, `attempted >= 1`,
+  `0 <= correct <= attempted`, a null pair clears a cell). "Limited response count" (aggregate attempted 1–9) is
+  a display hint only. No student names or IDs are stored.
+- **Access.** Administrations, results, `times_used`/`last_used`, the summary and the usage panel are visible and
+  editable only to the owner and to admin/power users (`core/policy.can_modify`). Other users get 404. Question
+  text stays broadly viewable.
+- **Routes.** `POST/GET /api/assessments/{id}/administrations`; `GET/PATCH/DELETE /api/administrations/{id}`
+  (+ `/restore`, `/sections`, `/results`); `GET /api/results/summary`; `GET /api/questions/{id}/usage`;
+  `POST /api/questions/variants/preview` and `/save`.
+- **Variants.** A variant is a new generated item from the same family and template as its parent (a new seed,
+  current family code, the parent's saved generation mode), linked by `questions.variant_of_id`. It is never
+  described as equivalent in difficulty. Preview persists nothing and returns signed, expiring (30 min),
+  user-bound candidate tokens; save accepts tokens only and re-derives everything server-side. Distinctness uses a
+  content fingerprint (stem, stimulus, unordered choice text/correct pairs, answer, question type) against every
+  version in the whole lineage. Limits: 20 per batch, 50 variants per root question, 25 attempts. Bundle-family,
+  retired-family and family-less parents are reported as "unavailable". A replayed token or a sibling saved first
+  returns 409.
+- **Locking.** Creating an administration locks the assessment row; the existing assessment mutators now lock it
+  too. Results and section edits lock the administration row.
+- **Coverage caveat.** Variants only exist for standards that have a question family (see
+  `docs/superpowers/plans/2026-09-29-coverage-roadmap.md`).
+
 ## EOCEP practice mode
 
 EOCEP mode was completed for the currently EOCEP-eligible implemented Biology 1 families.

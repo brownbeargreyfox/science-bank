@@ -1,9 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime
 
 from sqlalchemy import (
     BigInteger,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Index,
@@ -100,6 +101,7 @@ class Question(Base):
     provenance: Mapped[dict] = mapped_column(JSONB)
     current_version_no: Mapped[int] = mapped_column(Integer, default=1)
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"), index=True)
+    variant_of_id: Mapped[int | None] = mapped_column(ForeignKey("questions.id", ondelete="RESTRICT"), index=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
@@ -191,6 +193,88 @@ class AssessmentItem(Base):
     assessment: Mapped[Assessment] = relationship(back_populates="items")
     question: Mapped[Question] = relationship()
     question_version: Mapped[QuestionVersion] = relationship()
+
+
+class Administration(Base):
+    """An assessment actually given. Its items are a snapshot, so later assessment edits never change it."""
+
+    __tablename__ = "administrations"
+    __table_args__ = (
+        Index("ix_administrations_owner_date", "owner_id", "administered_on"),
+        Index("ix_administrations_assessment", "assessment_id", "deleted_at"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    assessment_id: Mapped[int] = mapped_column(ForeignKey("assessments.id", ondelete="RESTRICT"))
+    label: Mapped[str] = mapped_column(Text)
+    administered_on: Mapped[date] = mapped_column(Date)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="RESTRICT"))
+    deleted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now()
+    )
+
+    assessment: Mapped[Assessment] = relationship()
+    owner: Mapped[User] = relationship()
+    sections: Mapped[list["AdministrationSection"]] = relationship(
+        order_by="AdministrationSection.id", cascade="all, delete-orphan"
+    )
+    items: Mapped[list["AdministrationItem"]] = relationship(
+        order_by="AdministrationItem.position", cascade="all, delete-orphan"
+    )
+
+
+class AdministrationItem(Base):
+    """One assessment item as it stood when the use was recorded: exact question, version and position."""
+
+    __tablename__ = "administration_items"
+    __table_args__ = (
+        UniqueConstraint("administration_id", "position", name="uq_administration_items_position"),
+        Index("ix_administration_items_question", "question_id"),
+        Index("ix_administration_items_version", "question_version_id"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    administration_id: Mapped[int] = mapped_column(ForeignKey("administrations.id", ondelete="CASCADE"))
+    # Deliberately not a foreign key: removing the item from the assessment later must not erase this record.
+    source_assessment_item_id: Mapped[int] = mapped_column(Integer)
+    question_id: Mapped[int] = mapped_column(ForeignKey("questions.id"))
+    question_version_id: Mapped[int] = mapped_column(ForeignKey("question_versions.id"))
+    position: Mapped[int] = mapped_column(Integer)
+
+    question: Mapped[Question] = relationship()
+    question_version: Mapped[QuestionVersion] = relationship()
+
+
+class AdministrationSection(Base):
+    """A group tested, such as 'Period 2'. Names are unique within an administration, ignoring case."""
+
+    __tablename__ = "administration_sections"
+    # The functional unique index on (administration_id, lower(name)) also serves lookups by administration_id.
+    __table_args__ = (Index("uq_administration_sections_name", "administration_id", text("lower(name)"), unique=True),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    administration_id: Mapped[int] = mapped_column(ForeignKey("administrations.id", ondelete="CASCADE"))
+    name: Mapped[str] = mapped_column(Text)
+
+
+class ItemResult(Base):
+    """Correct/attempted totals for one section on one item. No row means no data, never zero."""
+
+    __tablename__ = "item_results"
+    __table_args__ = (
+        UniqueConstraint("section_id", "administration_item_id", name="uq_item_results_section_item"),
+        Index("ix_item_results_item", "administration_item_id"),
+        CheckConstraint("attempted >= 1", name="ck_item_results_attempted_positive"),
+        CheckConstraint("correct >= 0 AND correct <= attempted", name="ck_item_results_correct_range"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    section_id: Mapped[int] = mapped_column(ForeignKey("administration_sections.id", ondelete="CASCADE"))
+    administration_item_id: Mapped[int] = mapped_column(ForeignKey("administration_items.id", ondelete="CASCADE"))
+    correct: Mapped[int] = mapped_column(Integer)
+    attempted: Mapped[int] = mapped_column(Integer)
 
 
 class AuditEvent(Base):

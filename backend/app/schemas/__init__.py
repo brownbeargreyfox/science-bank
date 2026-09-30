@@ -1,7 +1,7 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, field_validator
 
 QuestionStatus = Literal["generated", "reviewed", "approved", "rejected", "archived"]
 Role = Literal["admin", "power", "regular"]
@@ -478,3 +478,213 @@ class SiteSettingsOut(BaseModel):
 
 class SiteSettingsUpdate(BaseModel):
     registration_open: bool
+
+
+# ---- results and variants ----------------------------------------------------------------------
+
+
+def _clean_name(value: str) -> str:
+    cleaned = " ".join(value.split())
+    if not cleaned or len(cleaned) > 60:
+        raise ValueError("Section names must be 1-60 characters")
+    return cleaned
+
+
+class AdministrationCreate(BaseModel):
+    label: str = Field(min_length=1, max_length=200)
+    administered_on: date
+    sections: list[str] = Field(min_length=1, max_length=12)
+
+    @field_validator("label")
+    @classmethod
+    def _label(cls, value: str) -> str:
+        cleaned = " ".join(value.split())
+        if not cleaned:
+            raise ValueError("Give this use a label")
+        return cleaned
+
+    @field_validator("sections")
+    @classmethod
+    def _sections(cls, value: list[str]) -> list[str]:
+        cleaned = [_clean_name(v) for v in value]
+        if len({v.lower() for v in cleaned}) != len(cleaned):
+            raise ValueError("Section names must be different from each other")
+        return cleaned
+
+
+class AdministrationUpdate(BaseModel):
+    label: str | None = Field(default=None, min_length=1, max_length=200)
+    administered_on: date | None = None
+
+    @field_validator("label")
+    @classmethod
+    def _label(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        cleaned = " ".join(value.split())
+        if not cleaned:
+            raise ValueError("Give this use a label")
+        return cleaned
+
+
+class SectionName(BaseModel):
+    name: str = Field(min_length=1, max_length=60)
+
+    @field_validator("name")
+    @classmethod
+    def _name(cls, value: str) -> str:
+        return _clean_name(value)
+
+
+class ResultRowIn(BaseModel):
+    section_id: int
+    item_id: int
+    correct: StrictInt | None = None
+    attempted: StrictInt | None = None
+
+
+class ResultsBatch(BaseModel):
+    rows: list[ResultRowIn] = Field(min_length=1, max_length=500)
+
+
+class SectionOut(BaseModel):
+    id: int
+    name: str
+
+
+class ResultOut(BaseModel):
+    section_id: int
+    item_id: int
+    correct: int
+    attempted: int
+
+
+class AccuracyOut(BaseModel):
+    correct: int
+    attempted: int
+    accuracy: float | None
+    limited_responses: bool
+
+
+class AdministrationItemOut(BaseModel):
+    id: int
+    position: int
+    question_id: int
+    question_version_id: int
+    pinned_version_no: int
+    standard_code: str
+    course_name: str
+    dok: int
+    question_type: QuestionType
+    stem: str
+    stimulus_title: str | None
+    totals: AccuracyOut
+
+
+class AdministrationSummary(BaseModel):
+    id: int
+    assessment_id: int
+    assessment_title: str
+    label: str
+    administered_on: date
+    owner: OwnerOut
+    section_count: int
+    item_count: int
+    items_with_data: int
+    created_at: datetime
+    deleted_at: datetime | None
+
+
+class AdministrationDetail(AdministrationSummary):
+    sections: list[SectionOut]
+    items: list[AdministrationItemOut]
+    results: list[ResultOut]
+
+
+class SummaryRow(BaseModel):
+    question_id: int
+    standard_id: int
+    standard_code: str
+    course_name: str
+    family_key: str | None
+    template_key: str | None
+    stem: str
+    dok: int
+    question_type: QuestionType
+    times_used: int
+    last_used: date | None
+    correct: int
+    attempted: int
+    accuracy: float | None
+    limited_responses: bool
+
+
+class ResultsSummaryPage(BaseModel):
+    items: list[SummaryRow]
+    total: int
+    limit: int
+    offset: int
+
+
+class QuestionRef(BaseModel):
+    id: int
+    status: QuestionStatus
+    standard_code: str
+
+
+class UsageEntry(BaseModel):
+    administration_id: int
+    label: str
+    administered_on: date
+    assessment_id: int
+    assessment_title: str
+    pinned_version_no: int
+    is_current_version: bool
+    correct: int
+    attempted: int
+    accuracy: float | None
+    limited_responses: bool
+
+
+class UsagePage(BaseModel):
+    items: list[UsageEntry]
+    total: int
+    limit: int
+    offset: int
+    parent: QuestionRef | None
+    variants: list[QuestionRef]
+
+
+class VariantPreviewRequest(BaseModel):
+    question_ids: list[int] = Field(min_length=1, max_length=100)
+
+
+class VariantCandidate(BaseModel):
+    question_type: QuestionType
+    dok: int
+    stem: str
+    choices: list[dict[str, Any]]
+    answer: str
+    explanation: str
+    stimulus: dict[str, Any] | None
+
+
+class VariantRecord(BaseModel):
+    parent_id: int
+    status: Literal["candidate", "unavailable"]
+    reason: str | None = None
+    candidate: VariantCandidate | None = None
+    candidate_token: str | None = None
+
+
+class VariantPreviewOut(BaseModel):
+    records: list[VariantRecord]
+
+
+class VariantSaveRequest(BaseModel):
+    tokens: list[str] = Field(min_length=1, max_length=100)
+
+
+class VariantSaveOut(BaseModel):
+    question_ids: list[int]
+    parent_ids: list[int]

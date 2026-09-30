@@ -30,7 +30,7 @@ from app.services.bank import ASSESSABLE, not_found
 router = APIRouter(prefix="/assessments", tags=["assessments"])
 
 
-def _load(db: Session, assessment_id: int, *, include_deleted: bool = False) -> Assessment:
+def _load(db: Session, assessment_id: int, *, include_deleted: bool = False, lock: bool = False) -> Assessment:
     stmt = (
         select(Assessment)
         .options(
@@ -48,6 +48,8 @@ def _load(db: Session, assessment_id: int, *, include_deleted: bool = False) -> 
     )
     if not include_deleted:
         stmt = stmt.where(Assessment.deleted_at.is_(None))
+    if lock:
+        stmt = stmt.with_for_update(of=Assessment)
     a = db.scalar(stmt)
     if a is None:
         raise not_found("Assessment")
@@ -55,7 +57,7 @@ def _load(db: Session, assessment_id: int, *, include_deleted: bool = False) -> 
 
 
 def _load_for_change(db: Session, assessment_id: int, actor: Actor) -> Assessment:
-    a = _load(db, assessment_id)
+    a = _load(db, assessment_id, lock=True)
     require_modify(actor.user, a.owner_id, "assessment")
     return a
 

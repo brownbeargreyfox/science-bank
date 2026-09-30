@@ -117,9 +117,7 @@ def test_failed_change_writes_no_audit_row(anon, db):
     assert anon.post(f"/api/questions/{qid}/status", json={"to_status": "archived"}).status_code == 403
     db.expire_all()
     written = db.scalar(
-        select(func.count())
-        .select_from(AuditEvent)
-        .where(AuditEvent.id > before, AuditEvent.target_type == "question")
+        select(func.count()).select_from(AuditEvent).where(AuditEvent.id > before, AuditEvent.target_type == "question")
     )
     assert written == 0
 
@@ -211,6 +209,8 @@ POLICY_COVERED = {
     ("POST", "/api/questions/{question_id}/restore/{version_no}"): "test_restore_matrix",
     ("POST", "/api/questions/{question_id}/status"): "test_status_matrix",
     ("POST", "/api/questions/bulk-status"): "test_bulk_status_is_all_or_nothing_on_ownership",
+    ("POST", "/api/questions/variants/preview"): "read-only preview",
+    ("POST", "/api/questions/variants/save"): "creates; owner = caller",
     ("POST", "/api/assessments"): "creates; owner = caller",
     ("PATCH", "/api/assessments/{assessment_id}"): "test_assessment_mutation_matrix",
     ("DELETE", "/api/assessments/{assessment_id}"): "test_assessment_mutation_matrix",
@@ -219,6 +219,20 @@ POLICY_COVERED = {
     ("DELETE", "/api/assessments/{assessment_id}/items/{item_id}"): "test_item_mutation_matrix",
     ("PUT", "/api/assessments/{assessment_id}/items/order"): "test_item_mutation_matrix",
     ("POST", "/api/assessments/{assessment_id}/items/{item_id}/refresh"): "test_item_mutation_matrix",
+    ("POST", "/api/assessments/{assessment_id}/administrations"): "creates; owner = caller",
+    ("PATCH", "/api/administrations/{administration_id}"): "test_administration_mutation_matrix",
+    ("DELETE", "/api/administrations/{administration_id}"): "test_administration_mutation_matrix",
+    ("POST", "/api/administrations/{administration_id}/restore"): "test_soft_delete_hides_and_restore_returns",
+    ("POST", "/api/administrations/{administration_id}/sections"): "test_administration_mutation_matrix",
+    (
+        "PATCH",
+        "/api/administrations/{administration_id}/sections/{section_id}",
+    ): "test_sections_can_be_added_renamed_and_removed_with_their_results",
+    (
+        "DELETE",
+        "/api/administrations/{administration_id}/sections/{section_id}",
+    ): "test_sections_can_be_added_renamed_and_removed_with_their_results",
+    ("PUT", "/api/administrations/{administration_id}/results"): "test_administration_mutation_matrix",
 }
 
 
