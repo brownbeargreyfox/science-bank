@@ -11,10 +11,13 @@ and no real key is configured. See "Switching it on".
 
 ```
 pg_dump -Fc  +  manifest.json (row counts, schema version, sha256s)  +  .env
-        -> tar -> age (public keys only) -> /srv/pool/config/science-bank-backups/science-bank-<UTC timestamp>.tar.age
-        -> rclone copyto gdrive-backup:science-bank-backups/   (size verified afterwards)
+        -> tar -> age (public keys only) -> sign (ssh-keygen -Y sign) -> science-bank-<UTC timestamp>.tar.age + .sig
+        -> /srv/pool/config/science-bank-backups/  and  rclone copyto gdrive-backup:science-bank-backups/ (sizes verified)
 ```
 
+- **Encryption is not authentication.** `age` lets anyone holding the public key make a file that decrypts. So every
+  artifact is also **signed**, and the restore drill verifies the signature *before* decrypting or unpacking anything.
+  Someone who can only write to the Drive folder cannot forge a backup that will be restored. See "Threat model".
 - Only `age` **public** keys are ever on the server. The private key decrypts everything, so it lives in your
   password manager and is brought out only to run a restore drill or a real restore.
 - `.env` (database password, `JWT_SECRET`) is inside the encrypted bundle and nowhere else.
@@ -29,8 +32,9 @@ pg_dump -Fc  +  manifest.json (row counts, schema version, sha256s)  +  .env
 | `lib.sh` | Settings and helpers shared by the scripts. All settings are overridable (env or `~/.config/science-bank-backup/backup.conf`). |
 | `backup-science-bank.sh` | The backup. `--label NAME` (e.g. `pre-deploy`), `--no-upload`. Exit 0 ok, 1 failed, 2 kept locally but upload failed, 75 already running. |
 | `check-backup-health.sh` | Watchdog. Alerts if the last local or upload success is older than 30 h. `--check-remote` also lists the remote. |
-| `restore-drill.sh` | Decrypts with your key, verifies checksums, restores into a throwaway Postgres, compares with the manifest. `--extract-to DIR` only unpacks. |
-| `tests/run-tests.sh`, `tests/fixture.sql` | End-to-end tests on scratch resources only (77 checks). |
+| `restore-drill.sh` | Verifies the signature, decrypts with your key, strictly unpacks and validates the bundle, checks checksums, restores into a throwaway Postgres (no network), compares with the manifest. `--extract-to DIR` only verifies and unpacks. |
+| `bundle.py` | The strict extractor and manifest validator the drill uses (allowlisted member names, regular files only, schema checks, file-name vs manifest-time check). |
+| `tests/run-tests.sh`, `tests/fixture.sql` | End-to-end tests on scratch resources only (150 checks). |
 
 ## Switching it on
 
@@ -45,16 +49,27 @@ Nothing below has been done. Do it in this order.
    echo 'age1...your-public-key...' > ~/.config/science-bank-backup/recipients.txt
    ```
    The scripts refuse a recipients file that contains `AGE-SECRET-KEY` or anything that is not an `age1...` key.
-3. **Check the remote and alert script exist:** `rclone listremotes` should show `gdrive-backup:`, and
+3. **Make the signing key, on this host, and keep its public half off it.** The backup job signs each artifact
+   with a key that has no passphrase (it runs unattended), so keep that file mode 600 and out of backups of your
+   home directory. The matching public key is what you verify with:
+   ```bash
+   ssh-keygen -t ed25519 -N '' -C science-bank-backup-signing -f ~/.config/science-bank-backup/signing_ed25519
+   echo "science-bank-backup $(cut -d' ' -f1,2 ~/.config/science-bank-backup/signing_ed25519.pub)" \
+     > ~/.config/science-bank-backup/allowed_signers
+   cat ~/.config/science-bank-backup/allowed_signers
+   ```
+   Save that one `allowed_signers` line in your password manager next to the age key. It is public, not secret, but
+   it must survive the loss of this server: it is how a restore on a new machine knows which backups are genuine.
+4. **Check the remote and alert script exist:** `rclone listremotes` should show `gdrive-backup:`, and
    `/srv/pool/config/dashboard-backups/notify.sh` should exist (alerts go through its `ntfy_alert`). Both are
    reused unchanged; the Life scripts are not modified.
-4. **Run it once by hand, then prove it restores:**
+5. **Run it once by hand, then prove it restores:**
    ```bash
    ops/backup/backup-science-bank.sh
    ops/backup/restore-drill.sh --identity /path/to/science-bank-backup-key.txt --from-remote latest
    ```
-   Expect `RESULT: PASS`. Delete the key file from disk afterwards.
-5. **Schedule it** (copy the units below, then enable). systemd user timers only fire while you are logged out if
+   Expect `signature: verified` and `RESULT: PASS`. Delete the key file from disk afterwards.
+6. **Schedule it** (copy the units below, then enable). systemd user timers only fire while you are logged out if
    lingering is on for the account: check `loginctl show-user $USER -p Linger` (the Life timers have the same
    requirement).
 
@@ -137,7 +152,9 @@ State lives in `~/.local/state/science-bank-backup/` (log, lock, last-run.json, 
 ops/backup/restore-drill.sh --identity /path/to/key.txt --from-remote latest
 ```
 
-A pass means: the file decrypts with your key, every file matches its checksum, `pg_restore` succeeds into a
+A pass means: the signature verifies against your `allowed_signers` (on a new machine pass
+`--signers /path/to/allowed_signers`), the file decrypts with your key, the bundle contains exactly the expected
+files and a well-formed manifest, every file matches its checksum, `pg_restore` succeeds into a
 throwaway Postgres, every table is present, and the schema version matches. Row counts that differ slightly are
 reported but do not fail (a teacher may save something while the dump runs); a missing table, an empty table that
 had rows, or a schema-version mismatch does fail. The throwaway container is removed afterwards.
@@ -147,7 +164,9 @@ had rows, or a schema-version mismatch does fail. The throwaway container is rem
 Try the drill first; a restore you have never rehearsed is a guess.
 
 1. On the target host, get the repo (`git clone`), and recover the files:
-   `ops/backup/restore-drill.sh --identity KEY --from-remote latest --extract-to ~/restore`.
+   `ops/backup/restore-drill.sh --identity KEY --signers /path/to/allowed_signers --from-remote latest --extract-to ~/restore`
+   (on a new machine, `allowed_signers` comes from your password manager; the drill refuses unsigned or
+   wrongly signed files before decrypting).
    That gives `~/restore/science_bank.dump`, `manifest.json`, and `env`. Copy `env` to `<repo>/.env` (mode 600).
 2. Start only the database: `docker compose up -d postgres`, wait until healthy.
 3. Load the dump into the empty database:
@@ -162,12 +181,27 @@ Try the drill first; a restore you have never rehearsed is a guess.
    `curl -s localhost:8420/readyz`.
 5. Delete `~/restore` (it holds the database and `.env`).
 
+## Threat model
+
+| Attacker can | Result |
+|---|---|
+| Read the Drive folder | Sees only ciphertext. |
+| **Write** to the Drive folder (stolen Google login) | Can add, delete, or rename files. Cannot make one that passes the drill: no valid signature without the signing key. A planted "latest" is refused; a renamed old backup is refused (the signed manifest's time must match the file name). Deleting the newest backups shows up as a stale-remote alert, and the older genuine ones remain. |
+| Hand-craft a hostile bundle | Only possible with the signing key. Even then the drill unpacks by an allowlist (no paths, links, or devices), validates the manifest before using any of it, and restores into a container with no network. |
+| Read this server's files | Gets the signing key (no passphrase) and the age **public** key, and the local `.env`. Cannot decrypt backups. Can sign, so a compromised server can poison future backups; that is the same as losing the server, so rotate everything. |
+| Steal the age private key **and** write to Drive | Can read old backups, still cannot forge signed ones. |
+
+The signing key has to be on this host because it signs at backup time; what protects you is that Drive access alone
+is not enough, and that the *verification* key lives off the host.
+
 ## Key management
 
 - Losing the private key means **no backup can be read**. Keep it in the password manager and confirm you can
   read it there. The restore drill is the proof.
 - Use a separate key for Science Bank (this job) from the Life key, so neither exposes the other.
-- Rotating: generate a new key, put its public key in `recipients.txt` (you may list several; every backup is
+- The signing key (`signing_ed25519`) is separate: losing it means generating a new one and updating `allowed_signers`
+  (old backups stay verifiable against the old public key; keep it listed too).
+- Rotating the age key: generate a new key, put its public key in `recipients.txt` (you may list several; every backup is
   encrypted to all of them), keep the old private key until the old backups age out (90 days).
 - If the server is suspected compromised, the public key alone reveals nothing, but rotate anyway.
 

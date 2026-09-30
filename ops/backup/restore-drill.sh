@@ -1,13 +1,19 @@
 #!/usr/bin/env bash
 # Prove a backup can be read and restored, without touching production.
 #
-# Decrypts an artifact with YOUR private key, checks the file checksums in its manifest, restores the dump into a
-# throwaway Postgres container, and compares the restored tables with the manifest.
+# Order of trust: (1) the artifact's signature must verify against your allowed-signers file, before anything is
+# decrypted; (2) it is decrypted with YOUR private key; (3) the decrypted tar is unpacked by a strict allowlist
+# extractor and its manifest validated (bundle.py); (4) file checksums are checked; (5) the dump is restored into a
+# throwaway Postgres (no network) and compared with the manifest. age alone proves nothing about who made a file.
 #
 # Usage:
-#   restore-drill.sh --identity KEYFILE --file ARTIFACT.tar.age
-#   restore-drill.sh --identity KEYFILE --from-remote latest|NAME
-#   ... add --extract-to DIR to only decrypt, verify and unpack (for a real restore or to recover .env)
+#   restore-drill.sh --identity KEYFILE --file ARTIFACT.tar.age [--signers FILE]
+#   restore-drill.sh --identity KEYFILE --from-remote latest|NAME [--signers FILE]
+#   ... add --extract-to DIR to only verify, decrypt and unpack (for a real restore or to recover .env)
+#
+# --signers defaults to ~/.config/science-bank-backup/allowed_signers: one line, "science-bank-backup ssh-ed25519
+# AAAA...", the PUBLIC signing key. Keep a copy off this server (password manager). The ARTIFACT.sig file must sit
+# next to the artifact (it is downloaded alongside it with --from-remote).
 #
 # The private key is read from the path you give and is never copied. Keep it in your password manager; put it on
 # disk only for the moment you run this, then delete it.
@@ -18,11 +24,12 @@ SCRIPT_TAG=drill
 # shellcheck source=lib.sh
 . "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/lib.sh"
 
-usage() { sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,22p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; }
 
 IDENTITY="" FILE="" FROM_REMOTE="" EXTRACT_TO=""
 while [ $# -gt 0 ]; do
   case "$1" in
+    --signers) SIGNERS_FILE="${2:-}"; shift 2 ;;
     --identity) IDENTITY="${2:-}"; shift 2 ;;
     --file) FILE="${2:-}"; shift 2 ;;
     --from-remote) FROM_REMOTE="${2:-}"; shift 2 ;;
@@ -55,20 +62,27 @@ if [ -n "$FROM_REMOTE" ]; then
   fi
   [[ "$name" =~ $ARTIFACT_RE ]] || fail "not a backup file name: $name"
   rclone copyto "$RCLONE_REMOTE/$name" "$TMP/artifact.age" 2>>"$LOG_FILE" || fail "could not download $name"
+  rclone copyto "$RCLONE_REMOTE/$name.sig" "$TMP/artifact.age.sig" 2>>"$LOG_FILE" || fail "could not download the signature $name.sig (an unsigned backup is not trusted)"
   ARTIFACT="$TMP/artifact.age"
+  SIGFILE="$TMP/artifact.age.sig"
 else
   ARTIFACT="$FILE"
+  SIGFILE="$FILE.sig"
   name="$(basename "$FILE")"
 fi
 [ -r "$ARTIFACT" ] || fail "cannot read $ARTIFACT"
 echo "artifact: $name"
 
-# Decrypt, unpack, verify checksums.
+# 1. Authenticity, before anything is decrypted or unpacked.
+[ -r "$SIGFILE" ] || fail "no signature found at $SIGFILE (an unsigned backup is not trusted)"
+[ -r "$SIGNERS_FILE" ] || fail "no allowed-signers file at $SIGNERS_FILE (pass --signers; it holds the PUBLIC signing key)"
+verify_sig "$ARTIFACT" "$SIGFILE" "$SIGNERS_FILE" || fail "the signature does not verify; this file was not made by the backup job, or was altered"
+echo "signature: verified"
+
+# 2. Decrypt, 3. strict unpack and manifest validation, 4. checksums.
 age -d -i "$IDENTITY" -o "$TMP/bundle.tar" "$ARTIFACT" 2>"$TMP/age.err" || fail "could not decrypt (wrong key, or a damaged file)"
-mkdir "$TMP/payload"
-tar -xf "$TMP/bundle.tar" -C "$TMP/payload" || fail "the decrypted bundle is not a valid archive"
+python3 "$OPS_DIR/bundle.py" extract "$TMP/bundle.tar" "$TMP/payload" "$name" >"$TMP/bundle.out" 2>&1 || fail "$(cat "$TMP/bundle.out")"
 rm -f "$TMP/bundle.tar"
-[ -f "$TMP/payload/manifest.json" ] || fail "manifest.json is missing"
 python3 - "$TMP/payload" <<'PY' || fail "file checksum does not match the manifest"
 import hashlib, json, os, sys
 payload = sys.argv[1]
@@ -102,7 +116,7 @@ fi
 command -v docker >/dev/null || fail "docker is not available"
 CONTAINER="sb-restore-drill-$$"
 docker run -d --rm --name "$CONTAINER" -e POSTGRES_PASSWORD=drill -e POSTGRES_DB=drill \
-  --tmpfs /var/lib/postgresql/data "$DRILL_IMAGE" >/dev/null 2>>"$LOG_FILE" || fail "could not start a throwaway Postgres ($DRILL_IMAGE)"
+  --network none --tmpfs /var/lib/postgresql/data "$DRILL_IMAGE" >/dev/null 2>>"$LOG_FILE" || fail "could not start a throwaway Postgres ($DRILL_IMAGE)"
 for _ in $(seq 1 60); do
   [ "$(docker logs "$CONTAINER" 2>&1 | grep -c 'ready to accept connections')" -ge 2 ] &&
     docker exec "$CONTAINER" pg_isready -U postgres -d drill >/dev/null 2>&1 && break
@@ -116,7 +130,7 @@ docker exec -i "$CONTAINER" pg_restore -U postgres -d drill --no-owner --no-priv
 restored="$(docker exec -i "$CONTAINER" psql -U postgres -d drill -At -c 'select version_num from alembic_version' 2>&1)"
 counts=""
 for t in $(python3 -c 'import json,sys; print(" ".join(json.load(open(sys.argv[1]))["tables"]))' "$TMP/payload/manifest.json"); do
-  n="$(docker exec -i "$CONTAINER" psql -U postgres -d drill -At -c "select count(*) from $t" 2>/dev/null)" || n="MISSING"
+  n="$(docker exec -i "$CONTAINER" psql -U postgres -d drill -At -c "select count(*) from \"$t\"" 2>/dev/null)" || n="MISSING"
   counts+="$t|${n:-MISSING}"$'\n'
 done
 

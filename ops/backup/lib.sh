@@ -26,6 +26,16 @@ MIN_DUMP_BYTES="${MIN_DUMP_BYTES:-1024}"
 TABLES="${TABLES:-users questions assessments administrations item_results audit_events}" # row counts in the manifest
 DRILL_IMAGE="${DRILL_IMAGE:-postgres:16-alpine}"
 
+# Authenticity. age only encrypts: anyone holding the public key can create a file that decrypts. So every artifact is
+# also signed (OpenSSH signatures, namespace below). The signing key lives on this host because it signs at backup
+# time; the matching PUBLIC key goes in an allowed-signers file kept off-host (password manager) and is what the
+# restore drill verifies against, before anything is decrypted or unpacked. Someone who can only write to the
+# Drive folder cannot forge a signature.
+SIGNING_KEY_FILE="${SIGNING_KEY_FILE:-$CONFIG_DIR/signing_ed25519}"
+SIGNERS_FILE="${SIGNERS_FILE:-$CONFIG_DIR/allowed_signers}"
+SIG_PRINCIPAL="science-bank-backup"
+SIG_NAMESPACE="science-bank-backup"
+
 # The two commands that talk to Postgres. Both run through `bash -c`. Tests replace them with commands aimed at a
 # scratch container; production uses the compose service, which already has POSTGRES_USER/POSTGRES_DB set.
 default_dump_cmd() {
@@ -78,6 +88,18 @@ name_epoch() {
 # older_than NAME DAYS
 older_than() {
   [ $(( $(date +%s) - $(name_epoch "$1") )) -gt $(( $2 * 86400 )) ]
+}
+
+# sign_file FILE -> writes FILE.sig. Fails if the key is missing or unusable.
+sign_file() {
+  [ -r "$SIGNING_KEY_FILE" ] || { echo "signing key not readable: $SIGNING_KEY_FILE"; return 1; }
+  ssh-keygen -Y sign -q -f "$SIGNING_KEY_FILE" -n "$SIG_NAMESPACE" "$1" 2>&1 || return 1
+}
+
+# verify_sig FILE SIGFILE SIGNERS_FILE. Succeeds only for a signature by a key listed in SIGNERS_FILE.
+verify_sig() {
+  [ -r "$1" ] && [ -r "$2" ] && [ -r "$3" ] || return 1
+  ssh-keygen -Y verify -f "$3" -I "$SIG_PRINCIPAL" -n "$SIG_NAMESPACE" -s "$2" <"$1" >/dev/null 2>&1
 }
 
 # Only ever encrypt to PUBLIC keys. Refuse anything else, and above all refuse a private key pasted by mistake.

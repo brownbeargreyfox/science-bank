@@ -32,10 +32,12 @@ for marker in last-local-success last-upload-success; do
 done
 
 if [ "$CHECK_REMOTE" = 1 ]; then
-  newest="$(rclone lsf "$RCLONE_REMOTE" --files-only 2>>"$LOG_FILE" | grep -E "$ARTIFACT_RE" | sort | tail -1)"
+  listing="$(rclone lsf "$RCLONE_REMOTE" --files-only 2>>"$LOG_FILE")"
+  newest="$(grep -E "$ARTIFACT_RE" <<<"$listing" | sort | tail -1)"
   if [ -z "$newest" ]; then
     problems+=("remote $RCLONE_REMOTE: no backups listed (or the remote could not be reached)")
   else
+    grep -qxF "$newest.sig" <<<"$listing" || problems+=("remote newest backup has no signature file: $newest.sig")
     remote_age=$(awk -v now="$(date +%s)" -v then="$(name_epoch "$newest")" 'BEGIN { printf "%.1f", (now - then) / 3600 }')
     stale "$remote_age" && problems+=("remote newest backup is ${remote_age}h old (limit ${MAX_AGE_HOURS}h): $newest")
   fi

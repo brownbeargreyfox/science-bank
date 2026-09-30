@@ -59,8 +59,10 @@ mkdir -p "$PAYLOAD"
 
 command -v age >/dev/null || fail "age is not installed"
 command -v python3 >/dev/null || fail "python3 is not installed"
+command -v ssh-keygen >/dev/null || fail "ssh-keygen (OpenSSH 8.0 or newer) is not installed; it signs the backups"
 [ "$UPLOAD" = 1 ] && { command -v rclone >/dev/null || fail "rclone is not installed"; }
 msg="$(validate_recipients "$RECIPIENTS_FILE")" || fail "$msg"
+[ -r "$SIGNING_KEY_FILE" ] || fail "signing key not found at $SIGNING_KEY_FILE (see ops/backup/README.md, Switching it on)"
 
 # 1. Dump.
 log "dumping the database"
@@ -119,24 +121,38 @@ age -R "$RECIPIENTS_FILE" -o "$TMP/bundle.tar.age" "$TMP/bundle.tar" 2>>"$LOG_FI
 [ -s "$TMP/bundle.tar.age" ] || fail "encryption produced an empty file"
 rm -f "$TMP/bundle.tar"
 
+# Sign the ciphertext, then prove the signature verifies before trusting it (catches a broken key right away).
+msg="$(sign_file "$TMP/bundle.tar.age")" || fail "signing failed: $msg"
+echo "$SIG_PRINCIPAL $(ssh-keygen -y -f "$SIGNING_KEY_FILE")" >"$TMP/signers" 2>>"$LOG_FILE" || fail "could not derive the public signing key"
+verify_sig "$TMP/bundle.tar.age" "$TMP/bundle.tar.age.sig" "$TMP/signers" || fail "the new signature does not verify"
+
 NAME="science-bank-$(date -u +%Y%m%dT%H%M%SZ)${LABEL:+-$LABEL}.tar.age"
 mkdir -p "$BACKUP_DIR" && chmod 700 "$BACKUP_DIR" || fail "cannot create $BACKUP_DIR"
+cp "$TMP/bundle.tar.age.sig" "$BACKUP_DIR/.$NAME.sig.partial" && mv "$BACKUP_DIR/.$NAME.sig.partial" "$BACKUP_DIR/$NAME.sig" ||
+  fail "could not write the signature to $BACKUP_DIR"
 cp "$TMP/bundle.tar.age" "$BACKUP_DIR/.$NAME.partial" && mv "$BACKUP_DIR/.$NAME.partial" "$BACKUP_DIR/$NAME" ||
   fail "could not write the encrypted copy to $BACKUP_DIR"
 write_marker last-local-success
 size=$(stat -c %s "$BACKUP_DIR/$NAME")
-log "encrypted copy written: $BACKUP_DIR/$NAME ($size bytes)"
+log "encrypted, signed copy written: $BACKUP_DIR/$NAME ($size bytes)"
 
 # 6. Upload, then confirm the remote copy has the same size.
 if [ "$UPLOAD" = 1 ]; then
   upload_error=""
-  if ! rclone copyto "$BACKUP_DIR/$NAME" "$RCLONE_REMOTE/$NAME" 2>>"$LOG_FILE"; then
-    upload_error="upload failed"
-  else
-    remote_size="$(rclone lsjson "$RCLONE_REMOTE" --files-only --include "$NAME" 2>>"$LOG_FILE" |
+  # Signature first, so a listed artifact always has its signature next to it.
+  for f in "$NAME.sig" "$NAME"; do
+    want=$(stat -c %s "$BACKUP_DIR/$f")
+    if ! rclone copyto "$BACKUP_DIR/$f" "$RCLONE_REMOTE/$f" 2>>"$LOG_FILE"; then
+      upload_error="upload of $f failed"
+      break
+    fi
+    remote_size="$(rclone lsjson "$RCLONE_REMOTE" --files-only --include "$f" 2>>"$LOG_FILE" |
       python3 -c 'import json,sys; d=json.load(sys.stdin); print(d[0]["Size"] if d else "")' 2>/dev/null)"
-    [ "$remote_size" = "$size" ] || upload_error="uploaded copy is ${remote_size:-missing} bytes, expected $size"
-  fi
+    if [ "$remote_size" != "$want" ]; then
+      upload_error="uploaded copy of $f is ${remote_size:-missing} bytes, expected $want"
+      break
+    fi
+  done
   if [ -n "$upload_error" ]; then
     log "ERROR: $upload_error (local copy kept)"
     write_last_run partial "$upload_error"
@@ -154,9 +170,13 @@ while IFS= read -r f; do
   [[ "$base" =~ $ARTIFACT_RE ]] || continue
   i=$((i + 1))
   [ "$i" -le "$MIN_KEEP" ] && continue
-  if older_than "$base" "$LOCAL_RETENTION_DAYS"; then rm -f -- "$f" && log "pruned local: $base"; fi
+  if older_than "$base" "$LOCAL_RETENTION_DAYS"; then rm -f -- "$f" "$f.sig" && log "pruned local: $base"; fi
 done < <(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'science-bank-*.tar.age' | sort -r)
-find "$BACKUP_DIR" -maxdepth 1 -type f -name '.science-bank-*.partial' -mtime +1 -delete 2>/dev/null
+# A signature whose artifact is gone (pruned by hand, say) is of no use.
+while IFS= read -r s; do
+  [ -e "${s%.sig}" ] || { rm -f -- "$s" && log "pruned orphan signature: $(basename "$s")"; }
+done < <(find "$BACKUP_DIR" -maxdepth 1 -type f -name 'science-bank-*.tar.age.sig')
+find "$BACKUP_DIR" -maxdepth 1 -type f \( -name '.science-bank-*.partial' -o -name '.science-bank-*.sig.partial' \) -mtime +1 -delete 2>/dev/null
 
 if [ "$UPLOAD" = 1 ]; then
   i=0
@@ -165,7 +185,12 @@ if [ "$UPLOAD" = 1 ]; then
     i=$((i + 1))
     [ "$i" -le "$MIN_KEEP" ] && continue
     if older_than "$base" "$REMOTE_RETENTION_DAYS"; then
-      if rclone deletefile "$RCLONE_REMOTE/$base" 2>>"$LOG_FILE"; then log "pruned remote: $base"; else log "WARN: could not prune remote $base"; fi
+      if rclone deletefile "$RCLONE_REMOTE/$base" 2>>"$LOG_FILE"; then
+        log "pruned remote: $base"
+        rclone deletefile "$RCLONE_REMOTE/$base.sig" 2>>"$LOG_FILE" || log "WARN: could not prune remote $base.sig"
+      else
+        log "WARN: could not prune remote $base"
+      fi
     fi
   done < <(rclone lsf "$RCLONE_REMOTE" --files-only 2>>"$LOG_FILE" | sort -r)
 fi
