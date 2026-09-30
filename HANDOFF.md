@@ -25,6 +25,15 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
+- Latest deploy: `a0669db` (2026-09-29; PR #3, frontend-only: strips Pydantic's "Value error, " prefix from
+  validation messages; no migration). Verified live. Rollback: image `science-bank-app:pre-pr3-a0669db`
+  (the image from before this deploy).
+- Live click-test of results/variants done 2026-09-29 as a regular teacher: record-use, grid validation,
+  zero-vs-blank, cross-use aggregation, variants (single and multi, distinct lineage), print views, filters all
+  passed. Not covered: owner/power/admin visibility with a second account, signed-token expiry, adding a
+  variant to an assessment and recording its results, the 20-at-a-time cap. Test rows still on the live DB
+  (assessments 1-2, administrations 1-2, questions 6-12 under `clicktest`; `zz-clicktest` user is disabled);
+  hard delete is left to the owner. Open question: soft-deleted assessments still count in Results.
 - Latest deployed feature commit: `c24ead0` (2026-09-29; PR #2: results recording/review and linked variants;
   migration `0005_results_and_variants`; backend 268 tests on Postgres, Playwright e2e 26/26). Deployed from
   `main`. Rollback needs both: image `science-bank-app:pre-0005-c24ead0` and database backup
