@@ -40,16 +40,22 @@ paths.
     GET, section add, delete, results PUT), Results, summary and question usage show none of it, and the other
     teacher's assessment is view/print-only. Note the results PUT validates the body before checking ownership,
     so an invalid body gets 422 rather than 404.
+  - Signed-token expiry (variant preview tokens, 1800 s TTL): on the deployed code, valid through the expiry
+    second and rejected one second later ("This candidate has expired; preview again"); wrong-user, tampered
+    payload/signature and malformed tokens are each rejected. Over HTTP as Nina all of these (and a mixed
+    batch) return 422 and create nothing. Not seen on screen: the UI expiry message (`ResultsPage` shows save
+    errors via `ErrorNotice`, so it should render the server text). The app's API client captures `fetch` at
+    startup, so a page-level fetch patch cannot intercept it; a real check needs a preview left over 30 minutes.
   - New dialogs: Escape, backdrop, Cancel and Confirm all behave for both delete-assessment and remove-section.
   - Passed as power (`Nina`): reads and writes another teacher's administrations (results, sections, label),
     edits another teacher's assessment, changes question status (status rules still apply: reviewed cannot go
     back to generated, 409); ownership unchanged; no Admin nav link; `/api/admin/*` returns 403. The dialogs
     appear for another teacher's assessment and administration.
-  - Not covered: signed-token expiry, adding a variant to an assessment
+  - Not covered: adding a variant to an assessment
     and recording its results, the 20-at-a-time cap, and real mouse clicks on the dialogs (the browser
     automation dropped clicks, so some steps used page-level click handlers).
   - Test rows still on the live DB, hard delete left to the owner: assessments 1-4, administrations 1-3,
-    questions 6-12 (under `clicktest` / `clicktest2`; question 7 is now `reviewed` from the power test); `zz-clicktest` is disabled. Open question: an assessment
+    questions 6-13 (under `clicktest` / `clicktest2` / `Nina`; question 7 is now `reviewed` from the power test; 13 was saved by accident during the token test); `zz-clicktest` is disabled. Open question: an assessment
     soft-delete does not remove its administrations from Results, which matches the spec (only soft-deleted
     administrations are excluded).
 - Latest deployed feature commit: `c24ead0` (2026-09-29; PR #2: results recording/review and linked variants;
