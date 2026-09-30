@@ -55,9 +55,8 @@ paths.
     edits another teacher's assessment, changes question status (status rules still apply: reviewed cannot go
     back to generated, 409); ownership unchanged; no Admin nav link; `/api/admin/*` returns 403. The dialogs
     appear for another teacher's assessment and administration.
-  - Not covered: adding a variant to an assessment
-    and recording its results, the 20-at-a-time cap, and real mouse clicks on the dialogs (the browser
-    automation dropped clicks, so some steps used page-level click handlers).
+  - Not covered: the 20-at-a-time cap, and real mouse clicks on the dialogs (the browser automation dropped
+    clicks, so some steps used page-level click handlers).
   - Test rows still on the live DB, hard delete left to the owner: assessments 1-5, administrations 1-4,
     questions 6-13 (under `clicktest` / `clicktest2` / `Nina`; question 7 is now `reviewed` from the power test; 13 was saved by accident during the token test); `zz-clicktest` is disabled. Open question: an assessment
     soft-delete does not remove its administrations from Results, which matches the spec (only soft-deleted
