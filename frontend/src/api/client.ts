@@ -54,7 +54,8 @@ export function describeError(error: unknown, status?: number): string {
           if (d && typeof d === "object") {
             const item = d as { loc?: unknown; msg?: unknown };
             const where = humanLoc(item.loc);
-            const msg = typeof item.msg === "string" ? item.msg : "Invalid value";
+            // Pydantic prefixes validator messages with "Value error, "; that is noise to a teacher.
+            const msg = typeof item.msg === "string" ? item.msg.replace(/^Value error, /, "") : "Invalid value";
             return where ? `${where}: ${msg}` : msg;
           }
           return String(d);
