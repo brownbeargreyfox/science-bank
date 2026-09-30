@@ -46,6 +46,10 @@ paths.
     batch) return 422 and create nothing. Not seen on screen: the UI expiry message (`ResultsPage` shows save
     errors via `ErrorNotice`, so it should render the server text). The app's API client captures `fetch` at
     startup, so a page-level fetch patch cannot intercept it; a real check needs a preview left over 30 minutes.
+  - Variant in an assessment (as Nina): question 13 (variant of 4) added to an assessment, use recorded, results
+    saved (V1 4/8, V2 6/10). The variant has its own results (10/18, 1 use, usage lists only its own
+    administration) and the original is unchanged (q4 22/40, 2 uses); parent/variants links are correct both
+    ways. Rows reference the variant's own question and version.
   - New dialogs: Escape, backdrop, Cancel and Confirm all behave for both delete-assessment and remove-section.
   - Passed as power (`Nina`): reads and writes another teacher's administrations (results, sections, label),
     edits another teacher's assessment, changes question status (status rules still apply: reviewed cannot go
@@ -54,7 +58,7 @@ paths.
   - Not covered: adding a variant to an assessment
     and recording its results, the 20-at-a-time cap, and real mouse clicks on the dialogs (the browser
     automation dropped clicks, so some steps used page-level click handlers).
-  - Test rows still on the live DB, hard delete left to the owner: assessments 1-4, administrations 1-3,
+  - Test rows still on the live DB, hard delete left to the owner: assessments 1-5, administrations 1-4,
     questions 6-13 (under `clicktest` / `clicktest2` / `Nina`; question 7 is now `reviewed` from the power test; 13 was saved by accident during the token test); `zz-clicktest` is disabled. Open question: an assessment
     soft-delete does not remove its administrations from Results, which matches the spec (only soft-deleted
     administrations are excluded).
