@@ -22,3 +22,6 @@ frontend/dist/
 .claude/worktrees/
 .superpowers/
 backups/
+
+__pycache__/
+*.pyc
