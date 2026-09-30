@@ -373,6 +373,15 @@ docker compose exec -T postgres psql -U science_bank science_bank < backup.sql
 Set up scheduled, encrypted, **off-host** backups before teachers accumulate meaningful content.
 Also preserve `.env`, especially `JWT_SECRET`; do not commit it.
 
+**Status (2026-09-30): built and tested, not installed.** `ops/backup/` holds an encrypted backup job modelled on
+the Life app's pipeline (age, the `gdrive-backup` rclone remote, ntfy via the Life `notify.sh`, a watchdog), with a
+restore drill and 77 end-to-end tests. Runbook: `ops/backup/README.md`. Review brief for Codex:
+`docs/superpowers/plans/2026-09-30-backup-ops-review-handoff.md`. **Nothing is scheduled, nothing has been uploaded,
+and there is no real key yet.** To finish: Brandon generates a Science Bank age key pair on his own machine (private
+key into the password manager), puts the `age1...` public key in `~/.config/science-bank-backup/recipients.txt`,
+runs one backup and one restore drill, then installs the timers from the README. The Life private key's location is
+unconfirmed (it may be in a Notepad++ buffer); that decides whether the Life backups can be read at all.
+
 ### Development checks
 
 ```sh
