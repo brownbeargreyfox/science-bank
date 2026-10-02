@@ -386,8 +386,8 @@ unconfirmed (it may be in a Notepad++ buffer); that decides whether the Life bac
 
 Backup job review and state:
 
-- **Branch `feat/backup-ops` is not merged to `main`** (commits `0a71eb9`, `a0384e0`, `c93e25a`). Merge only after a
-  second Codex look, then follow the finish steps above.
+- **Merged to `main` (PR #5, `5bc6126`, 2026-10-01). Still not switched on:** nothing is installed or scheduled, nothing
+  has been uploaded, and there is no real key. Merging changed no running behaviour. Finish with the steps above.
 - **Codex round 1 (2026-09-30), one Medium finding, fixed:** age encrypts but does not authenticate, so anyone with
   the public key and write access to the Drive folder could plant a forged "latest" that the drill would accept.
   Fix: every artifact is signed (OpenSSH `ssh-keygen -Y sign`) and the drill verifies the signature **before**
