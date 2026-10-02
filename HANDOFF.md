@@ -25,7 +25,14 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
-- Latest deploy: `9f063c9` (2026-09-29; PR #4, frontend-only: in-page `ConfirmDialog` replaces the two native
+- Latest deploy: `132b82e` (2026-10-02; PR #6, frontend-only, no migration): the Overview dashboard, the standard
+  Generate/View buttons on the Bundles page, Related standards on Generate, and the Azure-style look with the
+  expanding icon rail everywhere (see "Frontend look and shell"). Verified live: the served assets are the new build
+  (new accent colour, rail rules, strings), `/readyz` 200 locally and publicly, migration unchanged at `0005`, and the
+  signed-in non-admin session renders the new Overview with real data and no error alerts. Rollback: image
+  `science-bank-app:pre-pr6-132b82e` (the image from before this deploy). Not checked live: a real touch device,
+  Safari and Firefox.
+- Earlier deploy: `9f063c9` (2026-09-29; PR #4, frontend-only: in-page `ConfirmDialog` replaces the two native
   `window.confirm` boxes, for deleting an assessment and removing a section; no migration). Verified live.
   Rollback: image `science-bank-app:pre-pr4-9f063c9` (the image from before this deploy).
 - Earlier deploy: `a0669db` (PR #3, frontend-only: strips Pydantic's "Value error, " prefix from validation
