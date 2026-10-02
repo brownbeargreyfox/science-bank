@@ -85,11 +85,16 @@ if [ "$INCLUDE_ENV" = 1 ]; then
   fi
 fi
 
-# 4. Manifest.
+# 4. Manifest. The file name and the timestamp are decided here, once, and recorded inside the (signed) bundle, so a
+# restore can require the file it was handed to carry exactly the name and time the backup job gave it.
+STAMP="$(date -u +%Y%m%dT%H%M%SZ)"
+PLAN_NAME="science-bank-$STAMP${LABEL:+-$LABEL}.tar.age"
 GIT_COMMIT="$(git -C "$PROJECT_DIR" rev-parse --short HEAD 2>/dev/null || echo unknown)"
-COUNTS="$COUNTS" python3 - "$PAYLOAD" "$LABEL" "$GIT_COMMIT" <<'PY' || fail "could not write the manifest"
+COUNTS="$COUNTS" python3 - "$PAYLOAD" "$LABEL" "$GIT_COMMIT" "$STAMP" "$PLAN_NAME" <<'PY' || fail "could not write the manifest"
 import hashlib, json, os, socket, sys, time
-payload, label, commit = sys.argv[1:4]
+from datetime import datetime
+payload, label, commit, stamp, artifact_name = sys.argv[1:6]
+created_at = datetime.strptime(stamp, "%Y%m%dT%H%M%SZ").strftime("%Y-%m-%dT%H:%M:%SZ")
 lines = [l.strip() for l in os.environ["COUNTS"].splitlines() if l.strip()]
 tables = {}
 for line in lines[1:]:
@@ -106,7 +111,7 @@ for name in ("science_bank.dump", "env"):
     path = os.path.join(payload, name)
     if os.path.exists(path):
         files[name] = {"sha256": sha256(path), "bytes": os.path.getsize(path)}
-manifest = {"format": 1, "created_at": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()), "label": label,
+manifest = {"format": 1, "created_at": created_at, "artifact_name": artifact_name, "label": label,
             "host": socket.gethostname(), "git_commit": commit, "alembic_version": lines[0], "tables": tables,
             "files": files}
 with open(os.path.join(payload, "manifest.json"), "w") as f:
@@ -126,7 +131,7 @@ msg="$(sign_file "$TMP/bundle.tar.age")" || fail "signing failed: $msg"
 echo "$SIG_PRINCIPAL $(ssh-keygen -y -f "$SIGNING_KEY_FILE")" >"$TMP/signers" 2>>"$LOG_FILE" || fail "could not derive the public signing key"
 verify_sig "$TMP/bundle.tar.age" "$TMP/bundle.tar.age.sig" "$TMP/signers" || fail "the new signature does not verify"
 
-NAME="science-bank-$(date -u +%Y%m%dT%H%M%SZ)${LABEL:+-$LABEL}.tar.age"
+NAME="$PLAN_NAME"
 mkdir -p "$BACKUP_DIR" && chmod 700 "$BACKUP_DIR" || fail "cannot create $BACKUP_DIR"
 cp "$TMP/bundle.tar.age.sig" "$BACKUP_DIR/.$NAME.sig.partial" && mv "$BACKUP_DIR/.$NAME.sig.partial" "$BACKUP_DIR/$NAME.sig" ||
   fail "could not write the signature to $BACKUP_DIR"
@@ -160,6 +165,7 @@ if [ "$UPLOAD" = 1 ]; then
     exit 2
   fi
   write_marker last-upload-success
+  printf '%s\n' "$NAME" >"$STATE_DIR/last-upload-artifact"
   log "uploaded to $RCLONE_REMOTE/$NAME"
 fi
 
@@ -193,6 +199,18 @@ if [ "$UPLOAD" = 1 ]; then
       fi
     fi
   done < <(rclone lsf "$RCLONE_REMOTE" --files-only 2>>"$LOG_FILE" | sort -r)
+fi
+
+if [ "$UPLOAD" = 1 ]; then
+  # A signature whose artifact is gone from the remote (deleted by hand, say) is of no use. Only act on old ones, so
+  # a signature uploaded a moment before its artifact is never touched.
+  remote_listing="$(rclone lsf "$RCLONE_REMOTE" --files-only 2>>"$LOG_FILE")"
+  while IFS= read -r sname; do
+    [[ "$sname" =~ ^science-bank-[0-9]{8}T[0-9]{6}Z(-[a-z0-9-]+)?\.tar\.age\.sig$ ]] || continue
+    grep -qxF "${sname%.sig}" <<<"$remote_listing" && continue
+    older_than "$sname" 1 || continue
+    if rclone deletefile "$RCLONE_REMOTE/$sname" 2>>"$LOG_FILE"; then log "pruned remote orphan signature: $sname"; else log "WARN: could not prune remote orphan $sname"; fi
+  done <<<"$remote_listing"
 fi
 
 write_last_run ok "$NAME"

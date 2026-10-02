@@ -66,15 +66,19 @@ if [ -n "$FROM_REMOTE" ]; then
   ARTIFACT="$TMP/artifact.age"
   SIGFILE="$TMP/artifact.age.sig"
 else
-  ARTIFACT="$FILE"
-  SIGFILE="$FILE.sig"
   name="$(basename "$FILE")"
+  [ -r "$FILE" ] || fail "cannot read $FILE"
+  # Work on private copies, so what is verified is exactly what is later decrypted (no check-then-use gap).
+  cp "$FILE" "$TMP/artifact.age" || fail "cannot copy $FILE"
+  ARTIFACT="$TMP/artifact.age"
+  SIGFILE="$TMP/artifact.age.sig"
+  [ -r "$FILE.sig" ] && cp "$FILE.sig" "$SIGFILE"
 fi
 [ -r "$ARTIFACT" ] || fail "cannot read $ARTIFACT"
 echo "artifact: $name"
 
 # 1. Authenticity, before anything is decrypted or unpacked.
-[ -r "$SIGFILE" ] || fail "no signature found at $SIGFILE (an unsigned backup is not trusted)"
+[ -r "$SIGFILE" ] || fail "no signature found for $name (an unsigned backup is not trusted)"
 [ -r "$SIGNERS_FILE" ] || fail "no allowed-signers file at $SIGNERS_FILE (pass --signers; it holds the PUBLIC signing key)"
 verify_sig "$ARTIFACT" "$SIGFILE" "$SIGNERS_FILE" || fail "the signature does not verify; this file was not made by the backup job, or was altered"
 echo "signature: verified"

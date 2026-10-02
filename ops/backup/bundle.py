@@ -12,17 +12,17 @@ import os
 import re
 import sys
 import tarfile
-from datetime import datetime, timezone
+from datetime import datetime
 
 REQUIRED = ("manifest.json", "science_bank.dump")
 OPTIONAL = ("env",)
-MAX_BYTES = int(os.environ.get("MAX_BUNDLE_BYTES", str(8 * 1024**3)))  # refuse absurdly large members
-MAX_CREATED_SKEW_SECONDS = 15 * 60
+MAX_BYTES = int(os.environ.get("MAX_BUNDLE_BYTES", str(4 * 1024**3)))  # per member
+MAX_TOTAL_BYTES = int(os.environ.get("MAX_BUNDLE_TOTAL_BYTES", str(8 * 1024**3)))  # all members together
 
 TABLE_RE = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
 VERSION_RE = re.compile(r"^[A-Za-z0-9_]{1,64}$")
 CREATED_RE = re.compile(r"^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ$")
-NAME_TS_RE = re.compile(r"^science-bank-(\d{8}T\d{6}Z)")
+ARTIFACT_NAME_RE = re.compile(r"^science-bank-(\d{8}T\d{6}Z)(-[a-z0-9-]+)?\.tar\.age$")
 SHA_RE = re.compile(r"^[0-9a-f]{64}$")
 PRINTABLE_RE = re.compile(r"^[\x20-\x7e]{0,200}$")
 
@@ -49,6 +49,8 @@ def extract(tar_path, dest):
                 raise BundleError(f"archive member {m.name!r} is not a regular file")
             if m.size > MAX_BYTES:
                 raise BundleError(f"archive member {m.name!r} is implausibly large ({m.size} bytes)")
+        if sum(m.size for m in members) > MAX_TOTAL_BYTES:
+            raise BundleError("the archive is implausibly large in total")
         missing = [n for n in REQUIRED if n not in names]
         if missing:
             raise BundleError("the archive is missing: " + ", ".join(missing))
@@ -104,16 +106,20 @@ def validate_manifest(dest, artifact_name):
         if not isinstance(manifest.get(key, ""), str) or not PRINTABLE_RE.match(manifest.get(key, "")):
             raise BundleError(f"manifest {key} is malformed")
 
-    # A valid old backup renamed to look new must not pass as "latest": the name is not signed, the manifest is.
-    match = NAME_TS_RE.match(artifact_name)
-    if not match:
-        raise BundleError("the file name is not a backup name")
-    named = datetime.strptime(match.group(1), "%Y%m%dT%H%M%SZ").replace(tzinfo=timezone.utc)
-    made = datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
-    skew = abs((named - made).total_seconds())
-    if skew > MAX_CREATED_SKEW_SECONDS:
-        raise BundleError(f"the file name says {named:%Y-%m-%d %H:%M} but the manifest says {made:%Y-%m-%d %H:%M}; "
-                          "this file may have been renamed")
+    # The signature covers the bundle's content, not the file name it was uploaded under. The name is therefore bound
+    # inside the signed manifest and must match exactly: no skew, and the label counts. A genuine backup copied to any
+    # other name (newer, older, relabelled) is refused.
+    recorded = manifest.get("artifact_name")
+    if not isinstance(recorded, str) or not ARTIFACT_NAME_RE.match(recorded):
+        raise BundleError("manifest artifact_name is missing or malformed")
+    if recorded != artifact_name:
+        raise BundleError(f"this file is named {artifact_name[:80]!r} but the signed manifest says it is "
+                          f"{recorded!r}; it may have been renamed")
+    stamp = ARTIFACT_NAME_RE.match(recorded).group(1)
+    if datetime.strptime(stamp, "%Y%m%dT%H%M%SZ").strftime("%Y-%m-%dT%H:%M:%SZ") != created:
+        raise BundleError("manifest created_at does not match the timestamp in its artifact name")
+    if (manifest.get("label") or "") != (ARTIFACT_NAME_RE.match(recorded).group(2) or "").lstrip("-"):
+        raise BundleError("manifest label does not match its artifact name")
     return manifest
 
 

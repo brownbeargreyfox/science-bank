@@ -1,7 +1,7 @@
 # Codex review: Science Bank backup job (`ops/backup/`)
 
-Branch: `feat/backup-ops` (from `main` at `6b1023f`). Author: Claude. Reviewer: Codex. Status: round 1 review
-received and addressed (see "Review round 1" below); ready for a second look. Nothing is deployed,
+Branch: `feat/backup-ops` (from `main` at `6b1023f`). Author: Claude. Reviewer: Codex. Status: round 1 and round 2 reviews
+received and addressed (see "Review round 1" and "Review round 2" below). Nothing is deployed,
 scheduled, or uploaded. This is a code review of scripts that will later guard the only copy of teachers' work.
 
 ## What was asked
@@ -22,7 +22,7 @@ All under `ops/backup/` (read `README.md` there first; it is also the operator r
 | `check-backup-health.sh` | Watchdog: stale or missing success markers; optional remote listing check. |
 | `restore-drill.sh` | Verify signature, decrypt, strict unpack, verify checksums, restore into a throwaway Postgres (no network), compare to manifest; `--extract-to` for real restores. |
 | `bundle.py` | Strict extractor and manifest validator used by the drill. |
-| `tests/run-tests.sh`, `tests/fixture.sql` | 150 end-to-end checks against scratch resources. |
+| `tests/run-tests.sh`, `tests/fixture.sql` | 181 end-to-end checks against scratch resources. |
 
 Design decisions worth challenging:
 
@@ -52,7 +52,7 @@ Design decisions worth challenging:
 ops/backup/tests/run-tests.sh          # needs docker, age, age-keygen, rclone, python3, flock
 ```
 
-Expected: `passed: 150   failed: 0`, about two minutes. It starts one container named `sb-backup-test-<pid>` (no ports
+Expected: `passed: 181   failed: 0`, about three minutes. It starts one container named `sb-backup-test-<pid>` (no ports
 published) and removes it on exit. No real key, no Drive, no ntfy, no production. Two copies can run at the same
 time (container and temp names are per-PID); it does need Docker.
 
@@ -97,6 +97,24 @@ did write outside the work directory, so that test earns its place (it now uses 
 mutant that made every backup fail **hung** the suite, because a test called `age -d` with no file and waited on
 stdin. The suite now runs with stdin closed (`exec </dev/null`) and stops with a clear message if the first backup
 produces nothing.
+
+## Review round 2 (Codex, pre-merge verdict: MERGE AFTER FIXES) and what changed
+
+| Codex finding | Severity | Resolution |
+|---|---|---|
+| Signed backups can be renamed/replayed within the 15-minute skew window (a 10-minute rename was accepted; the label was not bound) | Medium, blocking | **Fixed.** The file name and timestamp are chosen once, before the manifest, and recorded in the signed manifest as `artifact_name`. `bundle.py` requires an exact match (no skew; the label counts) and that `created_at` equals the name's timestamp. Tests: 10 minutes later, one second later, much newer, and relabelled are all refused. |
+| `--check-remote` accepted any `.sig` that merely existed, so an attacker-signed newest file looked healthy | Medium, blocking | **Fixed.** The watchdog downloads the newest artifact and signature to a private temp dir and runs `verify_sig` against `allowed_signers` (nothing decrypted). A missing signers file is an alert, not a skip. Tests: attacker-signed newest, and no signers file, both alert. |
+| Deleting the newest remote artifact rolls restore back to an older fresh-looking genuine one; README overstated detection | Residual / docs | **Mitigated and documented honestly.** The backup records `last-upload-artifact`; the watchdog alerts when the remote no longer lists it (test: two backups, delete the newer, immediate alert). Rollback itself is not preventable by signatures alone; the README now says so. |
+| Remote orphan signatures never pruned | Low | **Fixed.** After remote retention, orphan `.sig` files older than a day are removed; a fresh orphan (possibly mid-upload) is left alone. Both tested. |
+| "Unsigned artifact never reached decryption" test did not test that | Low | **Fixed.** A recording `age` wrapper logs every call; a positive control proves it records `-d`; unsigned, attacker-signed and altered artifacts assert zero decrypt attempts. |
+| Per-member 8 GiB cap, no total cap | Info | **Fixed.** Per-member cap 4 GiB, total cap 8 GiB (both env-overridable); tested with tiny caps. |
+| Key rotation untested | Info | **Tested.** With only another key listed a genuine backup fails; with the old key listed beside a new one it verifies. |
+| Local `--file` check-then-use gap | Info | **Closed.** The drill verifies and decrypts private copies. |
+| PR text and README overstated renames, watchdog "signatures", and mutation coverage | Docs | **Corrected** in the README, this doc, and the PR description. |
+
+I mutation-tested each of the above (see the results recorded in `HANDOFF.md`): removing the exact-name check,
+the total size cap, the watchdog's signature verification, its vanished-artifact check, the remote orphan prune
+and its age guard, and moving decryption ahead of signature verification all make the suite fail.
 
 ## What I already verified, and how
 

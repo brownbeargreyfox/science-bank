@@ -31,10 +31,10 @@ pg_dump -Fc  +  manifest.json (row counts, schema version, sha256s)  +  .env
 |---|---|
 | `lib.sh` | Settings and helpers shared by the scripts. All settings are overridable (env or `~/.config/science-bank-backup/backup.conf`). |
 | `backup-science-bank.sh` | The backup. `--label NAME` (e.g. `pre-deploy`), `--no-upload`. Exit 0 ok, 1 failed, 2 kept locally but upload failed, 75 already running. |
-| `check-backup-health.sh` | Watchdog. Alerts if the last local or upload success is older than 30 h. `--check-remote` also lists the remote. |
+| `check-backup-health.sh` | Watchdog. Alerts if the last local or upload success is older than 30 h. `--check-remote` also downloads the newest remote backup and **verifies its signature** against `allowed_signers` (nothing is decrypted), and alerts if the last artifact this host uploaded has vanished from the remote. |
 | `restore-drill.sh` | Verifies the signature, decrypts with your key, strictly unpacks and validates the bundle, checks checksums, restores into a throwaway Postgres (no network), compares with the manifest. `--extract-to DIR` only verifies and unpacks. |
-| `bundle.py` | The strict extractor and manifest validator the drill uses (allowlisted member names, regular files only, schema checks, file-name vs manifest-time check). |
-| `tests/run-tests.sh`, `tests/fixture.sql` | End-to-end tests on scratch resources only (150 checks). |
+| `bundle.py` | The strict extractor and manifest validator the drill uses (allowlisted member names, regular files only, size caps, schema checks, and an **exact** match between the file name and the `artifact_name` recorded in the signed manifest). |
+| `tests/run-tests.sh`, `tests/fixture.sql` | End-to-end tests on scratch resources only (181 checks). |
 
 ## Switching it on
 
@@ -186,7 +186,7 @@ Try the drill first; a restore you have never rehearsed is a guess.
 | Attacker can | Result |
 |---|---|
 | Read the Drive folder | Sees only ciphertext. |
-| **Write** to the Drive folder (stolen Google login) | Can add, delete, or rename files. Cannot make one that passes the drill: no valid signature without the signing key. A planted "latest" is refused; a renamed old backup is refused (the signed manifest's time must match the file name). Deleting the newest backups shows up as a stale-remote alert, and the older genuine ones remain. |
+| **Write** to the Drive folder (stolen Google login) | Can add, delete, or rename files. Cannot make one that passes the drill: no valid signature without the signing key. A planted "latest" is refused. A genuine backup copied to **any** other name (newer, older, one second different, relabelled) is refused: the file name is recorded inside the signed manifest and must match exactly. The watchdog does not just look for a `.sig`; it downloads the newest remote backup and verifies the signature, so a forged newest file raises an alert. **Deleting** the newest backup is detected on the next watchdog run (the job remembers the last artifact it uploaded and alerts if the remote no longer lists it), not only after 30 hours. **Not preventable:** if the newest genuine backup is deleted, a restore will still succeed from an older genuine one (data loss, never forgery); keep the local copies and the watchdog alerts. |
 | Hand-craft a hostile bundle | Only possible with the signing key. Even then the drill unpacks by an allowlist (no paths, links, or devices), validates the manifest before using any of it, and restores into a container with no network. |
 | Read this server's files | Gets the signing key (no passphrase) and the age **public** key, and the local `.env`. Cannot decrypt backups. Can sign, so a compromised server can poison future backups; that is the same as losing the server, so rotate everything. |
 | Steal the age private key **and** write to Drive | Can read old backups, still cannot forge signed ones. |
@@ -206,6 +206,16 @@ is not enough, and that the *verification* key lives off the host.
 - If the server is suspected compromised, the public key alone reveals nothing, but rotate anyway.
 
 ## Limits, stated plainly
+
+- **The watchdog's remote check needs `allowed_signers` on this host** (setup step 3) and downloads the newest
+  backup twice a day (about 130 KB). Without that file it alerts rather than skipping the check.
+- **Rolling back to an older genuine backup cannot be made impossible by signatures alone** (that needs an
+  append-only remote or independent monotonic state). What is covered: deletion of the newest remote file is
+  alerted on the next watchdog run, and local copies remain on this host.
+- **A compromised host can sign poisoned backups** (the signing key has no passphrase). Accepted and documented
+  above; rotate everything if the server is suspected compromised.
+- The drill verifies and decrypts private copies of the artifact it is given, so the file cannot change between the
+  signature check and decryption.
 
 - **Up to 24 hours of changes can be lost** (daily schedule). Use `--label pre-deploy` before risky changes.
   Point-in-time recovery (WAL archiving) is not set up and is not needed at this size.

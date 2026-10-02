@@ -77,17 +77,6 @@ run() { # [VAR=value ...] -- script args...
 sign_with() { # keyfile, file: writes file.sig
   ssh-keygen -Y sign -q -f "$1" -n science-bank-backup "$2"
 }
-# forge NAME-SUFFIX PAYLOAD_DIR [signing key]: tar PAYLOAD_DIR's files, encrypt to the real public key, sign, and
-# print the path. The name carries the original artifact's timestamp so only the thing under test can fail.
-forge() {
-  local suffix="$1" dir="$2" key="${3:-$WORK/cfg/signing_ed25519}" base out
-  base="$(basename "$ART" .tar.age)"
-  mkdir -p "$WORK/forged"
-  out="$WORK/forged/${base}-${suffix}.tar.age"
-  tar -C "$dir" -cf "$WORK/forged/$suffix.tar" $(cd "$dir" && ls) && age -R "$WORK/cfg/recipients.txt" -o "$out" "$WORK/forged/$suffix.tar" &&
-    sign_with "$key" "$out"
-  echo "$out"
-}
 newest_local() { find "$WORK/local" -maxdepth 1 -name 'science-bank-*.tar.age' | sort | tail -1; }
 count_local() { find "$WORK/local" -maxdepth 1 -name 'science-bank-*.tar.age' | wc -l; }
 count_remote() { find "$WORK/remote" -maxdepth 1 -name 'science-bank-*.tar.age' | wc -l; }
@@ -213,6 +202,9 @@ for d in 01 02 03 04 05; do
   : >"$WORK/remote/science-bank-202001${d}T000000Z.tar.age"; : >"$WORK/remote/science-bank-202001${d}T000000Z.tar.age.sig"
 done
 : >"$WORK/local/science-bank-20190101T000000Z.tar.age.sig" # a signature whose artifact is gone
+: >"$WORK/remote/science-bank-20190101T000000Z.tar.age.sig" # an old orphan on the remote
+# A recent orphan (maybe mid-upload). One hour old, so its name can never collide with the artifact the run below creates.
+RECENT_ORPHAN="science-bank-$(date -u -d '1 hour ago' +%Y%m%dT%H%M%SZ).tar.age.sig"; : >"$WORK/remote/$RECENT_ORPHAN"
 : >"$WORK/local/not-ours.txt"
 run -- "$OPS/backup-science-bank.sh" >/dev/null 2>&1
 expect "run with old copies present exits 0" 0 $?
@@ -226,6 +218,8 @@ expect "run with old copies present exits 0" 0 $?
 [ "$(count_remote)" = 3 ] && ok "remote: pruned to MIN_KEEP (3) newest" || no "remote: pruned to MIN_KEEP (3) newest" "$(count_remote)"
 [ ! -e "$WORK/remote/science-bank-20200103T000000Z.tar.age.sig" ] && [ -e "$WORK/remote/science-bank-20200105T000000Z.tar.age.sig" ] &&
   ok "remote: signatures follow their artifacts" || no "remote: signatures follow their artifacts"
+[ ! -e "$WORK/remote/science-bank-20190101T000000Z.tar.age.sig" ] && ok "remote: an old orphan signature is removed" || no "remote: an old orphan signature is removed"
+[ -e "$WORK/remote/$RECENT_ORPHAN" ] && ok "remote: a fresh orphan signature is left alone (it may be mid-upload)" || no "remote: a fresh orphan signature is left alone"
 rm -f "${WORK:?}/local"/science-bank-2020*; : >"$WORK/local/science-bank-20200101T000000Z.tar.age"
 run LOCAL_RETENTION_DAYS=36500 -- "$OPS/backup-science-bank.sh" --no-upload >/dev/null 2>&1
 [ -e "$WORK/local/science-bank-20200101T000000Z.tar.age" ] && ok "retention window is respected (nothing pruned inside it)" || no "retention window is respected"
@@ -243,6 +237,16 @@ expect "--check-remote alerts when the newest remote backup has lost its signatu
 has "  ...and says so" "$WORK/alerts.log" 'no signature file'
 mv "$WORK/hidden.sig" "$NEWEST_REMOTE.sig"
 reset_alerts
+FORGED_NEWEST="$WORK/remote/science-bank-29990101T000000Z.tar.age"
+cp "$NEWEST_REMOTE" "$FORGED_NEWEST"; sign_with "$WORK/attacker_ed25519" "$FORGED_NEWEST"
+run -- "$OPS/check-backup-health.sh" --check-remote >/dev/null 2>&1
+expect "--check-remote alerts on a newest artifact whose signature exists but does NOT verify" 1 $?
+has "  ...and says the signature does not verify" "$WORK/alerts.log" 'does not verify'
+rm -f -- "$FORGED_NEWEST" "$FORGED_NEWEST.sig"
+reset_alerts
+run SIGNERS_FILE="$WORK/none" -- "$OPS/check-backup-health.sh" --check-remote >/dev/null 2>&1
+expect "--check-remote alerts when it has no allowed-signers file to verify with" 1 $?
+reset_alerts
 echo $(($(date +%s) - 40 * 3600)) >"$WORK/state/last-upload-success"
 run -- "$OPS/check-backup-health.sh" >/dev/null 2>&1
 expect "a stale upload marker alerts" 1 $?
@@ -258,6 +262,21 @@ expect "--check-remote alerts when the remote has no backups" 1 $?
 : >"$WORK/remote/science-bank-20200101T000000Z.tar.age"
 run -- "$OPS/check-backup-health.sh" --check-remote >/dev/null 2>&1
 expect "--check-remote alerts when the newest remote backup is old" 1 $?
+
+echo "== rollback: the newest genuine remote backup is deleted, leaving an older (still fresh) one"
+rm -rf "${WORK:?}/remote"/*; reset_alerts
+run -- "$OPS/backup-science-bank.sh" >/dev/null 2>&1; sleep 1
+run -- "$OPS/backup-science-bank.sh" >/dev/null 2>&1
+NEWEST_NAME="$(basename "$(newest_local)")"
+[ -f "$WORK/state/last-upload-artifact" ] && [ "$(cat "$WORK/state/last-upload-artifact")" = "$NEWEST_NAME" ] &&
+  ok "the backup job records the artifact it last uploaded" || no "the backup job records the artifact it last uploaded"
+run -- "$OPS/check-backup-health.sh" --check-remote >/dev/null 2>&1
+expect "healthy before the deletion" 0 $?
+rm -f -- "$WORK/remote/$NEWEST_NAME" "$WORK/remote/$NEWEST_NAME.sig"
+run -- "$OPS/check-backup-health.sh" --check-remote >/dev/null 2>&1
+expect "deleting the newest remote backup is detected immediately (not only after 30 hours)" 1 $?
+has "  ...and names the missing artifact" "$WORK/alerts.log" "missing from the remote: $NEWEST_NAME"
+reset_alerts
 
 echo "== restore drill"
 run -- "$OPS/backup-science-bank.sh" --no-upload >/dev/null 2>&1
@@ -282,6 +301,24 @@ has "drill reports the signature check" "$WORK/drill1.out" 'signature: verified'
 mkdir -p "$WORK/forged" "$WORK/p"
 age -d -i "$WORK/id.txt" -o "$WORK/tb.tar" "$ART" && tar -xf "$WORK/tb.tar" -C "$WORK/p"
 BASE="$(basename "$ART" .tar.age)"
+# Forged bundles carry a manifest naming the genuine file; point it at the forged name so that only the check under
+# test can reject them (the exact-name check has its own tests below).
+retarget() { # payload_dir suffix
+  python3 - "$1/manifest.json" "${BASE}-$2.tar.age" "$2" <<'PY'
+import json, sys
+p, name, label = sys.argv[1:4]
+m = json.load(open(p)); m["artifact_name"] = name; m["label"] = label; json.dump(m, open(p, "w"))
+PY
+}
+# A recording `age`: lets a test prove decryption was (or was not) attempted.
+mkdir -p "$WORK/bin2"
+cat >"$WORK/bin2/age" <<EOF
+#!/usr/bin/env bash
+echo "\$*" >>"$WORK/age-calls.log"
+exec "$(command -v age)" "\$@"
+EOF
+chmod +x "$WORK/bin2/age"
+decrypt_attempts() { grep -c -- ' -d \| -d$\|^-d ' "$WORK/age-calls.log" 2>/dev/null || true; }
 drill() { # description, expected rc, pattern, identity file, artifact [extra args...]
   local desc="$1" want="$2" pat="$3" id="$4" art="$5"; shift 5
   run -- "$OPS/restore-drill.sh" --identity "$id" --file "$art" "$@" >"$WORK/d.out" 2>&1
@@ -297,29 +334,65 @@ forge_from_tar() { # suffix tar [signing key]
 
 # 1. A forged artifact that someone with only the public key can make: valid bundle, no signature.
 age -R "$WORK/cfg/recipients.txt" -o "$WORK/forged/${BASE}-unsigned.tar.age" "$WORK/tb.tar"
-drill "an unsigned (forged) artifact is refused" 1 'no signature found' "$WORK/id.txt" "$WORK/forged/${BASE}-unsigned.tar.age"
+# Positive control first, so a silent wrapper cannot make the "no decrypt" assertions pass vacuously.
+: >"$WORK/age-calls.log"
+run PATH="$WORK/bin2:$PATH" -- "$OPS/restore-drill.sh" --identity "$WORK/id.txt" --file "$ART" --extract-to "$WORK/ctl" >/dev/null 2>&1
+[ "$(decrypt_attempts)" -ge 1 ] && ok "control: a genuine artifact does reach 'age -d' (the wrapper records it)" || no "control: the recording age wrapper works" "$(cat "$WORK/age-calls.log")"
+: >"$WORK/age-calls.log"
+run PATH="$WORK/bin2:$PATH" -- "$OPS/restore-drill.sh" --identity "$WORK/id.txt" --file "$WORK/forged/${BASE}-unsigned.tar.age" >"$WORK/d.out" 2>&1
+expect "an unsigned (forged) artifact is refused" 1 $?
+has "  ...message: no signature found" "$WORK/d.out" 'no signature found'
 [ ! -e "$WORK/forged/${BASE}-unsigned.tar.age.sig" ] && ok "  ...and the drill did not invent one" || no "  ...and the drill did not invent one"
-! grep -q 'signature: verified' "$WORK/d.out" && ok "  ...and never reached decryption" || no "  ...and never reached decryption"
+[ "$(decrypt_attempts)" = 0 ] && ok "  ...and decryption was never attempted" || no "  ...and decryption was never attempted" "$(cat "$WORK/age-calls.log")"
 
 # 2. Signed by the wrong key (the attacker's).
 F="$(forge_from_tar attacker-signed "$WORK/tb.tar" "$WORK/attacker_ed25519")"
-drill "an artifact signed by another key is refused" 1 'signature does not verify' "$WORK/id.txt" "$F"
+: >"$WORK/age-calls.log"
+run PATH="$WORK/bin2:$PATH" -- "$OPS/restore-drill.sh" --identity "$WORK/id.txt" --file "$F" >"$WORK/d.out" 2>&1
+expect "an artifact signed by another key is refused" 1 $?
+has "  ...message: signature does not verify" "$WORK/d.out" 'signature does not verify'
+[ "$(decrypt_attempts)" = 0 ] && ok "  ...and decryption was never attempted" || no "  ...and decryption was never attempted"
 
 # 3. A genuine artifact altered after signing.
 cp "$ART" "$WORK/forged/${BASE}-altered.tar.age"; cp "$ART.sig" "$WORK/forged/${BASE}-altered.tar.age.sig"
 printf 'X' >>"$WORK/forged/${BASE}-altered.tar.age"
-drill "an artifact altered after signing is refused" 1 'signature does not verify' "$WORK/id.txt" "$WORK/forged/${BASE}-altered.tar.age"
+: >"$WORK/age-calls.log"
+run PATH="$WORK/bin2:$PATH" -- "$OPS/restore-drill.sh" --identity "$WORK/id.txt" --file "$WORK/forged/${BASE}-altered.tar.age" >"$WORK/d.out" 2>&1
+expect "an artifact altered after signing is refused" 1 $?
+has "  ...message: signature does not verify" "$WORK/d.out" 'signature does not verify'
+[ "$(decrypt_attempts)" = 0 ] && ok "  ...and decryption was never attempted" || no "  ...and decryption was never attempted"
 
 # 4. A missing allowed-signers file is an error, not a pass.
 drill "no allowed-signers file is refused" 1 'allowed-signers' "$WORK/id.txt" "$ART" --signers "$WORK/none"
 
-# 5. Replay / rename: a genuine, correctly signed OLD backup renamed to look like the newest.
-cp "$ART" "$WORK/forged/science-bank-29990101T000000Z.tar.age"; cp "$ART.sig" "$WORK/forged/science-bank-29990101T000000Z.tar.age.sig"
-drill "a genuine backup renamed to look newer is refused" 1 'may have been renamed' "$WORK/id.txt" "$WORK/forged/science-bank-29990101T000000Z.tar.age"
+# 5. Replay / rename: a genuine, correctly signed backup copied to any other name must be refused (the signature
+# covers content, not the name; the name is bound inside the signed manifest and must match exactly).
+rename_case() { # description, new name
+  cp "$ART" "$WORK/forged/$2"; cp "$ART.sig" "$WORK/forged/$2.sig"
+  drill "$1" 1 'may have been renamed' "$WORK/id.txt" "$WORK/forged/$2"
+}
+rename_case "a genuine backup renamed to look much newer is refused" science-bank-29990101T000000Z.tar.age
+TEN_LATER="science-bank-$(python3 - "$BASE" <<'PY'
+import sys
+from datetime import datetime, timedelta
+ts = sys.argv[1].split("-")[2]
+print((datetime.strptime(ts, "%Y%m%dT%H%M%SZ") + timedelta(minutes=10)).strftime("%Y%m%dT%H%M%SZ"))
+PY
+).tar.age"
+rename_case "a genuine backup renamed only TEN MINUTES later is refused (no tolerance window)" "$TEN_LATER"
+ONE_SEC="science-bank-$(python3 - "$BASE" <<'PY'
+import sys
+from datetime import datetime, timedelta
+ts = sys.argv[1].split("-")[2]
+print((datetime.strptime(ts, "%Y%m%dT%H%M%SZ") + timedelta(seconds=1)).strftime("%Y%m%dT%H%M%SZ"))
+PY
+).tar.age"
+rename_case "a genuine backup renamed ONE SECOND later is refused" "$ONE_SEC"
+rename_case "a genuine backup given a different label is refused" "${BASE}-relabelled.tar.age"
 
 echo "== restore drill: damage and content checks (each bundle is signed by the real key, so only the check under test can fail)"
 # 6. Dump modified but manifest left alone.
-mkdir "$WORK/t1"; cp "$WORK/p"/* "$WORK/t1/"; printf 'X' >>"$WORK/t1/science_bank.dump"
+mkdir "$WORK/t1"; cp "$WORK/p"/* "$WORK/t1/"; printf 'X' >>"$WORK/t1/science_bank.dump"; retarget "$WORK/t1" tampered
 tar -C "$WORK/t1" -cf "$WORK/forged/tampered.tar" manifest.json science_bank.dump env
 F="$(forge_from_tar tampered "$WORK/forged/tampered.tar")"
 drill "a modified dump is caught by the checksum" 1 'checksum' "$WORK/id.txt" "$F"
@@ -328,7 +401,7 @@ cp "$ART" "$WORK/forged/${BASE}-damaged.tar.age"; printf '\x00\x01\x02' | dd of=
 sign_with "$WORK/cfg/signing_ed25519" "$WORK/forged/${BASE}-damaged.tar.age"
 drill "a damaged encrypted file is caught by age" 1 'could not decrypt' "$WORK/id.txt" "$WORK/forged/${BASE}-damaged.tar.age"
 # 8. A table the manifest lists is missing after restore.
-mkdir "$WORK/t2"; cp "$WORK/p"/* "$WORK/t2/"
+mkdir "$WORK/t2"; cp "$WORK/p"/* "$WORK/t2/"; retarget "$WORK/t2" mismatch
 python3 - "$WORK/t2/manifest.json" <<'PY'
 import json, sys
 p = sys.argv[1]; m = json.load(open(p)); m["tables"]["nonexistent_table"] = 1; json.dump(m, open(p, "w"))
@@ -349,24 +422,32 @@ def add(tf, name, payload, typ=tarfile.REGTYPE, link=""):
     ti = tarfile.TarInfo(name); ti.type = typ; ti.linkname = link
     ti.size = len(payload) if typ == tarfile.REGTYPE else 0
     tf.addfile(ti, io.BytesIO(payload) if typ == tarfile.REGTYPE else None)
-manifest = json.loads(data("manifest.json"))
+def base_manifest():
+    m = json.loads(data("manifest.json")); m["artifact_name"] = os.environ["FORGED_NAME"]; m["label"] = os.environ["FORGED_LABEL"]
+    return m
 def manifest_bytes(m): return json.dumps(m).encode()
 with tarfile.open(out, "w") as tf:
     if kind == "unlisted":
-        m = json.loads(data("manifest.json")); del m["files"]["env"]
+        m = base_manifest(); del m["files"]["env"]
         add(tf, "manifest.json", manifest_bytes(m)); add(tf, "science_bank.dump", data("science_bank.dump")); add(tf, "env", data("env"))
     elif kind == "inject":
-        m = json.loads(data("manifest.json")); m["tables"]['users"; drop table x; --'] = 1
+        m = base_manifest(); m["tables"]['users"; drop table x; --'] = 1
         add(tf, "manifest.json", manifest_bytes(m)); add(tf, "science_bank.dump", data("science_bank.dump")); add(tf, "env", data("env"))
     elif kind == "badversion":
-        m = json.loads(data("manifest.json")); m["alembic_version"] = "x'; drop table y; --"
+        m = base_manifest(); m["alembic_version"] = "x'; drop table y; --"
+        add(tf, "manifest.json", manifest_bytes(m)); add(tf, "science_bank.dump", data("science_bank.dump")); add(tf, "env", data("env"))
+    elif kind == "noname":
+        m = base_manifest(); del m["artifact_name"]
+        add(tf, "manifest.json", manifest_bytes(m)); add(tf, "science_bank.dump", data("science_bank.dump")); add(tf, "env", data("env"))
+    elif kind == "badstamp":
+        m = base_manifest(); m["created_at"] = "2001-01-01T00:00:00Z"
         add(tf, "manifest.json", manifest_bytes(m)); add(tf, "science_bank.dump", data("science_bank.dump")); add(tf, "env", data("env"))
     elif kind == "escapecode":
-        m = json.loads(data("manifest.json")); m["host"] = "evil\x1b]0;pwned\x07"
+        m = base_manifest(); m["host"] = "evil\x1b]0;pwned\x07"
         add(tf, "manifest.json", manifest_bytes(m)); add(tf, "science_bank.dump", data("science_bank.dump")); add(tf, "env", data("env"))
     else:
         if kind != "nomanifest":
-            add(tf, "manifest.json", data("manifest.json"))
+            add(tf, "manifest.json", manifest_bytes(base_manifest()))
         if kind == "symlink":
             add(tf, "science_bank.dump", b"", tarfile.SYMTYPE, "/etc/passwd")
         elif kind != "nodump":
@@ -381,7 +462,8 @@ with tarfile.open(out, "w") as tf:
         if kind == "device": add(tf, "dev", b"", tarfile.CHRTYPE)
 PY
 }
-for kind in escape absolute symlink extra nodump nomanifest dir dup device unlisted inject badversion escapecode; do
+for kind in escape absolute symlink extra nodump nomanifest dir dup device unlisted inject badversion noname badstamp escapecode; do
+  export FORGED_NAME="${BASE}-$kind.tar.age" FORGED_LABEL="$kind"
   mktar "$WORK/forged/$kind.tar" "$kind" "$WORK/p"
   F="$(forge_from_tar "$kind" "$WORK/forged/$kind.tar")"
   drill "hostile bundle '$kind' is rejected" 1 'bundle rejected' "$WORK/id.txt" "$F"
@@ -390,6 +472,17 @@ done
 if [ ! -e "$ABS_TARGET" ]; then ok "an absolute-path member wrote nothing outside the work dir"; else no "an absolute-path member wrote nothing outside the work dir"; rm -f -- "$ABS_TARGET"; fi
 ! grep -q $'\x1b' "$WORK/d.out" && ok "control characters from a manifest never reach the terminal" || no "control characters from a manifest never reach the terminal"
 [ -z "$(docker ps -aq --filter name=sb-restore-drill)" ] && ok "no throwaway container was left running" || no "no throwaway container was left running"
+
+echo "== restore drill: size cap and signer rotation"
+run MAX_BUNDLE_BYTES=100 -- "$OPS/restore-drill.sh" --identity "$WORK/id.txt" --file "$ART" >"$WORK/d.out" 2>&1
+expect "a member over the size cap is refused" 1 $?
+has "  ...message: implausibly large" "$WORK/d.out" 'implausibly large'
+run MAX_BUNDLE_TOTAL_BYTES=100 -- "$OPS/restore-drill.sh" --identity "$WORK/id.txt" --file "$ART" >"$WORK/d.out" 2>&1
+expect "a bundle over the total size cap is refused" 1 $?
+echo "science-bank-backup $(cut -d' ' -f1,2 "$WORK/attacker_ed25519.pub")" >"$WORK/signers-only-other"
+drill "rotation: only a different key listed -> a genuine backup does not verify" 1 'signature does not verify' "$WORK/id.txt" "$ART" --signers "$WORK/signers-only-other"
+cat "$WORK/signers-only-other" "$WORK/cfg/allowed_signers" >"$WORK/signers-both"
+drill "rotation: the old key stays listed next to a new one -> the old backup still verifies" 0 'signature: verified' "$WORK/id.txt" "$ART" --signers "$WORK/signers-both"
 
 echo "== restore drill: extract only"
 run -- "$OPS/restore-drill.sh" --identity "$WORK/id.txt" --file "$ART" --extract-to "$WORK/extracted" >"$WORK/drill5.out" 2>&1
