@@ -6,7 +6,7 @@ import { Widget } from "./Widget";
 
 export function RecentAssessmentsWidget() {
   const assessments = useAssessments();
-  const recent = [...(assessments.data ?? [])].sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, 5);
+  const recent = [...(assessments.data ?? [])].sort((a, b) => b.updated_at.localeCompare(a.updated_at)).slice(0, 3);
   return (
     <Widget
       id="dashboard-assessments"

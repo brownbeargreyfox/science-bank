@@ -5,7 +5,7 @@ import { Chart } from "./Chart";
 export function DataTable({ table }: { table: StimulusTable }) {
   const fmts = table.columns.map((c) => columnFormatter(table.rows.map((r) => r[c.key])));
   return (
-    <div className="keep my-3 max-w-full overflow-x-auto">
+    <div className="keep my-3 max-w-full relative overflow-x-auto">
       <table className="data-table">
         <caption>{table.caption}</caption>
         <thead>

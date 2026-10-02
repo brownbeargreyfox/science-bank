@@ -23,6 +23,10 @@ export default function BundlesPage() {
   }, [hash, bundles.data]);
 
   const course = courses.data?.find((c) => c.id === courseId);
+  const familyKeys = (standardId: number) =>
+    (families.data ?? [])
+      .filter((family) => family.bindings.some((binding) => binding.standard_ids.includes(standardId)))
+      .map((family) => family.key);
 
   return (
     <>
@@ -66,19 +70,37 @@ export default function BundlesPage() {
 
               <div className="mt-4 grid gap-5 md:grid-cols-2">
                 <div>
-                  <h3 className="mb-2 font-bold">Aligned performance expectations</h3>
+                  <h3 className="mb-1 font-bold">Aligned performance expectations</h3>
+                  <p className="mb-2 text-sm text-muted">
+                    Filled buttons open Generate with that standard ready. Outlined buttons open the standard; there is
+                    no question generator for them yet.
+                  </p>
                   <ul className="space-y-2.5">
-                    {b.aligned.map((a) => (
-                      <li key={a.standard_id}>
-                        <div className="flex flex-wrap items-center gap-2">
-                          <CodeTag code={a.code} course={b.course_name} to={`/standards/${a.standard_id}`} />
-                          {a.partial ? (
-                            <span className="badge border-line bg-paper text-muted">Partially addressed</span>
-                          ) : null}
-                        </div>
-                        <p className="mt-1 text-[0.9375rem]">{a.performance_expectation}</p>
-                      </li>
-                    ))}
+                    {b.aligned.map((a) => {
+                      const keys = familyKeys(a.standard_id);
+                      const query = new URLSearchParams({ standard: String(a.standard_id), bundle: String(b.id) });
+                      if (keys.length === 1) query.set("family", keys[0]);
+                      return (
+                        <li key={a.standard_id}>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <CodeTag code={a.code} course={b.course_name} to={`/standards/${a.standard_id}`} />
+                            {a.partial ? (
+                              <span className="badge border-line bg-paper text-muted">Partially addressed</span>
+                            ) : null}
+                            {keys.length ? (
+                              <Link to={`/generate?${query}`} className="btn btn-sm btn-primary">
+                                Generate
+                              </Link>
+                            ) : (
+                              <Link to={`/standards/${a.standard_id}`} className="btn btn-sm">
+                                View<span className="sr-only"> {a.code} (no question generator yet)</span>
+                              </Link>
+                            )}
+                          </div>
+                          <p className="mt-1 text-[0.9375rem]">{a.performance_expectation}</p>
+                        </li>
+                      );
+                    })}
                   </ul>
                 </div>
                 <div className="space-y-4">
@@ -109,11 +131,17 @@ export default function BundlesPage() {
               </div>
               {families.data
                 ?.filter((family) => {
-                  const codes = new Set(b.aligned.filter((alignment) => !alignment.partial).map((alignment) => alignment.code));
+                  const codes = new Set(
+                    b.aligned.filter((alignment) => !alignment.partial).map((alignment) => alignment.code),
+                  );
                   return family.bindings.every((binding) => codes.has(binding.code));
                 })
                 .map((family) => (
-                  <Link key={family.key} className="btn btn-primary mt-5" to={`/generate/bundle?bundle=${b.id}&family=${family.key}`}>
+                  <Link
+                    key={family.key}
+                    className="btn btn-primary mt-5 h-auto whitespace-normal py-2 text-left"
+                    to={`/generate/bundle?bundle=${b.id}&family=${family.key}`}
+                  >
                     Generate shared stimulus: {family.title}
                   </Link>
                 ))}

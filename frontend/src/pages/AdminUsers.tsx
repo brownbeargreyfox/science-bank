@@ -297,14 +297,14 @@ export default function AdminUsersPage() {
           </>
         }
       />
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-5">
           <Section title="Accounts" id="users-h">
             <ErrorNotice error={users.error} />
             {users.isPending ? (
               <Loading />
             ) : (
-              <div className="overflow-x-auto">
+              <div className="relative overflow-x-auto">
                 <table className="data-table">
                   <thead>
                     <tr>

@@ -50,7 +50,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-6 flex items-center gap-3">
           <svg width="40" height="40" viewBox="0 0 30 30" aria-hidden="true">
-            <rect x="1" y="1" width="28" height="28" rx="4" fill="#0f5563" />
+            <rect x="1" y="1" width="28" height="28" rx="4" fill="#106ebe" />
             <path d="M11 6h8M13 6v7l-5.5 9.5a1.6 1.6 0 0 0 1.4 2.5h12.2a1.6 1.6 0 0 0 1.4-2.5L17 13V6" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinejoin="round" />
             <path d="M9.6 19h10.8" stroke="#fbe38a" strokeWidth="2.4" />
           </svg>

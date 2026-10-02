@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 /*
- * Science Bank design tokens.
+ * Science Bank design tokens. The look follows Azure DevOps: a blue top bar, an icon rail, flat widgets with
+ * small corners. Neutral text tokens (ink, muted, line) are deliberately unchanged so printed student copies look
+ * exactly as before.
  * Two voices: Atkinson Hyperlegible for the teacher's working UI, and
  * Source Serif 4 for anything a student would read (stimuli, stems, choices),
  * so the screen previews what the printed booklet will look like.
@@ -10,15 +12,15 @@
   --font-sans: "Atkinson Hyperlegible", ui-sans-serif, system-ui, sans-serif;
   --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
 
-  --color-paper: #f3f5f4;
+  --color-paper: #f5f5f5;
   --color-surface: #ffffff;
   --color-ink: #1b2a30;
   --color-muted: #4b5b61;
   --color-line: #c9d3d4;
-  --color-line-soft: #e2e8e8;
-  --color-petrol: #0f5563;
-  --color-petrol-dark: #0a3f4a;
-  --color-petrol-soft: #e1eeef;
+  --color-line-soft: #e6e6e6;
+  --color-accent: #106ebe; /* white on this is 5.0:1, so it is safe for small text; Azure's brighter #0078d4 is 4.1:1 */
+  --color-accent-dark: #0f548c;
+  --color-accent-soft: #ebf3fc;
   --color-mark: #fbe38a;
   --color-mark-edge: #b08a00;
   --color-bound: #7a4200;
@@ -50,22 +52,26 @@
     text-wrap: balance;
   }
   :focus-visible {
-    outline: 3px solid var(--color-petrol);
+    outline: 3px solid var(--color-accent);
     outline-offset: 2px;
     border-radius: 3px;
   }
   a {
-    color: var(--color-petrol);
+    color: var(--color-accent);
     text-underline-offset: 0.18em;
   }
   a:hover {
-    color: var(--color-petrol-dark);
+    color: var(--color-accent-dark);
   }
   input,
   select,
   textarea,
   button {
     font: inherit;
+  }
+  /* A fieldset defaults to its content's minimum width, which pushes narrow screens sideways. */
+  fieldset {
+    min-width: 0;
   }
 }
 
@@ -78,7 +84,7 @@
     gap: 0.4rem;
     min-height: 2.5rem;
     padding: 0.45rem 0.95rem;
-    border-radius: 5px;
+    border-radius: 2px;
     border: 1px solid var(--color-line);
     background: var(--color-surface);
     color: var(--color-ink);
@@ -89,8 +95,8 @@
     white-space: nowrap;
   }
   .btn:hover {
-    border-color: var(--color-petrol);
-    color: var(--color-petrol-dark);
+    border-color: var(--color-accent);
+    color: var(--color-accent-dark);
   }
   .btn:disabled,
   .btn[aria-disabled="true"] {
@@ -98,13 +104,13 @@
     cursor: not-allowed;
   }
   .btn-primary {
-    background: var(--color-petrol);
-    border-color: var(--color-petrol);
+    background: var(--color-accent);
+    border-color: var(--color-accent);
     color: #fff;
   }
   .btn-primary:hover {
-    background: var(--color-petrol-dark);
-    border-color: var(--color-petrol-dark);
+    background: var(--color-accent-dark);
+    border-color: var(--color-accent-dark);
     color: #fff;
   }
   .btn-danger {
@@ -151,7 +157,7 @@
     min-height: 2.5rem;
     padding: 0.45rem 0.65rem;
     border: 1px solid #8d9ca1;
-    border-radius: 5px;
+    border-radius: 2px;
     background: var(--color-surface);
     color: var(--color-ink);
   }
@@ -165,7 +171,7 @@
   .check {
     width: 1.1rem;
     height: 1.1rem;
-    accent-color: var(--color-petrol);
+    accent-color: var(--color-accent);
     flex: none;
   }
 
@@ -173,7 +179,7 @@
   .panel {
     background: var(--color-surface);
     border: 1px solid var(--color-line);
-    border-radius: 6px;
+    border-radius: 2px;
   }
 
   /* ---- The standard code "specimen tag" ---- */
@@ -181,12 +187,12 @@
     display: inline-flex;
     align-items: baseline;
     gap: 0.35rem;
-    border: 1px solid var(--color-petrol);
+    border: 1px solid var(--color-accent);
     border-left-width: 4px;
     border-radius: 3px;
     padding: 0.05rem 0.45rem;
     background: var(--color-surface);
-    color: var(--color-petrol-dark);
+    color: var(--color-accent-dark);
     font-weight: 700;
     font-size: 0.875rem;
     white-space: nowrap;
@@ -206,7 +212,9 @@
     font-size: 0.8125rem;
     font-weight: 700;
     border: 1px solid transparent;
-    white-space: nowrap;
+    max-width: 100%;
+    white-space: normal;
+    overflow-wrap: anywhere;
   }
 
   /* ---- Student-facing material ---- */
@@ -238,7 +246,7 @@
     text-align: right;
   }
   .data-table thead th {
-    background: var(--color-petrol-soft);
+    background: var(--color-accent-soft);
     text-align: center;
     font-weight: 700;
   }
@@ -273,6 +281,117 @@
 @page {
   size: letter;
   margin: 0.6in 0.65in 0.7in;
+}
+
+@layer components {
+  /* ---- App shell: blue top bar and an icon rail that expands over the page ---- */
+  :root {
+    --rail-duration: 375ms;
+    --rail-collapsed: 3rem;
+    --rail-expanded: 14rem;
+    --topbar-height: 3rem;
+  }
+  .topbar {
+    background: var(--color-accent);
+    color: #fff;
+    height: var(--topbar-height);
+  }
+  .topbar a,
+  .topbar button {
+    color: #fff;
+  }
+  .topbar :focus-visible {
+    outline-color: #fff;
+  }
+  .topbar .btn {
+    background: transparent;
+    border-color: rgb(255 255 255 / 0.7);
+    color: #fff;
+  }
+  .topbar .btn:hover {
+    background: rgb(255 255 255 / 0.16);
+    border-color: #fff;
+    color: #fff;
+  }
+  .rail {
+    position: fixed;
+    top: var(--topbar-height);
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    width: var(--rail-collapsed);
+    overflow: hidden;
+    background: var(--color-surface);
+    border-right: 1px solid var(--color-line);
+    transition:
+      width var(--rail-duration) cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow var(--rail-duration) ease;
+  }
+  .rail:hover,
+  .rail:has(:focus-visible),
+  .rail[data-pinned="true"] {
+    width: var(--rail-expanded);
+  }
+  .rail:not([data-pinned="true"]):hover,
+  .rail:not([data-pinned="true"]):has(:focus-visible) {
+    box-shadow: 4px 0 12px rgb(0 0 0 / 0.14);
+  }
+  .rail-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    height: 2.5rem;
+    padding: 0 0.875rem;
+    color: var(--color-ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .rail-item:hover {
+    background: var(--color-line-soft);
+    color: var(--color-ink);
+  }
+  .rail-item[aria-current="page"] {
+    background: var(--color-accent-soft);
+    color: var(--color-accent-dark);
+    font-weight: 700;
+  }
+  .rail-item[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.5rem;
+    bottom: 0.5rem;
+    width: 3px;
+    background: var(--color-accent);
+  }
+  .rail-item:focus-visible {
+    outline-offset: -3px;
+  }
+  .rail-icon {
+    flex: 0 0 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+  .rail-label {
+    opacity: 0;
+    transform: translateX(-6px);
+    transition:
+      opacity var(--rail-duration) ease,
+      transform var(--rail-duration) ease;
+  }
+  .rail:hover .rail-label,
+  .rail:has(:focus-visible) .rail-label,
+  .rail[data-pinned="true"] .rail-label {
+    opacity: 1;
+    transform: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .rail,
+    .rail-label {
+      transition: none;
+    }
+  }
 }
 
 @media print {

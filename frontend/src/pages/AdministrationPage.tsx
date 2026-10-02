@@ -130,7 +130,7 @@ function Grid({ detail }: { detail: AdministrationDetail }) {
         {!anyInvalid && changed.length > 0 ? <span className="text-sm text-muted">Unsaved changes</span> : null}
         <ErrorNotice error={save.error ?? addSection.error ?? removeSection.error} />
       </div>
-      <div className="panel mb-5 overflow-x-auto">
+      <div className="panel mb-5 relative overflow-x-auto">
         <table className="w-full text-sm">
           <caption className="sr-only">Correct and attempted counts by question and section</caption>
           <thead>

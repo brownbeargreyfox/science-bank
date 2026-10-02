@@ -228,7 +228,7 @@ export default function GeneratePage() {
                 <label
                   key={s.id}
                   className={`flex cursor-pointer gap-3 rounded-md border p-3 ${
-                    s.id === standardId ? "border-petrol bg-petrol-soft" : "border-line"
+                    s.id === standardId ? "border-accent bg-accent-soft" : "border-line"
                   }`}
                 >
                   <input
@@ -268,7 +268,7 @@ export default function GeneratePage() {
                 <label
                   key={f.key}
                   className={`flex cursor-pointer gap-3 rounded-md border p-3 ${
-                    f.key === familyKey ? "border-petrol bg-petrol-soft" : "border-line"
+                    f.key === familyKey ? "border-accent bg-accent-soft" : "border-line"
                   }`}
                 >
                   <input
@@ -299,7 +299,7 @@ export default function GeneratePage() {
           <h2 className="mb-3 text-lg font-bold">
             <span className="mr-2 text-muted">3.</span>Options
           </h2>
-          <div className="grid gap-5 md:grid-cols-[auto_auto_1fr]">
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-[auto_auto_1fr]">
             <fieldset>
               <legend className="field-label">Depth of Knowledge</legend>
               <div className="flex flex-wrap gap-3">
@@ -346,8 +346,8 @@ export default function GeneratePage() {
                   : "None checked means both."}
               </p>
             </fieldset>
-            <div className="grid grid-cols-2 gap-3 sm:max-w-sm">
-              <div>
+            <div className="grid min-w-0 grid-cols-2 gap-3 sm:max-w-sm md:col-span-2 xl:col-span-1">
+              <div className="min-w-0">
                 <label htmlFor="g-qty" className="field-label">
                   Quantity
                 </label>
@@ -367,7 +367,7 @@ export default function GeneratePage() {
                   1 to 40 questions
                 </p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <label htmlFor="g-seed" className="field-label">
                   Seed
                 </label>

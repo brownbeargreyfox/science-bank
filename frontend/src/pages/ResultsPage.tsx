@@ -158,7 +158,7 @@ export default function ResultsPage() {
       ) : rows.length === 0 ? (
         <Empty>No recorded uses match. Record a use from an assessment page, then enter results.</Empty>
       ) : (
-        <div className="panel overflow-x-auto">
+        <div className="panel relative overflow-x-auto">
           <table className="w-full text-sm">
             <caption className="sr-only">Questions by accuracy across your recorded uses</caption>
             <thead>

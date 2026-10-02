@@ -5,6 +5,10 @@ import { useFamilies } from "../../api/queries";
 import { Empty, ErrorNotice, Loading } from "../ui";
 import { Widget } from "./Widget";
 
+/**
+ * The overview of the course's bundles: one small tile each, with how many of its standards can generate questions.
+ * Working with a bundle's standards happens on the Bundles page, which each tile opens.
+ */
 export function BundlesWidget({ courseId, courseName }: { courseId: number | null; courseName: string }) {
   const families = useFamilies();
   const bundles = useQuery({
@@ -13,85 +17,60 @@ export function BundlesWidget({ courseId, courseName }: { courseId: number | nul
     enabled: courseId !== null,
     staleTime: 5 * 60_000,
   });
-  const familyKeys = (standardId: number) =>
-    (families.data ?? [])
-      .filter((family) => family.bindings.some((binding) => binding.standard_ids.includes(standardId)))
-      .map((family) => family.key);
+  const generatorIds = new Set(
+    (families.data ?? []).flatMap((family) => family.bindings.flatMap((binding) => binding.standard_ids)),
+  );
+  const all = `/bundles?course=${courseId}`;
 
   return (
-    <Widget id="dashboard-bundles" title="Bundles" className="lg:col-span-2">
+    <Widget
+      id="dashboard-bundles"
+      title="Bundles"
+      className="lg:col-span-2"
+      actions={
+        <Link to={all} className="text-sm font-bold">
+          Open bundles
+        </Link>
+      }
+    >
       <ErrorNotice error={bundles.error ?? families.error} />
       {bundles.isPending || families.isPending ? (
         <Loading />
       ) : bundles.data?.length === 0 ? (
         <Empty>{courseName} has no bundles in the imported data.</Empty>
       ) : (
-        <>
-          <p className="mb-3 text-sm text-muted">
-            Filled buttons open Generate with that standard ready. Outlined buttons open the standard; there is no
-            question generator for them yet.
-          </p>
-          <ol className="space-y-4">
-            {bundles.data?.map((bundle) => {
-              const ready = bundle.aligned.filter((standard) => familyKeys(standard.standard_id).length > 0).length;
-              const total = bundle.aligned.length;
-              const pct = total ? Math.round((ready / total) * 100) : 0;
-              return (
-                <li key={bundle.id} className="rounded border border-line-soft p-3">
-                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                    <Link to={`/bundles?course=${courseId}#bundle-${bundle.id}`} className="font-bold">
-                      {bundle.name}
-                    </Link>
-                    <div className="flex min-w-[13rem] flex-1 items-center gap-2 text-sm text-muted">
-                      <div
-                        className="h-1.5 flex-1 overflow-hidden rounded bg-line-soft"
-                        role="progressbar"
-                        aria-label={`${bundle.name}: ${ready} of ${total} ready to generate`}
-                        aria-valuemin={0}
-                        aria-valuemax={total}
-                        aria-valuenow={ready}
-                      >
-                        <div className="h-full bg-petrol" style={{ width: `${pct}%` }} />
-                      </div>
-                      <span>
-                        {ready} of {total} ready to generate
-                      </span>
-                    </div>
-                    <Link to={`/bundles?course=${courseId}#bundle-${bundle.id}`} className="text-sm font-bold">
-                      Open
-                    </Link>
-                  </div>
-                  <ul className="mt-3 flex flex-wrap gap-2">
-                    {bundle.aligned.map((standard) => {
-                      const keys = familyKeys(standard.standard_id);
-                      const generated = keys.length > 0;
-                      const query = new URLSearchParams({
-                        standard: String(standard.standard_id),
-                        bundle: String(bundle.id),
-                      });
-                      if (keys.length === 1) query.set("family", keys[0]);
-                      return (
-                        <li key={standard.standard_id} className="flex flex-wrap items-center gap-1">
-                          <Link
-                            to={generated ? `/generate?${query}` : `/standards/${standard.standard_id}`}
-                            title={standard.performance_expectation}
-                            className={`btn btn-sm ${generated ? "btn-primary" : ""}`}
-                          >
-                            <code>{standard.code}</code> · {generated ? "Generate" : "View"}
-                            {generated ? null : <span className="sr-only"> (no question generator yet)</span>}
-                          </Link>
-                          {standard.partial ? (
-                            <span className="badge border-line bg-paper text-muted">Partially addressed</span>
-                          ) : null}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </li>
-              );
-            })}
-          </ol>
-        </>
+        <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {bundles.data?.map((bundle) => {
+            const total = bundle.aligned.length;
+            const ready = bundle.aligned.filter((standard) => generatorIds.has(standard.standard_id)).length;
+            return (
+              <li key={bundle.id}>
+                <Link
+                  to={`${all}#bundle-${bundle.id}`}
+                  className="block h-full border border-line px-3 py-2 text-ink no-underline hover:border-accent hover:bg-accent-soft hover:text-ink"
+                >
+                  <span className="line-clamp-2 text-sm font-bold">{bundle.name}</span>
+                  <span
+                    className="my-1.5 block h-1 overflow-hidden bg-line-soft"
+                    role="progressbar"
+                    aria-label={`${bundle.name}: ${ready} of ${total} ready to generate`}
+                    aria-valuemin={0}
+                    aria-valuemax={total}
+                    aria-valuenow={ready}
+                  >
+                    <span
+                      className="block h-full bg-accent"
+                      style={{ width: total ? `${(ready / total) * 100}%` : "0%" }}
+                    />
+                  </span>
+                  <span className="text-xs text-muted">
+                    {ready} of {total} ready to generate
+                  </span>
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       )}
     </Widget>
   );
