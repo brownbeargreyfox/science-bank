@@ -373,6 +373,58 @@ docker compose exec -T postgres psql -U science_bank science_bank < backup.sql
 Set up scheduled, encrypted, **off-host** backups before teachers accumulate meaningful content.
 Also preserve `.env`, especially `JWT_SECRET`; do not commit it.
 
+**Status (2026-09-30): built and tested, not installed.** `ops/backup/` holds an encrypted backup job modelled on
+the Life app's pipeline (age, the `gdrive-backup` rclone remote, ntfy via the Life `notify.sh`, a watchdog), with a
+restore drill, per-artifact signatures (age only encrypts, so a forged file could otherwise be planted), a strict
+bundle extractor, a signature-verifying watchdog, and 181 end-to-end tests. Runbook: `ops/backup/README.md`. Review brief for Codex:
+`docs/superpowers/plans/2026-09-30-backup-ops-review-handoff.md`. **Nothing is scheduled, nothing has been uploaded,
+and there is no real key yet.** To finish: Brandon generates a Science Bank age key pair on his own machine (private
+key into the password manager), puts the `age1...` public key in `~/.config/science-bank-backup/recipients.txt`,
+creates the signing key and `allowed_signers` (README step 3; keep the public line in the password manager too),
+runs one backup and one restore drill, then installs the timers from the README. The Life private key's location is
+unconfirmed (it may be in a Notepad++ buffer); that decides whether the Life backups can be read at all.
+
+Backup job review and state:
+
+- **Branch `feat/backup-ops` is not merged to `main`** (commits `0a71eb9`, `a0384e0`, `c93e25a`). Merge only after a
+  second Codex look, then follow the finish steps above.
+- **Codex round 1 (2026-09-30), one Medium finding, fixed:** age encrypts but does not authenticate, so anyone with
+  the public key and write access to the Drive folder could plant a forged "latest" that the drill would accept.
+  Fix: every artifact is signed (OpenSSH `ssh-keygen -Y sign`) and the drill verifies the signature **before**
+  decrypting; the decrypted tar is unpacked by an allowlist extractor (`ops/backup/bundle.py`: exact member names,
+  regular files only, no links, devices, absolute or `..` paths); the manifest is validated before any of it is used
+  (table names go into SQL, strings may reach a terminal); the file name must match the signed manifest time, so a
+  renamed old backup is refused; the drill's throwaway Postgres has no network. The signing key sits on the host
+  (it signs at backup time, no passphrase); Drive write access alone cannot forge a backup, and the verifying
+  `allowed_signers` line lives in the password manager. The backup refuses to run without a signing key.
+- **Tests:** 181 end-to-end checks in `ops/backup/tests/run-tests.sh` (scratch Postgres, throwaway keys, a local
+  directory as the "remote", fake notifier), including a forged `latest` on the remote and 13 hostile signed
+  bundles. Each new security check was verified by breaking it on purpose. A read-only run of the real commands
+  against production restored cleanly into a throwaway Postgres (counts matched), before and after the change.
+- **Codex round 2 (pre-merge verdict MERGE AFTER FIXES), all addressed:**
+  - *Rename window (Medium).* The 15-minute skew let a genuine signed backup be accepted under a name up to 15 minutes
+    different, and the label was not bound. The file name and time are now chosen once and recorded in the signed
+    manifest as `artifact_name`; `bundle.py` requires an exact match (one second off, or relabelled, is refused).
+  - *Watchdog trusted any `.sig` (Medium).* `--check-remote` now downloads the newest remote artifact and signature and
+    verifies them against `allowed_signers` on this host (nothing decrypted); a missing signers file alerts. It also
+    alerts when the last artifact this host uploaded (`last-upload-artifact`) is no longer on the remote, so deleting
+    the newest backup is noticed at the next run rather than after 30 hours. Rolling back to an older genuine backup
+    cannot be prevented by signatures alone; the README says so.
+  - Low/info: remote orphan signatures are pruned (old ones only); the "never reached decryption" test now uses a
+    recording `age` wrapper with a positive control; a per-member (4 GiB) and a total (8 GiB) size cap; a signer
+    rotation test; the drill works on private copies (no check-then-use gap); README, PR text and handoff corrected.
+  - Mutation tests for every new check were run (removing the exact-name check, the total cap, the watchdog's
+    signature verification, its vanished-artifact check, the orphan prune and its age guard, and moving decryption
+    ahead of signature verification); each makes the suite fail. Two of these first exposed weak tests (a "fresh
+    orphan" test whose name collided with the run's own artifact; the original decrypt-ordering test), which were fixed.
+    A read-only run of the real commands against production restored cleanly, and a 10-minute rename of a genuine
+    backup was refused.
+- **Still unverified:** real Google Drive/rclone behaviour (all upload tests used a local directory; the size check
+  via `rclone lsjson --include` needs confirming on the first real run), the systemd units in the README (never
+  created or validated; unit files and an installer were blocked by the permission system and left to Brandon),
+  `loginctl` linger state, the Life `notify.sh` interface (assumed `ntfy_alert title msg [priority]`, never read),
+  ShellCheck (not installed; `bash -n` only), and OpenSSH 8.0+ on any machine used for a recovery.
+
 ### Development checks
 
 ```sh
