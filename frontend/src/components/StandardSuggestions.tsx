@@ -2,8 +2,13 @@ import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { api, unwrap } from "../api/client";
 import { useFamilies, useStandard, useStandards } from "../api/queries";
-import type { StandardSummary } from "../api/types";
 import { ErrorNotice, Loading } from "./ui";
+
+interface Suggestion {
+  id: number;
+  code: string;
+  performance_expectation: string;
+}
 
 function short(text: string) {
   return text.length > 110 ? `${text.slice(0, 107)}…` : text;
@@ -14,7 +19,7 @@ function SuggestionRow({
   bundleId,
   familyKeys,
 }: {
-  standard: StandardSummary;
+  standard: Suggestion;
   bundleId?: number;
   familyKeys: (id: number) => string[];
 }) {
@@ -43,90 +48,102 @@ function SuggestionRow({
   );
 }
 
+function Group({
+  id,
+  title,
+  items,
+  bundleId,
+  familyKeys,
+}: {
+  id: string;
+  title: string;
+  items: Suggestion[];
+  bundleId?: number;
+  familyKeys: (id: number) => string[];
+}) {
+  return (
+    <section className="panel min-w-0 p-4" aria-labelledby={id}>
+      <h3 id={id} className="mb-2 font-bold">
+        {title}
+      </h3>
+      <ul>
+        {items.map((item) => (
+          <SuggestionRow key={item.id} standard={item} bundleId={bundleId} familyKeys={familyKeys} />
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** Other standards worth generating next: the rest of the bundle that sent you here, then the same domain. */
 export function StandardSuggestions({ standardId, bundleId }: { standardId: number | null; bundleId: number | null }) {
   const standard = useStandard(standardId);
   const families = useFamilies();
+  const current = standard.data;
   const bundles = useQuery({
-    queryKey: ["bundles", "suggestions", standard.data?.course_id],
-    queryFn: () =>
-      unwrap(api.GET("/api/bundles", { params: { query: { course_id: standard.data?.course_id ?? null } } })),
-    enabled: standard.data !== undefined,
+    queryKey: ["bundles", current?.course_id],
+    queryFn: () => unwrap(api.GET("/api/bundles", { params: { query: { course_id: current?.course_id ?? null } } })),
+    enabled: current !== undefined,
+    staleTime: 5 * 60_000,
   });
   const domain = useStandards(
-    { course_id: standard.data?.course_id ?? null, domain: standard.data?.domain_code ?? null },
-    standard.data !== undefined,
+    { course_id: current?.course_id ?? null, domain: current?.domain_code ?? null },
+    current !== undefined,
   );
   if (standardId === null) return null;
-  if (standard.isPending || families.isPending)
+  const error = standard.error ?? families.error ?? bundles.error ?? domain.error;
+  if (error)
     return (
-      <aside className="mt-5 lg:mt-0">
+      <div className="mt-5">
+        <ErrorNotice error={error} />
+      </div>
+    );
+  if (!current || families.isPending || bundles.isPending || domain.isPending)
+    return (
+      <div className="mt-5">
         <Loading label="Loading related standards…" />
-      </aside>
+      </div>
     );
-  if (standard.error || families.error || bundles.error || domain.error)
-    return (
-      <aside className="mt-5 lg:mt-0">
-        <ErrorNotice error={standard.error ?? families.error ?? bundles.error ?? domain.error} />
-      </aside>
-    );
-  const current = standard.data;
-  if (!current) return null;
-  const selectedBundle =
+
+  const bundle =
     bundles.data?.find((item) => item.id === bundleId) ??
     bundles.data?.find((item) => current.bundles.some((ref) => ref.id === item.id));
-  const siblings = (selectedBundle?.aligned ?? [])
+  const siblings: Suggestion[] = (bundle?.aligned ?? [])
     .filter((item) => item.standard_id !== current.id)
-    .map((item) => ({
-      id: item.standard_id,
-      code: item.code,
-      performance_expectation: item.performance_expectation,
-      course_id: current.course_id,
-      course_name: current.course_name,
-      course_slug: current.course_slug,
-      domain_code: current.domain_code,
-      domain_name: current.domain_name,
-      families: [],
-      question_family_candidate: false,
-      repeat_of_biology_1: false,
-      topics: [],
-      use_year: current.use_year,
-    }));
-  const siblingIds = new Set(siblings.map((item) => item.id));
-  const domainItems = (domain.data ?? []).filter((item) => item.id !== current.id && !siblingIds.has(item.id));
-  const keys = (id: number) =>
+    .map((item) => ({ id: item.standard_id, code: item.code, performance_expectation: item.performance_expectation }));
+  const listed = new Set(siblings.map((item) => item.id));
+  const sameDomain: Suggestion[] = (domain.data ?? []).filter((item) => item.id !== current.id && !listed.has(item.id));
+  if (!siblings.length && !sameDomain.length) return null;
+
+  const familyKeys = (id: number) =>
     (families.data ?? [])
       .filter((family) => family.bindings.some((binding) => binding.standard_ids.includes(id)))
       .map((family) => family.key);
-  if (!siblings.length && !domainItems.length) return null;
   return (
-    <aside className="space-y-4">
-      <h2 className="text-lg font-bold">Related standards</h2>
-      {siblings.length ? (
-        <section className="panel p-4" aria-labelledby="also-bundle">
-          <h3 id="also-bundle" className="mb-2 font-bold">
-            Also in this bundle
-          </h3>
-          <ul>
-            <>
-              {siblings.map((item) => (
-                <SuggestionRow key={item.id} standard={item} bundleId={selectedBundle?.id} familyKeys={keys} />
-              ))}
-            </>
-          </ul>
-        </section>
-      ) : null}
-      {domainItems.length ? (
-        <section className="panel p-4" aria-labelledby="same-domain">
-          <h3 id="same-domain" className="mb-2 font-bold">
-            Same domain
-          </h3>
-          <ul>
-            {domainItems.map((item) => (
-              <SuggestionRow key={item.id} standard={item} bundleId={selectedBundle?.id} familyKeys={keys} />
-            ))}
-          </ul>
-        </section>
-      ) : null}
-    </aside>
+    <section className="mt-5" aria-labelledby="related-standards">
+      <h2 id="related-standards" className="mb-3 text-lg font-bold">
+        Related standards
+      </h2>
+      <div className="grid gap-4 md:grid-cols-2">
+        {siblings.length ? (
+          <Group
+            id="also-in-bundle"
+            title="Also in this bundle"
+            items={siblings}
+            bundleId={bundle?.id}
+            familyKeys={familyKeys}
+          />
+        ) : null}
+        {sameDomain.length ? (
+          <Group
+            id="same-domain"
+            title="Same domain"
+            items={sameDomain}
+            bundleId={bundle?.id}
+            familyKeys={familyKeys}
+          />
+        ) : null}
+      </div>
+    </section>
   );
 }

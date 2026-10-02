@@ -26,71 +26,72 @@ export function BundlesWidget({ courseId, courseName }: { courseId: number | nul
       ) : bundles.data?.length === 0 ? (
         <Empty>{courseName} has no bundles in the imported data.</Empty>
       ) : (
-        <ol className="space-y-4">
-          {bundles.data?.map((bundle) => {
-            const ready = bundle.aligned.filter((standard) => familyKeys(standard.standard_id).length > 0).length;
-            const total = bundle.aligned.length;
-            const pct = total ? Math.round((ready / total) * 100) : 0;
-            return (
-              <li key={bundle.id} className="rounded border border-line-soft p-3">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
-                  <Link to={`/bundles?course=${courseId}#bundle-${bundle.id}`} className="font-bold">
-                    {bundle.name}
-                  </Link>
-                  <div className="flex min-w-[13rem] flex-1 items-center gap-2 text-sm text-muted">
-                    <div
-                      className="h-1.5 flex-1 overflow-hidden rounded bg-line-soft"
-                      role="progressbar"
-                      aria-label={`${bundle.name}: ${ready} of ${total} ready to generate`}
-                      aria-valuemin={0}
-                      aria-valuemax={total}
-                      aria-valuenow={ready}
-                    >
-                      <div className="h-full bg-petrol" style={{ width: `${pct}%` }} />
+        <>
+          <p className="mb-3 text-sm text-muted">
+            Filled buttons open Generate with that standard ready. Outlined buttons open the standard; there is no
+            question generator for them yet.
+          </p>
+          <ol className="space-y-4">
+            {bundles.data?.map((bundle) => {
+              const ready = bundle.aligned.filter((standard) => familyKeys(standard.standard_id).length > 0).length;
+              const total = bundle.aligned.length;
+              const pct = total ? Math.round((ready / total) * 100) : 0;
+              return (
+                <li key={bundle.id} className="rounded border border-line-soft p-3">
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <Link to={`/bundles?course=${courseId}#bundle-${bundle.id}`} className="font-bold">
+                      {bundle.name}
+                    </Link>
+                    <div className="flex min-w-[13rem] flex-1 items-center gap-2 text-sm text-muted">
+                      <div
+                        className="h-1.5 flex-1 overflow-hidden rounded bg-line-soft"
+                        role="progressbar"
+                        aria-label={`${bundle.name}: ${ready} of ${total} ready to generate`}
+                        aria-valuemin={0}
+                        aria-valuemax={total}
+                        aria-valuenow={ready}
+                      >
+                        <div className="h-full bg-petrol" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span>
+                        {ready} of {total} ready to generate
+                      </span>
                     </div>
-                    <span>
-                      {ready} of {total} ready to generate
-                    </span>
+                    <Link to={`/bundles?course=${courseId}#bundle-${bundle.id}`} className="text-sm font-bold">
+                      Open
+                    </Link>
                   </div>
-                  <Link to={`/bundles?course=${courseId}#bundle-${bundle.id}`} className="text-sm font-bold">
-                    Open
-                  </Link>
-                </div>
-                <ul className="mt-3 flex flex-wrap gap-2">
-                  {bundle.aligned.map((standard) => {
-                    const keys = familyKeys(standard.standard_id);
-                    const generated = keys.length > 0;
-                    const query = new URLSearchParams({
-                      standard: String(standard.standard_id),
-                      bundle: String(bundle.id),
-                    });
-                    if (keys.length === 1) query.set("family", keys[0]);
-                    return (
-                      <li key={standard.standard_id} className="flex items-center gap-1">
-                        <Link
-                          to={generated ? `/generate?${query}` : `/standards/${standard.standard_id}`}
-                          title={standard.performance_expectation}
-                          aria-label={
-                            generated
-                              ? `Generate questions for ${standard.code}`
-                              : `View ${standard.code} (no question generator yet)`
-                          }
-                          className={`btn btn-sm ${generated ? "btn-primary" : ""}`}
-                        >
-                          <code>{standard.code}</code> · {generated ? "Generate" : "View"}
-                        </Link>
-                        {!generated ? <span className="text-xs text-muted">No question generator yet</span> : null}
-                        {standard.partial ? (
-                          <span className="badge border-line bg-paper text-muted">Partially addressed</span>
-                        ) : null}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </li>
-            );
-          })}
-        </ol>
+                  <ul className="mt-3 flex flex-wrap gap-2">
+                    {bundle.aligned.map((standard) => {
+                      const keys = familyKeys(standard.standard_id);
+                      const generated = keys.length > 0;
+                      const query = new URLSearchParams({
+                        standard: String(standard.standard_id),
+                        bundle: String(bundle.id),
+                      });
+                      if (keys.length === 1) query.set("family", keys[0]);
+                      return (
+                        <li key={standard.standard_id} className="flex flex-wrap items-center gap-1">
+                          <Link
+                            to={generated ? `/generate?${query}` : `/standards/${standard.standard_id}`}
+                            title={standard.performance_expectation}
+                            className={`btn btn-sm ${generated ? "btn-primary" : ""}`}
+                          >
+                            <code>{standard.code}</code> · {generated ? "Generate" : "View"}
+                            {generated ? null : <span className="sr-only"> (no question generator yet)</span>}
+                          </Link>
+                          {standard.partial ? (
+                            <span className="badge border-line bg-paper text-muted">Partially addressed</span>
+                          ) : null}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </li>
+              );
+            })}
+          </ol>
+        </>
       )}
     </Widget>
   );

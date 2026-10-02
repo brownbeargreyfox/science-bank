@@ -48,21 +48,30 @@ export function StandardsCoverageWidget({ courseId }: { courseId: number | null 
     <Widget id="dashboard-coverage" title="Standards coverage">
       <div
         className="flex h-3 overflow-hidden rounded bg-line-soft"
-        aria-label={`${usedCount} of ${all.length} used in a recorded assessment`}
+        role="img"
+        aria-label={`Of ${all.length} standards: ${usedCount} used in a recorded assessment, ${generatedCount} with a generator but not used yet, ${neither} with no generator and not used yet`}
       >
         <span className="bg-petrol" style={{ width: width(usedCount) }} />
         <span className="bg-bound" style={{ width: width(generatedCount) }} />
-        <span className="bg-line-soft" style={{ width: width(neither) }} />
       </div>
       <ul className="mt-3 space-y-1 text-sm">
-        <li>
-          <span className="font-bold">Used in a recorded assessment:</span> {usedCount} of {all.length}
+        <li className="flex items-center gap-2">
+          <span className="h-3 w-3 shrink-0 rounded-sm bg-petrol" aria-hidden="true" />
+          <span>
+            <span className="font-bold">Used in a recorded assessment:</span> {usedCount} of {all.length}
+          </span>
         </li>
-        <li>
-          <span className="font-bold">Has a question generator:</span> {generatedCount} of {all.length}
+        <li className="flex items-center gap-2">
+          <span className="h-3 w-3 shrink-0 rounded-sm bg-bound" aria-hidden="true" />
+          <span>
+            <span className="font-bold">Has a generator, not used yet:</span> {generatedCount} of {all.length}
+          </span>
         </li>
-        <li>
-          <span className="font-bold">Neither:</span> {neither} of {all.length}
+        <li className="flex items-center gap-2">
+          <span className="h-3 w-3 shrink-0 rounded-sm border border-line bg-line-soft" aria-hidden="true" />
+          <span>
+            <span className="font-bold">No generator, not used yet:</span> {neither} of {all.length}
+          </span>
         </li>
       </ul>
       <p className="mt-3 text-sm text-muted">Used means a teacher recorded results for it.</p>

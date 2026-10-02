@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from "react-router";
 import { useCourses } from "../api/queries";
-import { Loading, PageHeader } from "../components/ui";
+import { Empty, ErrorNotice, Loading, PageHeader } from "../components/ui";
 import { BundlesWidget } from "../components/dashboard/BundlesWidget";
 import { RecentAssessmentsWidget } from "../components/dashboard/RecentAssessmentsWidget";
 import { QuestionBankWidget } from "../components/dashboard/QuestionBankWidget";
@@ -14,6 +14,8 @@ export default function OverviewPage() {
   const course = courses.data?.find((item) => item.id === requested) ?? courses.data?.[0];
   const courseId = course?.id ?? null;
   if (courses.isPending) return <Loading />;
+  if (courses.error) return <ErrorNotice error={courses.error} title="Courses could not be loaded." />;
+  if (!course) return <Empty>No courses have been imported yet.</Empty>;
   return (
     <>
       <PageHeader

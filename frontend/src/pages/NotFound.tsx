@@ -6,7 +6,7 @@ export default function NotFoundPage() {
     <>
       <PageHeader title="Page not found" lead="The address doesn’t match any page in Science Bank." />
       <Link to="/" className="btn">
-        Go to Home
+        Go to Overview
       </Link>
     </>
   );
