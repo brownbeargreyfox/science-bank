@@ -25,7 +25,7 @@ from other bundled standards", and wants the front page to look good. Most Biolo
 - Do not read or search for secrets (`.env`, key files, `ops/backup` material). Nothing here needs them.
 - Checks before every commit, from `frontend/`: `npx tsc -b`, `npm run lint`, `npm run build`. All clean.
 - Use `ConfirmDialog` (`frontend/src/components/ui.tsx`) for any confirmation; never `window.confirm`.
-- Match the surrounding code: react-query hooks in `api/queries.ts`, `unwrap(api.GET(...))`, Tailwind utilities and the
+- Match the surrounding code: react-query hooks in `api/queries.ts` (no new dependencies, and no state library), `unwrap(api.GET(...))`, Tailwind utilities and the
   existing `panel` / `btn` / `field-label` / `input` classes, `Section`, `Notice`, `ErrorNotice`, `Loading`, `Empty`,
   `CodeTag` from `components/ui.tsx`. No new dependencies. No new test framework.
 
@@ -46,6 +46,10 @@ from other bundled standards", and wants the front page to look good. Most Biolo
 - **`/` becomes the Overview dashboard.** It replaces `Home.tsx`. `/bundles` keeps working unchanged (other pages link
   to `/bundles?course=<id>#bundle-<id>`).
 - **One course at a time**, chosen by a course select (default: the first course), remembered in `?course=<id>`.
+- **No new state library.** No Zustand, Redux, Jotai, or React context. Server data stays in react-query (one hook per
+  widget), and the selected course and bundle live in the URL (`?course=`, `?bundle=`), as `Bundles.tsx` and
+  `Generate.tsx` already do. Everything else is local `useState`. If you believe shared client state is unavoidable,
+  stop and say why instead of adding a dependency.
 - **Widgets load independently.** One failing or empty widget never blanks the page.
 - **No arranging, editing, tabs, "…" menus, favourites, or per-user layouts.** Fixed layout.
 
