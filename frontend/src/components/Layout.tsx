@@ -7,7 +7,7 @@ import { ROLE_LABEL } from "../api/types";
 import { ErrorNotice, Loading } from "./ui";
 
 const NAV = [
-  { to: "/", label: "Home", end: true },
+  { to: "/", label: "Overview", end: true },
   { to: "/standards", label: "Standards" },
   { to: "/bundles", label: "Bundles" },
   { to: "/generate", label: "Generate" },

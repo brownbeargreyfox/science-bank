@@ -20,7 +20,7 @@ import AssessmentsPage from "./pages/Assessments";
 import BundlesPage from "./pages/Bundles";
 import BundleGeneratePage from "./pages/BundleGenerate";
 import GeneratePage from "./pages/Generate";
-import HomePage from "./pages/Home";
+import OverviewPage from "./pages/Overview";
 import LoginPage from "./pages/Login";
 import NotFoundPage from "./pages/NotFound";
 import PrintPage from "./pages/Print";
@@ -40,7 +40,7 @@ const router = createBrowserRouter([
       {
         element: <AppLayout />,
         children: [
-          { path: "/", element: <HomePage /> },
+          { path: "/", element: <OverviewPage /> },
           { path: "/standards", element: <StandardsPage /> },
           { path: "/standards/:id", element: <StandardDetailPage /> },
           { path: "/bundles", element: <BundlesPage /> },

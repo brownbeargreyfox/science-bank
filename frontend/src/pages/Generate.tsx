@@ -13,6 +13,7 @@ import {
 } from "../api/types";
 import { QuestionBody } from "../components/QuestionBody";
 import { Stimulus } from "../components/Stimulus";
+import { StandardSuggestions } from "../components/StandardSuggestions";
 import { CodeTag, DokBadge, ErrorNotice, Notice, PageHeader, TypeBadge } from "../components/ui";
 import { humanize, pluralize } from "../lib/format";
 import { generateUrl } from "../lib/links";
@@ -185,6 +186,7 @@ export default function GeneratePage() {
         lead="Pick a standard and a question family. The family builds a data set from a seed and writes questions from it; the same seed always reproduces the same set."
       />
 
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <form onSubmit={submit} className="grid gap-5 lg:grid-cols-2" aria-label="Generation options">
         <fieldset className="panel p-4 sm:p-5">
           <legend className="sr-only">Step 1: Course and standard</legend>
@@ -436,6 +438,8 @@ export default function GeneratePage() {
           </div>
         </fieldset>
       </form>
+      <StandardSuggestions standardId={standardId} bundleId={Number(params.get("bundle")) || null} />
+      </div>
 
       <div aria-live="polite" className="mt-5">
         <ErrorNotice error={runPreview.error} title="The preview could not be generated." />
