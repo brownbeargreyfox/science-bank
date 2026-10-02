@@ -1,8 +1,9 @@
 # Nina feedback roadmap: landing flow, coverage, and Word study
 
 Date: 2026-09-30
-Status: Planning. Workstream A's design is presented and awaiting Brandon's explicit approval; B, C, and E need
-their own design or spec before any build. Nothing here is implemented.
+Status: Planning. **Workstream A is approved (Brandon, 2026-09-30)** with the Azure DevOps dashboard style for the
+landing page, and handed to Codex: see `2026-09-30-landing-dashboard-codex-handoff.md` (it supersedes the A1 to A5 task
+list below, which described a plain Bundles landing). B, C, and E still need their own design or spec before any build.
 
 ## Where this came from
 
