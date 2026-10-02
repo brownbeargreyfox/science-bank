@@ -139,7 +139,7 @@ export default function QuestionsPage() {
         }
       />
 
-      <nav aria-label="Filter by status" className="mb-4 overflow-x-auto">
+      <nav aria-label="Filter by status" className="mb-4 relative overflow-x-auto">
         <ul className="flex min-w-max gap-1 border-b border-line">
           {tabs.map((t) => {
             const active = t.key === status;
@@ -277,7 +277,7 @@ export default function QuestionsPage() {
       </div>
 
       {selected.size > 0 ? (
-        <section aria-label="Bulk actions" className="panel mb-4 space-y-4 border-petrol p-4">
+        <section aria-label="Bulk actions" className="panel mb-4 space-y-4 border-accent p-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="font-bold">{pluralize(selected.size, "question")} selected</p>
             <button type="button" className="btn btn-sm btn-quiet" onClick={clearSelection}>
@@ -346,7 +346,7 @@ export default function QuestionsPage() {
       ) : (
         <ul className="panel divide-y divide-line-soft">
           {items.map((it) => (
-            <li key={it.id} className={`flex gap-3 p-3 sm:p-4 ${selected.has(it.id) ? "bg-petrol-soft" : ""}`}>
+            <li key={it.id} className={`flex gap-3 p-3 sm:p-4 ${selected.has(it.id) ? "bg-accent-soft" : ""}`}>
               <input
                 type="checkbox"
                 className="check mt-1"

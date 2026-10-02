@@ -25,7 +25,7 @@ export function CodeTag({ code, course, to }: { code: string; course?: string | 
   );
   if (to) {
     return (
-      <Link to={to} className="code-tag hover:bg-petrol-soft">
+      <Link to={to} className="code-tag hover:bg-accent-soft">
         {inner}
       </Link>
     );
@@ -63,7 +63,7 @@ export function TypeBadge({ type, short = false }: { type: QuestionType; short?:
 
 export function OriginBadge({ origin }: { origin: "engine" | "teacher_edit" }) {
   return origin === "engine" ? (
-    <span className="badge border-petrol bg-petrol-soft text-petrol-dark">Engine-generated key</span>
+    <span className="badge border-accent bg-accent-soft text-accent-dark">Engine-generated key</span>
   ) : (
     <span className="badge border-[#a37fc0] bg-[#f3ebf9] text-[#5a2d7f]">Teacher-edited</span>
   );
@@ -89,7 +89,7 @@ export function Notice({ children, tone = "ok" }: { children: ReactNode; tone?: 
       ? "border-[#a7d1b4] bg-ok-soft text-ok"
       : tone === "warn"
         ? "border-[#e2c28c] bg-bound-soft text-bound"
-        : "border-line bg-petrol-soft text-petrol-dark";
+        : "border-line bg-accent-soft text-accent-dark";
   return <div className={`rounded-md border px-4 py-3 ${cls}`}>{children}</div>;
 }
 
@@ -151,7 +151,7 @@ export function Hash({ value }: { value: string | null | undefined }) {
 }
 
 export function FamilyBadge() {
-  return <span className="badge border-petrol bg-petrol-soft text-petrol-dark">Question family available</span>;
+  return <span className="badge border-accent bg-accent-soft text-accent-dark">Question family available</span>;
 }
 
 export function RepeatBadge() {

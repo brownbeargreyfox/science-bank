@@ -425,6 +425,34 @@ Backup job review and state:
   `loginctl` linger state, the Life `notify.sh` interface (assumed `ntfy_alert title msg [priority]`, never read),
   ShellCheck (not installed; `bash -n` only), and OpenSSH 8.0+ on any machine used for a recovery.
 
+### Frontend look and shell (2026-10-02, PR #6)
+
+The app follows an Azure DevOps look, applied everywhere in one pass:
+- **Palette:** the accent token is now `accent` (renamed from `petrol`): `#106ebe`, dark `#0f548c`, soft `#ebf3fc`
+  (`frontend/src/index.css`). `#106ebe` is white-on-blue 5.3:1 (Azure's brighter `#0078d4` is about 4.1:1 and fails for
+  small text). Neutral text tokens (ink, muted, line) are unchanged **on purpose** so the printed student and teacher
+  copies are identical to before (verified pixel by pixel). Corners are 2px. Font stays Atkinson Hyperlegible.
+- **Shell:** a blue top bar (brand, user, log out) and an icon rail that expands over the page on hover or keyboard
+  focus in `--rail-duration` (**375ms**, one CSS variable). The active page gets the Filled icon. Keyboard-only
+  expansion uses `:has(:focus-visible)` so a mouse click does not leave the rail stuck open. A pin button ("Keep menu
+  open") holds it open and pushes the content over; the choice is remembered in `localStorage`
+  (`science-bank:rail-pinned`). Below 1024px the rail becomes a Menu button. Motion is off under reduced-motion.
+- **Icons:** Microsoft Fluent System Icons (MIT) via the **full** `@fluentui/react-icons` package, chosen by Brandon.
+  Only the eight nav icons are imported, all in `components/navIcons.tsx`, and tree-shaking keeps the bundle growth
+  to about 16 kB. Plan: once the icon set is settled, trim to the few SVGs actually used (vendor them with the MIT
+  notice) or move them off-site; only `navIcons.tsx` and `Layout.tsx` would change.
+- **Overview (`/`)** is a 30,000-foot view: four summary tiles, compact bundle tiles (name, progress, "n of m ready"),
+  three recent assessments, three results to review, a one-line standards coverage strip. No per-standard buttons.
+- **Working buttons moved to the Bundles page:** each aligned standard has a filled **Generate** (opens
+  `/generate?standard=&family=&bundle=`) or an outlined **View** (no question generator yet; says so to screen readers).
+  The Generate page shows **Related standards** (also in this bundle, same domain) below the form.
+- Fixed while restyling (all pre-existing): horizontal overflow on `/bundles` at 360px, `/standards/:id` at 360px,
+  `/admin/users` at 360px (hidden `sr-only` text escaping a scroll wrapper; wrappers are now `relative`), and
+  `/generate` at 768px (three columns forced into too little room).
+- Verified in headless Chromium against a scratch stack (42 checks): every page at 1440, 1024, 768, 360px with no
+  overflow, rail timing (207px at 150ms, 224px by 450ms), hover, keyboard, pin, reduced motion, contrast measured on
+  the real elements, focus rings, console errors, and print compared with the baseline.
+
 ### Development checks
 
 ```sh

@@ -1,5 +1,11 @@
 # Codex handoff: landing dashboard and standard-to-Generate flow (Workstream A)
 
+> **Updated 2026-10-02 (PR #6).** After seeing the first build, Brandon asked for a trimmed overview and the Azure look
+> everywhere. The overview is now a 30,000-foot view (summary tiles, compact bundle tiles, no per-standard buttons), the
+> standard buttons live on the Bundles page, the Question families widget was dropped, and the shell (blue top bar,
+> expanding icon rail, Fluent icons) and palette changed app-wide. The text below is the original brief and is kept
+> for history; see `HANDOFF.md` ("Frontend look and shell") for what shipped.
+
 Frontend only. Claude does not change `backend/`, and neither do you. Approved by Brandon on 2026-09-30:
 the **Azure DevOps dashboard style** (a grid of widgets) for the new landing page, and the flow below.
 

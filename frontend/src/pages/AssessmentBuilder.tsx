@@ -108,7 +108,7 @@ function Summary({ a }: { a: AssessmentDetail }) {
           <div key={d} className="grid grid-cols-[3.5rem_1fr_2rem] items-center gap-2 text-sm">
             <dt>DOK {d}</dt>
             <dd className="h-3 rounded-sm bg-line-soft" aria-hidden="true">
-              <div className="h-3 rounded-sm bg-petrol" style={{ width: `${(n / max) * 100}%` }} />
+              <div className="h-3 rounded-sm bg-accent" style={{ width: `${(n / max) * 100}%` }} />
             </dd>
             <dd className="text-right tabular-nums">{n}</dd>
           </div>

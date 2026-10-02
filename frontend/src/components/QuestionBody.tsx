@@ -78,7 +78,7 @@ export function QuestionBody({
             </div>
           ) : null}
           {showKey && (answer || explanation) ? (
-            <div className="mt-3 space-y-2 border-l-4 border-petrol pl-3 font-sans text-[0.9375rem] print:border-black">
+            <div className="mt-3 space-y-2 border-l-4 border-accent pl-3 font-sans text-[0.9375rem] print:border-black">
               {answer && questionType === "constructed_response" ? (
                 <div>
                   <p className="font-bold">Exemplar answer</p>
