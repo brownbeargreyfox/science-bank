@@ -16,7 +16,10 @@ from other bundled standards", and wants the front page to look good. Most Biolo
 
 ## Working rules (same as the last two rounds)
 
-- Work in your own worktree: `git worktree add ../science-bank-codex -b codex/landing-dashboard main`.
+- Work in the worktree Claude created for you: `/home/brandon/apps/science-bank-codex-landing` (branch
+  `codex/landing-dashboard`, currently identical to `main`). Do not reuse `../science-bank-codex` (it hosts an older
+  branch) or `../science-bank-codex-review`. If you ever need another, use a new path, e.g.
+  `git worktree add ../science-bank-codex-<topic> -b codex/<topic> main`.
 - You own `frontend/**` only. Do not edit `backend/`, `docs/`, `HANDOFF.md`, or `ops/`. Do not regenerate API types
   (no backend change is needed; if you think one is, stop and say why).
 - Do **not** deploy, push, merge, or touch `main`. Claude reviews, merges, and deploys.
