@@ -25,7 +25,16 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
-- Latest deploy: `52126d9` (2026-10-03; merge of `feat/dna-protein-synthesis`, no migration; migration still `0005`):
+- Latest deploy: `46e4a36` (2026-10-03; merge of `feat/mutation-effects`, no migration; migration still `0005`): the
+  `mutation-effects` family for Biology 1 B-LS3-2 (see "Implemented families"). Verified live: `/readyz` 200 locally and
+  publicly, startup log shows 8 families synced, the database lists `mutation-effects 1.0.0`, Biology 1 B-LS3-2 is
+  flagged as a family candidate (Biology 2 is not), and the family generates a set inside the container. Not checked
+  live: a signed-in Generate page for B-LS3-2 on production, and no questions have been saved from the new family.
+  Known design limit: every insertion/deletion item shows a longer changed protein (a frameshift that also ends early
+  is excluded by the approved rule); a later family could add truncating frameshifts. Rollback: image
+  `science-bank-app:pre-mutation-effects-46e4a36`; nothing in the database changed beyond the standards importer's flag
+  update. Any change to this family's output now needs a version bump.
+- Earlier deploy: `52126d9` (2026-10-03; merge of `feat/dna-protein-synthesis`, no migration; migration still `0005`):
   the `dna-protein-synthesis` family for Biology 1 B-LS1-1 (see "Implemented families"). Verified live: `/readyz` 200
   locally and publicly, startup log shows 7 families synced, the database lists `dna-protein-synthesis 1.0.0`,
   Biology 1 B-LS1-1 is flagged as a family candidate (Biology 2 is not), and the family generates a set inside the
@@ -279,7 +288,7 @@ in `backend/app/services/engine/`.
 | `quantitative-conservation` | Chemistry C-PS1-7 | 1.0.1 | Curated reactions, moles/particles/mass as evidence for conservation. |
 | `reaction-outcome` | Chemistry C-PS1-2 | 1.0.0 | Curated main-group/combustion reactions: bond type, electrons lost/gained/shared, product formula, same-family reactivity trends. Classroom-only. |
 | `dna-protein-synthesis` | Biology 1 B-LS1-1 | 1.0.0 | Template strand to mRNA, mRNA to amino acids with a displayed partial codon table, gene activity across two cell types, and a DOK 3 explanation. Classroom-only; no mutation-effect items (those belong to B-LS3-2, which can reuse `CODONS`/`translate`). |
-| `mutation-effects` | Biology 1 B-LS3-2 | 1.0.0 (built on branch `feat/mutation-effects`, not yet merged or deployed) | One-nucleotide substitution, insertion, or deletion in a gene: identify it, find the protein from the changed gene with a displayed codon table, describe the effect (frameshift taught explicitly for indels), decide whether it can be inherited, and defend a claim. Classroom-only; meiosis and mutagen-dataset items are a later B-LS3-2 family. |
+| `mutation-effects` | Biology 1 B-LS3-2 | 1.0.0 | One-nucleotide substitution, insertion, or deletion in a gene: identify it, find the protein from the changed gene with a displayed codon table, describe the effect (frameshift taught explicitly for indels), decide whether it can be inherited, and defend a claim. Classroom-only; meiosis and mutagen-dataset items are a later B-LS3-2 family. |
 
 Engine invariants are tested in `backend/tests/test_engine.py`:
 
