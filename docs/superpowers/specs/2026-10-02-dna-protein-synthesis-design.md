@@ -16,7 +16,7 @@ it gets its own templates later.
 ## Scientific scope
 
 Allowed: DNA template strand, complementary base pairing (A–U, T–A, G–C, C–G), mRNA, codons, start codon (AUG,
-methionine), stop codon, amino acid sequence, "a single gene codes for a protein", and cells of one organism sharing
+methionine), stop codon, amino acid sequence, "a gene contains instructions for an amino-acid sequence (a protein)", and cells of one organism sharing
 the same DNA while using different genes.
 
 Excluded by the Biology 1 assessment boundary: specific cell or tissue types, whole body systems, specific protein
