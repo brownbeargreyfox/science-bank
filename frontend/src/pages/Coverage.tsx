@@ -1,27 +1,16 @@
 import { Link, useSearchParams } from "react-router";
 import { useCourses, useCoveragePage } from "../api/queries";
 import { accuracyText } from "../lib/results";
-import {
-  CodeTag,
-  Empty,
-  ErrorNotice,
-  Loading,
-  PageHeader,
-} from "../components/ui";
+import { CodeTag, Empty, ErrorNotice, Loading, PageHeader } from "../components/ui";
 
-const STATUS_ORDER = [
-  "generated",
-  "reviewed",
-  "approved",
-  "rejected",
-  "archived",
-] as const;
+const STATUS_ORDER = ["generated", "reviewed", "approved", "rejected", "archived"] as const;
 
 export default function CoveragePage() {
   const [params, setParams] = useSearchParams();
   const courses = useCourses();
-  const courseId =
-    Number(params.get("course")) || courses.data?.[0]?.id || null;
+  const requested = Number(params.get("course"));
+  // A course id that is not in the list (an old link) falls back to the first course.
+  const courseId = courses.data?.some((c) => c.id === requested) ? requested : (courses.data?.[0]?.id ?? null);
   const yearParam = params.get("year");
   const coverage = useCoveragePage(courseId, yearParam);
   const data = coverage.data;
@@ -67,15 +56,8 @@ export default function CoveragePage() {
           <select
             id="cov-year"
             className="input"
-            value={
-              data
-                ? data.scope.kind === "all_time"
-                  ? "all"
-                  : String(data.scope.year)
-                : (yearParam ?? "")
-            }
+            value={data ? (data.scope.kind === "all_time" ? "all" : String(data.scope.year)) : (yearParam ?? "")}
             onChange={(e) => update({ year: e.target.value })}
-            disabled={!data}
           >
             {data?.available_years.map((y) => (
               <option key={y} value={y}>
@@ -87,9 +69,16 @@ export default function CoveragePage() {
         </div>
       </div>
 
-      <ErrorNotice error={coverage.error} />
-      {coverage.isPending ? (
+      <ErrorNotice error={courses.error ?? coverage.error} />
+      {coverage.error && yearParam ? (
+        <p className="mb-4 text-sm">
+          <Link to={courseId ? `/coverage?course=${courseId}` : "/coverage"}>Show the current school year</Link>
+        </p>
+      ) : null}
+      {courses.isPending || (courseId !== null && coverage.isPending) ? (
         <Loading />
+      ) : courses.data?.length === 0 ? (
+        <Empty>No courses have been imported yet.</Empty>
       ) : data ? (
         <>
           <p className="mb-5 text-sm" data-testid="coverage-scope">
@@ -102,70 +91,46 @@ export default function CoveragePage() {
             ) : null}
             <span className="text-muted">
               {" "}
-              · {data.summary.standards_assessed} of{" "}
-              {data.summary.standards_total} standards assessed in this period.
+              · {data.summary.standards_assessed} of {data.summary.standards_total} standards assessed in this period.
               Assessed means recorded in an assessment you can see.
             </span>
           </p>
           {data.groups.length === 0 ? (
-            <Empty>
-              {course?.name ?? "This course"} has no standards in the imported
-              data.
-            </Empty>
+            <Empty>{course?.name ?? "This course"} has no standards in the imported data.</Empty>
           ) : (
             <div className="space-y-5">
               {data.groups.map((group) => {
                 const gid = `cov-${group.bundle_id ?? "other"}`;
                 return (
-                  <section
-                    key={gid}
-                    className="panel p-4 sm:p-5"
-                    aria-labelledby={gid}
-                  >
+                  <section key={gid} className="panel p-4 sm:p-5" aria-labelledby={gid}>
                     <h2 id={gid} className="text-lg font-bold">
                       {group.name}
                     </h2>
                     <p className="mt-0.5 text-sm text-muted">
-                      {group.assessed} of {group.total} standards assessed in
-                      this period
+                      {group.assessed} of {group.total} standards assessed in this period
                     </p>
                     <ul className="mt-3 divide-y divide-line-soft">
                       {group.standards.map((s) => {
-                        const none = STATUS_ORDER.every(
-                          (k) => s.questions[k] === 0,
-                        );
+                        const none = STATUS_ORDER.every((k) => s.questions[k] === 0);
                         const query = new URLSearchParams({
                           standard: String(s.standard_id),
                         });
-                        if (group.bundle_id !== null)
-                          query.set("bundle", String(group.bundle_id));
-                        if (s.families.length === 1)
-                          query.set("family", s.families[0]);
+                        if (group.bundle_id !== null) query.set("bundle", String(group.bundle_id));
+                        if (s.families.length === 1) query.set("family", s.families[0]);
                         return (
                           <li
                             key={s.standard_id}
                             className="grid gap-x-4 gap-y-2 py-3 md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)_auto]"
                           >
                             <div className="min-w-0">
-                              <CodeTag
-                                code={s.code}
-                                course={course?.name}
-                                to={`/standards/${s.standard_id}`}
-                              />
-                              <p className="mt-1 line-clamp-3 text-[0.9375rem]">
-                                {s.expectation}
-                              </p>
+                              <CodeTag code={s.code} course={course?.name} to={`/standards/${s.standard_id}`} />
+                              <p className="mt-1 line-clamp-3 text-[0.9375rem]">{s.expectation}</p>
                               <p className="mt-1 flex flex-wrap gap-1.5 text-xs">
                                 {s.partial ? (
-                                  <span className="badge border-line bg-paper text-muted">
-                                    Partially addressed
-                                  </span>
+                                  <span className="badge border-line bg-paper text-muted">Partially addressed</span>
                                 ) : null}
                                 {s.also_in.map((name) => (
-                                  <span
-                                    key={name}
-                                    className="badge border-line bg-paper text-muted"
-                                  >
+                                  <span key={name} className="badge border-line bg-paper text-muted">
                                     Also in {name}
                                   </span>
                                 ))}
@@ -173,40 +138,26 @@ export default function CoveragePage() {
                             </div>
                             <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm sm:grid-cols-4">
                               <div>
-                                <dt className="text-xs text-muted">
-                                  Times assessed
-                                </dt>
+                                <dt className="text-xs text-muted">Times assessed</dt>
                                 <dd className="tabular-nums">
-                                  {s.times_assessed === 0
-                                    ? "Not assessed in this period"
-                                    : s.times_assessed}
+                                  {s.times_assessed === 0 ? "Not assessed in this period" : s.times_assessed}
                                 </dd>
                               </div>
                               <div>
-                                <dt className="text-xs text-muted">
-                                  Last assessed
-                                </dt>
-                                <dd className="tabular-nums">
-                                  {s.last_assessed ?? "—"}
-                                </dd>
+                                <dt className="text-xs text-muted">Last assessed</dt>
+                                <dd className="tabular-nums">{s.last_assessed ?? "—"}</dd>
                               </div>
                               <div>
                                 <dt className="text-xs text-muted">Accuracy</dt>
                                 <dd className="tabular-nums">
-                                  {s.accuracy === null
-                                    ? "—"
-                                    : accuracyText(s.correct, s.attempted)}
+                                  {s.accuracy === null ? "—" : accuracyText(s.correct, s.attempted)}
                                   {s.limited_responses ? (
-                                    <span className="block text-xs text-muted">
-                                      Limited response count
-                                    </span>
+                                    <span className="block text-xs text-muted">Limited response count</span>
                                   ) : null}
                                 </dd>
                               </div>
                               <div>
-                                <dt className="text-xs text-muted">
-                                  Questions in bank
-                                </dt>
+                                <dt className="text-xs text-muted">Questions in bank</dt>
                                 <dd>
                                   {none ? (
                                     "No questions in bank"
@@ -224,28 +175,17 @@ export default function CoveragePage() {
                             </dl>
                             <div className="no-print md:text-right">
                               {s.families.length ? (
-                                <Link
-                                  to={`/generate?${query}`}
-                                  className="btn btn-sm btn-primary"
-                                >
+                                <Link to={`/generate?${query}`} className="btn btn-sm btn-primary">
                                   Generate
                                   <span className="sr-only"> for {s.code}</span>
                                 </Link>
                               ) : (
                                 <>
-                                  <Link
-                                    to={`/standards/${s.standard_id}`}
-                                    className="btn btn-sm"
-                                  >
+                                  <Link to={`/standards/${s.standard_id}`} className="btn btn-sm">
                                     View
-                                    <span className="sr-only">
-                                      {" "}
-                                      {s.code} (no question generator yet)
-                                    </span>
+                                    <span className="sr-only"> {s.code} (no question generator yet)</span>
                                   </Link>
-                                  <p className="mt-1 text-xs text-muted">
-                                    No question generator yet
-                                  </p>
+                                  <p className="mt-1 text-xs text-muted">No question generator yet</p>
                                 </>
                               )}
                             </div>

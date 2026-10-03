@@ -179,10 +179,11 @@ def test_limited_response_count_is_the_aggregate_across_sections(anon):
 def test_accuracy_is_summed_not_averaged_and_times_assessed_counts_administrations(anon):
     aid, _ = build_assessment(anon, who="regular", n=2)  # two questions, same standard
     d = record(anon, aid, ["A", "B"], on="2014-12-01")
-    put(anon, d, (0, 0, 1, 2), (1, 0, 9, 18), (0, 1, 1, 2))
-    s = row(coverage(anon, year="2014"))
-    assert s["times_assessed"] >= 1
-    assert s["accuracy"] == pytest.approx(s["correct"] / s["attempted"])
+    put(anon, d, (0, 0, 1, 2), (1, 0, 3, 18), (0, 1, 1, 2))
+    s = row(coverage(anon, year="2014"))  # 2014 belongs to this test alone
+    assert s["times_assessed"] == 1  # one administration, however many sections and results it has
+    assert (s["correct"], s["attempted"]) == (5, 22)
+    assert s["accuracy"] == pytest.approx(5 / 22)  # summed; averaging the cell ratios would give about 0.39
 
 
 def test_soft_deleted_administrations_are_excluded_until_restored(anon):

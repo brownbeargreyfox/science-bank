@@ -1,11 +1,5 @@
 import { QueryClient, useQuery } from "@tanstack/react-query";
-import {
-  ApiError,
-  api,
-  cleanQuery,
-  setUnauthorizedHandler,
-  unwrap,
-} from "./client";
+import { ApiError, api, cleanQuery, setUnauthorizedHandler, unwrap } from "./client";
 import type { Status } from "./types";
 
 export const queryClient = new QueryClient({
@@ -14,8 +8,7 @@ export const queryClient = new QueryClient({
       staleTime: 30_000,
       refetchOnWindowFocus: false,
       retry: (count, err) => {
-        if (err instanceof ApiError && err.status >= 400 && err.status < 500)
-          return false;
+        if (err instanceof ApiError && err.status >= 400 && err.status < 500) return false;
         return count < 2;
       },
     },
@@ -25,8 +18,7 @@ export const queryClient = new QueryClient({
 export const ME_KEY = ["auth", "me"] as const;
 
 setUnauthorizedHandler(() => {
-  if (queryClient.getQueryData(ME_KEY) !== null)
-    queryClient.setQueryData(ME_KEY, null);
+  if (queryClient.getQueryData(ME_KEY) !== null) queryClient.setQueryData(ME_KEY, null);
 });
 
 export function useMe() {
@@ -93,12 +85,7 @@ export function useStandards(filter: StandardsFilter, enabled = true) {
 export function useStandard(id: number | null) {
   return useQuery({
     queryKey: ["standard", id],
-    queryFn: () =>
-      unwrap(
-        api.GET("/api/standards/{standard_id}", {
-          params: { path: { standard_id: id ?? 0 } },
-        }),
-      ),
+    queryFn: () => unwrap(api.GET("/api/standards/{standard_id}", { params: { path: { standard_id: id ?? 0 } } })),
     enabled: id !== null,
   });
 }
@@ -117,9 +104,7 @@ export interface QuestionFilter {
 }
 
 export function fetchQuestions(filter: QuestionFilter) {
-  return unwrap(
-    api.GET("/api/questions", { params: { query: cleanQuery({ ...filter }) } }),
-  );
+  return unwrap(api.GET("/api/questions", { params: { query: cleanQuery({ ...filter }) } }));
 }
 
 export function useQuestions(filter: QuestionFilter) {
@@ -134,11 +119,7 @@ export function useAssessments(includeDeleted = false) {
   return useQuery({
     queryKey: ["assessments", { includeDeleted }],
     queryFn: () =>
-      unwrap(
-        api.GET("/api/assessments", {
-          params: { query: includeDeleted ? { include_deleted: true } : {} },
-        }),
-      ),
+      unwrap(api.GET("/api/assessments", { params: { query: includeDeleted ? { include_deleted: true } : {} } })),
   });
 }
 
@@ -146,17 +127,11 @@ export const ADMIN_USERS_KEY = ["admin", "users"] as const;
 export const SITE_SETTINGS_KEY = ["admin", "settings"] as const;
 
 export function useAdminUsers() {
-  return useQuery({
-    queryKey: ADMIN_USERS_KEY,
-    queryFn: () => unwrap(api.GET("/api/admin/users")),
-  });
+  return useQuery({ queryKey: ADMIN_USERS_KEY, queryFn: () => unwrap(api.GET("/api/admin/users")) });
 }
 
 export function useSiteSettings() {
-  return useQuery({
-    queryKey: SITE_SETTINGS_KEY,
-    queryFn: () => unwrap(api.GET("/api/admin/settings")),
-  });
+  return useQuery({ queryKey: SITE_SETTINGS_KEY, queryFn: () => unwrap(api.GET("/api/admin/settings")) });
 }
 
 /** The coverage grid for a course. `year` is a school-year start, "all", or null for the server's default year. */
@@ -166,12 +141,7 @@ export function useCoveragePage(courseId: number | null, year: string | null) {
     queryFn: () =>
       unwrap(
         api.GET("/api/coverage", {
-          params: {
-            query: cleanQuery({
-              course_id: courseId ?? 0,
-              year: year ?? undefined,
-            }),
-          },
+          params: { query: cleanQuery({ course_id: courseId ?? 0, year: year ?? undefined }) },
         }),
       ),
     enabled: courseId !== null,

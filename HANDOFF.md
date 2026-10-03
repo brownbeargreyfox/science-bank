@@ -348,7 +348,7 @@ Workstream B of `2026-09-30-nina-feedback-roadmap.md`. No migration.
   stack, 42 checks): no overflow or console errors at 1440, 1024, 768, 360px; scope line equals the API; 0 of 30 shows
   0%, blank shows a dash, 9 attempted shows "Limited response count"; Jul 31 vs Aug 1 land in different years; bad
   `?year=` shows the error notice; keyboard reaches both selects and Generate; print hides selects, rail and buttons;
-  a second teacher sees no administration figures but the same question counts; row Generate links carry
+  a second teacher sees no administration figures but the same question counts; a bad `?year=`, an unknown `?course=`, failed or empty course lists all recover (link back, fallback course, error, empty state); row Generate links carry
   `standard`, `bundle`, `family`. Not verified: a real touch device, Safari, Firefox.
 - **Known small things.** In all-time view an unassessed standard still reads "Not assessed in this period".
 

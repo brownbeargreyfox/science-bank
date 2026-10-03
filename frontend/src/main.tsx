@@ -54,10 +54,7 @@ const router = createBrowserRouter([
           { path: "/assessments/:id", element: <AssessmentBuilderPage /> },
           { path: "/administrations/:id", element: <AdministrationPage /> },
           { path: "/results", element: <ResultsPage /> },
-          {
-            element: <RequireAdmin />,
-            children: [{ path: "/admin/users", element: <AdminUsersPage /> }],
-          },
+          { element: <RequireAdmin />, children: [{ path: "/admin/users", element: <AdminUsersPage /> }] },
           { path: "*", element: <NotFoundPage /> },
         ],
       },
