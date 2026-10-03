@@ -25,7 +25,13 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
-- Latest deploy: `132b82e` (2026-10-02; PR #6, frontend-only, no migration): the Overview dashboard, the standard
+- Latest deploy: `5e12510` (2026-10-02; merge of `feat/coverage-grid`, no migration; migration still `0005`): the
+  coverage grid (`/coverage`, `GET /api/coverage`; see "Coverage grid"). Verified live: `/readyz` 200 locally and
+  publicly, the served bundle contains the new page strings, `/api/coverage` returns 401 when signed out, no errors in
+  the app log. Not checked live: a signed-in view of the page on production (verified on a scratch stack only), a real
+  touch device, Safari and Firefox. Rollback: image `science-bank-app:pre-coverage-grid-5e12510` (the image from before
+  this deploy); nothing in the database changed.
+- Earlier deploy: `132b82e` (2026-10-02; PR #6, frontend-only, no migration): the Overview dashboard, the standard
   Generate/View buttons on the Bundles page, Related standards on Generate, and the Azure-style look with the
   expanding icon rail everywhere (see "Frontend look and shell"). Verified live: the served assets are the new build
   (new accent colour, rail rules, strings), `/readyz` 200 locally and publicly, migration unchanged at `0005`, and the
@@ -327,7 +333,7 @@ Design: `docs/superpowers/specs/2026-09-29-results-and-variants-design.md`. Plan
 - **Coverage caveat.** Variants only exist for standards that have a question family (see
   `docs/superpowers/plans/2026-09-29-coverage-roadmap.md`).
 
-## Coverage grid (built 2026-10-02, branch `feat/coverage-grid`, not yet merged or deployed)
+## Coverage grid (deployed 2026-10-02 as `5e12510`)
 
 Spec: `docs/superpowers/specs/2026-10-02-coverage-grid-design.md`. Plan: `docs/superpowers/plans/2026-10-02-coverage-grid-plan.md`.
 Workstream B of `2026-09-30-nina-feedback-roadmap.md`. No migration.
