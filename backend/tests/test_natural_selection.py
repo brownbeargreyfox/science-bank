@@ -5,8 +5,10 @@ from the numbers in the displayed tables.
 """
 
 import json
+import re
 
 from app.services.engine.core import Rng
+from app.services.engine.family import generate_set
 from app.services.families import natural_selection as ns
 
 SEEDS = [f"nst-{i}" for i in range(200)]
@@ -100,3 +102,97 @@ def test_survival_rows_are_valid_and_traps_occur_about_half_the_time():
         assert s["survival"]["trap"] == (more_survivors != higher)
         traps += s["survival"]["trap"]
     assert 60 <= traps <= 140  # about half of 200
+
+
+# ---- items: shared helpers, registration, compare_survival, trait_trend -------------------------
+
+
+def _set(seed: str, *keys: str) -> dict:
+    return generate_set(ns.NaturalSelectionTrend(), seed, len(keys), template_keys=list(keys))
+
+
+def _only(out: dict, key: str) -> dict:
+    return next(q for g in out["groups"] for q in g["questions"] if q["template_key"] == key)
+
+
+def _correct(q: dict) -> str:
+    return next(c["text"] for c in q["choices"] if c["correct"])
+
+
+def _tables(out: dict) -> dict[str, dict]:
+    return {t["caption"]: t for t in out["groups"][0]["stimulus"]["tables"]}
+
+
+def _generation_table(out: dict) -> dict:
+    return next(t for c, t in _tables(out).items() if "in each generation" in c)
+
+
+def _survival_table(out: dict) -> dict:
+    return next(t for c, t in _tables(out).items() if c.startswith("Survival"))
+
+
+def test_family_is_registered_and_bound_to_biology_1_only():
+    from app.services.families.registry import FAMILIES
+
+    fam = FAMILIES["natural-selection-trend"]
+    assert fam.version == "1.0.0"
+    assert [(b.state, b.course_slug, b.code) for b in fam.bindings] == [("SC", "biology-1", "B-LS4-4")]
+    assert all(t.standard_code is None for t in fam.templates)
+
+
+def test_compare_survival_key_follows_the_displayed_survival_table():
+    saw_trap = saw_plain = 0
+    for seed in SEEDS:
+        out = _set(seed, "compare_survival")
+        q = _only(out, "compare_survival")
+        table = _survival_table(out)
+        assert [c["label"] for c in table["columns"]] == ["Variant", "Started", "Survived"]
+        rows = table["rows"]
+        assert len(rows) == 2 and all(0 <= r["survived"] <= r["started"] for r in rows)
+        rates = {r["variant"]: r["survived"] / r["started"] for r in rows}
+        winner = max(rates, key=rates.get)
+        assert _correct(q) == f"{winner} had the higher survival rate."
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4
+        assert "The two variants had the same survival rate." in texts
+        assert any("cannot be compared" in t for t in texts)
+        more_survivors = max(rows, key=lambda r: r["survived"])["variant"]
+        if more_survivors == winner:
+            saw_plain += 1
+        else:
+            saw_trap += 1
+    assert saw_trap >= 60 and saw_plain >= 60  # counts alone mislead in about half of the items
+
+
+def test_compare_survival_shows_only_the_survival_table():
+    out = _set("only-survival", "compare_survival")
+    stim = out["groups"][0]["stimulus"]
+    assert len(stim["tables"]) == 1 and stim["charts"] == []
+
+
+def _noun_in(stem: str, out: dict) -> str:
+    labels = [c["label"] for c in _generation_table(out)["columns"][1:]]
+    # "resistant bacteria" also appears inside "non-resistant bacteria", so take the longest label that matches
+    return max((label for label in labels if label.lower() in stem), key=len)
+
+
+def test_trait_trend_key_follows_the_displayed_counts():
+    for seed in SEEDS:
+        out = _set(seed, "trait_trend")
+        q = _only(out, "trait_trend")
+        label = _noun_in(q["stem"], out)
+        column = {c["label"]: c["key"] for c in _generation_table(out)["columns"]}[label]
+        end = int(re.search(r"to generation (\d+)", q["stem"]).group(1))
+        rows = _generation_table(out)["rows"]
+        direction = "increased" if rows[end][column] > rows[0][column] else "decreased"
+        assert _correct(q) == f"The fraction of the population that is {label.lower()} {direction}."
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4
+        assert abs(rows[end][column] - rows[0][column]) >= 25
+
+
+def test_trait_trend_includes_the_table_and_a_chart_that_points_at_it():
+    stim = _set("only-trend", "trait_trend")["groups"][0]["stimulus"]
+    assert len(stim["tables"]) == 1 and len(stim["charts"]) == 1
+    chart = stim["charts"][0]
+    assert chart["type"] == "line" and chart["table_index"] == 0 and len(chart["series"]) == 2

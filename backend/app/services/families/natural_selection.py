@@ -8,7 +8,8 @@ individuals changing because they need to). Resistance cases are fictional lab c
 
 from typing import Any
 
-from app.services.engine.core import GenerationError, Rng
+from app.services.engine.core import Binding, DraftChoice, DraftQuestion, GenerationError, Rng, TemplateSpec
+from app.services.engine.family import QuestionFamily
 
 SAMPLE = 100
 MAX_DRAWS = 300
@@ -266,3 +267,177 @@ def draw_scenario(rng: Rng) -> dict[str, Any]:
             "rows": [{"variant": v, **survival_rows[v]} for v in ("a", "b")],
         },
     }
+
+
+# ---- family ------------------------------------------------------------------------------------
+
+_GENERATION_KEYS = {
+    "trait_trend",
+    "effect_of_change",
+    "explain_adaptation",
+    "predict_new_change",
+    "explain_with_data",
+}
+
+
+def _case(params: dict[str, Any]) -> dict[str, Any]:
+    return CASES[params["case"]]
+
+
+def _other(variant: str) -> str:
+    return "b" if variant == "a" else "a"
+
+
+def _pct(survived: int, started: int) -> str:
+    return f"{round(100 * survived / started)}%"
+
+
+class NaturalSelectionTrend(QuestionFamily):
+    key = "natural-selection-trend"
+    version = "1.0.0"
+    title = "Natural selection and adaptation"
+    description = (
+        "Use counts of two heritable variants across generations, and an environmental change, to compare survival "
+        "rates, read trends in the fraction of a population with a trait, explain how natural selection leads to "
+        "adaptation, and predict the direction of change when the environment reverses."
+    )
+    stimulus_kind = "natural_selection_trend"
+    bindings = (Binding("SC", "biology-1", "B-LS4-4"),)
+    templates = (
+        TemplateSpec("compare_survival", "Compare survival rates", 1, "multiple_choice", "evidence", 1),
+        TemplateSpec("trait_trend", "Read a trend in a trait", 2, "multiple_choice", "reasoning", 1),
+    )
+
+    # ---- scenario and stimulus --------------------------------------------------------------
+
+    def build_scenario(self, rng: Rng) -> dict[str, Any]:
+        return draw_scenario(rng)
+
+    def render_stimulus(self, params: dict[str, Any], template_keys: list[str]) -> dict[str, Any]:
+        keys = set(template_keys)
+        case = _case(params)
+        first, second = case["envs"][params["env_first"]], case["envs"][params["env_second"]]
+        a, b = case["variants"]["a"], case["variants"]["b"]
+        intro = f"{case['intro']} {first['is']}"
+        tables: list[dict[str, Any]] = []
+        charts: list[dict[str, Any]] = []
+        if keys & _GENERATION_KEYS:
+            intro += f" The environment changed after generation {params['l1']}. {second['became']}"
+            tables.append(
+                {
+                    "caption": f"{case['organism'].capitalize()} in each generation, out of {SAMPLE} sampled",
+                    "columns": [
+                        {"key": "generation", "label": "Generation"},
+                        {"key": "a", "label": a["label"]},
+                        {"key": "b", "label": b["label"]},
+                    ],
+                    "rows": params["rows"],
+                }
+            )
+            charts.append(
+                {
+                    "type": "line",
+                    "title": f"{case['organism'].capitalize()} with each {case['trait']} over the generations",
+                    "x": {"key": "generation", "label": "Generation"},
+                    "y": {"label": f"Individuals out of {SAMPLE}", "min": 0},
+                    "series": [{"key": "a", "label": a["label"]}, {"key": "b", "label": b["label"]}],
+                    "table_index": 0,
+                }
+            )
+        if "compare_survival" in keys:
+            tables.append(
+                {
+                    "caption": "Survival through one season in the first environment",
+                    "columns": [
+                        {"key": "variant", "label": "Variant"},
+                        {"key": "started", "label": "Started"},
+                        {"key": "survived", "label": "Survived"},
+                    ],
+                    "rows": [
+                        {
+                            "variant": case["variants"][r["variant"]]["label"],
+                            "started": r["started"],
+                            "survived": r["survived"],
+                        }
+                        for r in params["survival"]["rows"]
+                    ],
+                }
+            )
+        return {
+            "title": "Natural selection in a population",
+            "intro": intro,
+            "sections": [],
+            "tables": tables,
+            "charts": charts,
+        }
+
+    # ---- items ------------------------------------------------------------------------------
+
+    def build_question(self, template: TemplateSpec, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        return getattr(self, f"_q_{template.key}")(params, rng)
+
+    def _q_compare_survival(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        case = _case(params)
+        rows = {r["variant"]: r for r in params["survival"]["rows"]}
+        label = {v: case["variants"][v]["label"] for v in ("a", "b")}
+        rate = {v: rows[v]["survived"] / rows[v]["started"] for v in rows}
+        facts = " ".join(
+            f"{label[v]}: {rows[v]['survived']} of {rows[v]['started']} survived ({_pct(rows[v]['survived'], rows[v]['started'])})."
+            for v in ("a", "b")
+        )
+        winner = "a" if rate["a"] > rate["b"] else "b"
+        texts = {
+            "a": f"{label['a']} had the higher survival rate.",
+            "b": f"{label['b']} had the higher survival rate.",
+            "same": "The two variants had the same survival rate.",
+            "incomparable": "The survival rates cannot be compared, because the groups started with different numbers.",
+        }
+        why = {
+            winner: f"Correct: {facts} A survival rate is the fraction that survived, so {label[winner]} had the higher rate.",
+            _other(winner): f"Not supported: {facts} The higher rate belongs to {label[winner]}.",
+            "same": f"Not supported: {facts} The two rates are not the same.",
+            "incomparable": (
+                "Not supported: a survival rate (the number that survived out of the number that started) can be "
+                f"compared even when the groups started with different numbers. {facts}"
+            ),
+        }
+        choices = [DraftChoice(texts[name], name == winner, why[name]) for name in texts]
+        return DraftQuestion(
+            stem=(
+                "Scientists counted how many individuals of each variant started a season and how many survived. "
+                f"{case['envs'][params['env_first']]['is']} Which statement is supported by the survival table?"
+            ),
+            answer=texts[winner],
+            explanation=f"{facts} {label[winner]} had the higher survival rate.",
+            choices=choices,
+        )
+
+    def _q_trait_trend(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        case = _case(params)
+        variant = rng.choice(["a", "b"])
+        noun = case["variants"][variant]["noun"]
+        l1 = params["l1"]
+        start, end = params["rows"][0][variant], params["rows"][l1][variant]
+        direction = "increased" if end > start else "decreased"
+        texts = {
+            "increased": f"The fraction of the population that is {noun} increased.",
+            "decreased": f"The fraction of the population that is {noun} decreased.",
+            "same": f"The fraction of the population that is {noun} stayed about the same.",
+            "unknown": f"The change in the fraction of {noun} cannot be determined from the table.",
+        }
+        facts = f"{noun.capitalize()} went from {start} out of {SAMPLE} in generation 0 to {end} out of {SAMPLE} in generation {l1}."
+        choices = [
+            DraftChoice(
+                texts[name], name == direction, f"Correct: {facts}" if name == direction else f"Not supported: {facts}"
+            )
+            for name in texts
+        ]
+        return DraftQuestion(
+            stem=(
+                f"Look at the generation table. How did the fraction of the population that is {noun} change from "
+                f"generation 0 to generation {l1}?"
+            ),
+            answer=texts[direction],
+            explanation=f"{facts} The fraction {direction}.",
+            choices=choices,
+        )

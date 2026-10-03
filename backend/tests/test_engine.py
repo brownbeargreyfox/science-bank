@@ -31,6 +31,7 @@ GOLDEN = {
     "reaction-outcome": "ee1df82b94db39de882f05d6606220a458d53d9006f617ee737d5d50b81cc009",
     "dna-protein-synthesis": "9f2f9a47a24ce709ee576bc919d84c5512020cf35a2993d03bae506109c80fca",
     "mutation-effects": "1d5b9a9ab23f50190c4035c0d4981d639efa9ce863c777119d41e45a0fb1dead",
+    "natural-selection-trend": None,
 }
 
 
