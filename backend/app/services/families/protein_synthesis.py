@@ -90,6 +90,7 @@ def transcribe_candidates(gene: dict[str, Any]) -> list[tuple[str, str]]:
     """Wrong mRNA strings a student might choose, each distinct from the key and from each other."""
     key, template = gene["mrna"], gene["template"]
     raw = [
+        ("later_codons_copied", key[:3] + template[3:].replace("T", "U")),
         ("dna_complement", "".join(_TEMPLATE_COMPLEMENT[b] for b in template)),
         ("copied", template.replace("T", "U")),
         ("reversed", key[::-1]),
@@ -134,7 +135,7 @@ def protein_gene_ok(gene: dict[str, Any]) -> bool:
     if any(CODONS[c] == "*" for c in misread):
         return False
     o = protein_options(gene)
-    return _distinct([gene["protein"], o["template_as_mrna"], o["reversed"], o["no_start"]])
+    return _distinct([gene["protein"], o["template_as_mrna"], o["reversed"], o["swapped"]])
 
 
 # ---- scenario ----------------------------------------------------------------------------------
@@ -186,8 +187,8 @@ def draw_scenario(rng: Rng) -> dict[str, Any]:
 # ---- family ------------------------------------------------------------------------------------
 
 _BASE_INTRO = (
-    "A gene is a region of DNA that contains instructions for an amino-acid sequence (a protein). A cell copies one "
-    "strand of a gene, the template strand, into messenger RNA (mRNA) by transcription. At a ribosome, the mRNA is read "
+    "A gene is a region of DNA that contains instructions for an amino-acid sequence (a protein). A cell uses one "
+    "strand of a gene, the template strand, as a pattern to build messenger RNA (mRNA) by transcription. At a ribosome, the mRNA is read "
     "in groups of three nucleotides called codons, and each codon specifies an amino acid. This is translation."
 )
 _TABLE_RULE = "Use the codon table shown. You do not need to memorize codons."
@@ -201,6 +202,10 @@ _TRANSCRIBE_WHY = {
         "same left-to-right position."
     ),
     "gc_unchanged": "G pairs with C and C pairs with G; this strand leaves the G and C bases unchanged.",
+    "later_codons_copied": (
+        "The first codon is paired correctly, but the rest of the template strand is copied instead of paired with its "
+        "complement."
+    ),
 }
 _PROTEIN_WHY = {
     "reversed": "The amino acids are in reverse order. Codons are read in order from the 5′ end of the mRNA.",
@@ -315,7 +320,10 @@ class DnaProteinSynthesis(QuestionFamily):
     def _q_transcribe_mrna(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
         g = params["genes"]["transcribe"]
         correct = strand_text(g["mrna"], "5", "3")
-        wrong = rng.sample(transcribe_candidates(g), 3)
+        candidates = transcribe_candidates(g)
+        # One wrong answer always starts with the correct AUG, so the start codon alone never gives the key away.
+        forced = [c for c in candidates if c[0] == "later_codons_copied"]
+        wrong = forced + rng.sample([c for c in candidates if c[0] != "later_codons_copied"], 3 - len(forced))
         choices = [
             DraftChoice(
                 correct,
@@ -376,7 +384,7 @@ class DnaProteinSynthesis(QuestionFamily):
             )
         ] + [
             DraftChoice(sequence_text(options[k]), False, _PROTEIN_WHY[k])
-            for k in ("template_as_mrna", "reversed", "no_start")
+            for k in ("template_as_mrna", "reversed", "swapped")
         ]
         return DraftQuestion(
             stem=(
@@ -403,7 +411,7 @@ class DnaProteinSynthesis(QuestionFamily):
                 "produced."
             ),
             answer=(
-                f"Transcription copies the template strand into mRNA by base pairing (A–U, T–A, G–C, C–G), so "
+                f"Transcription builds an mRNA by pairing each template base with its complement (A–U, T–A, G–C, C–G), so "
                 f"{strand_text(g['template'], '3', '5')} is transcribed into {strand_text(g['mrna'], '5', '3')}. The "
                 f"mRNA is read in codons ({', '.join(g['codons'])}), and the table shows the amino acid each codon "
                 f"specifies: {protein}; the stop codon ends the chain. The order of amino acids is the protein's "
@@ -435,7 +443,7 @@ class DnaProteinSynthesis(QuestionFamily):
                     DraftChoice(
                         f"{gene} is {CATEGORY_TEXT[wrong]}.",
                         False,
-                        f"The table shows {gene} is {CATEGORY_TEXT[actual[gene]]}, not {CATEGORY_TEXT[wrong]}.",
+                        f"The table shows {gene} is {CATEGORY_TEXT[actual[gene]]}, but this statement says it is {CATEGORY_TEXT[wrong]}.",
                     )
                 )
         correct = next(c.text for c in choices if c.correct)

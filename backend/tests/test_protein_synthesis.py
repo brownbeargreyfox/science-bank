@@ -374,3 +374,29 @@ def test_single_template_requests_include_only_what_they_need():
     assert _set("one", "transcribe_mrna")["groups"][0]["stimulus"]["tables"] == []
     only_activity = _set("one", "gene_activity_by_cell")["groups"][0]["stimulus"]["tables"]
     assert [list(t["rows"][0]) for t in only_activity] == [["gene", "p", "q"]]
+
+
+# ---- review fixes --------------------------------------------------------------------------
+
+
+def test_the_key_is_never_the_only_choice_that_starts_like_a_protein_or_an_mrna():
+    for seed in SEEDS:
+        transcribe = _only(_set(seed, "transcribe_mrna"), "transcribe_mrna")
+        assert sum(c["text"].startswith("5′-AUG") for c in transcribe["choices"]) >= 2, seed
+        for key in ("translate_mrna", "dna_to_protein"):
+            q = _only(_set(seed, key), key)
+            assert sum(c["text"].startswith("Methionine") for c in q["choices"]) >= 2, (seed, key)
+
+
+def test_rationales_read_cleanly():
+    for seed in SEEDS:
+        for text in _all_text(_full(seed)):
+            assert "not not" not in text, (seed, text)
+
+
+def test_transcription_is_not_described_as_copying_the_template():
+    for seed in SEEDS[:40]:
+        out = _full(seed)
+        explain = _only(out, "explain_dna_to_protein")
+        assert "copies" not in out["groups"][0]["stimulus"]["intro"].lower()
+        assert "copies" not in explain["answer"].lower()

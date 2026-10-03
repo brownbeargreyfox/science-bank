@@ -57,8 +57,12 @@ what students see.
 - Each row is `codon | amino acid`; AUG reads "methionine (start)" and stop codons read "Stop".
 - A distractor is only built if every codon it uses is in the table; otherwise the draw is rejected and redrawn.
 - Distractors must not equal the key, must not equal each other (the engine's duplicate-choice check), and must not be
-  valid under another reading: the coding strand (the template's complement written as DNA) gives the **same** protein,
-  so it is never used as a distractor.
+  valid under another reading. The coding strand written as DNA contains T, so as an mRNA choice it is wrong; it is
+  offered only as the "T kept instead of U" transcription distractor and is never offered as a *protein* distractor,
+  because translating it gives the **same** protein as the key.
+- The key must never be the only choice that starts like a protein or an mRNA: every `transcribe_mrna` item includes a
+  wrong strand that begins with the correct `AUG`, and every `translate_mrna` and `dna_to_protein` item includes a wrong
+  sequence that begins with methionine.
 - All choices state the reading direction (mRNA written 5′→3′) so a reversed string cannot be valid by direction.
 
 ## Templates
@@ -75,16 +79,15 @@ Single-standard family: bound only to `SC / biology-1 / B-LS1-1`; no template de
 
 ### Item details
 
-- **`transcribe_mrna`**: stem shows the template strand; choices are mRNA strings (5′→3′). Key is the pairing. Distractors:
-  T kept instead of U; the template copied as if it were mRNA (U substituted); the key reversed; one wrong pair swapped
-  (A↔U exchanged for G↔C). Needs no table.
+- **`transcribe_mrna`**: stem shows the template strand; choices are mRNA strings (5′→3′). Key is the pairing. Distractors
+  (always the first, plus two of the others): correct first codon with the rest copied; T kept instead of U; the
+  template copied as if it were mRNA (U substituted); the key reversed; G and C left unpaired. Needs no table.
 - **`translate_mrna`**: stem shows the mRNA (5′→3′, starting at AUG) and the table; choices are amino acid sequences
-  joined with arrows. Key follows the codons in order. Distractors: key in reverse order; the mRNA's codons read with
-  each codon's letters reversed; the template strand's letters read as if they were an mRNA (T written as U). Each
-  uses only codons added to the table. Rejected if any distractor hits a stop codon before its end.
+  joined with arrows. Key follows the codons in order. Distractors: key in reverse order; the start (methionine)
+  dropped; the second and third amino acids swapped. Each uses only codons already in the key.
 - **`dna_to_protein`**: stem shows only the template strand and the table; choices are amino acid sequences. Key is the
-  two-step result. Distractors: the template read directly as codons; the key reversed; the mRNA codons with their
-  letters reversed.
+  two-step result. Distractors: the template read directly as codons (rejected if it hits a stop codon, and its codons
+  are added to the table); the key reversed; the second and third amino acids swapped.
 - **`gene_activity_by_cell`**: stimulus says cell types P and Q come from the same organism and contain the same DNA, and
   shows a gene-activity table (four generic genes × P and Q, "active" or "not active"). Stem: which statement is
   supported by the table. Four choices each assert a category (only in P, only in Q, both, neither) for a different
@@ -92,7 +95,7 @@ Single-standard family: bound only to `SC / biology-1 / B-LS1-1`; no template de
 - **`explain_dna_to_protein`**: stem asks the student to use the table to explain how the template strand of the gene
   determines the amino acid sequence of its protein, including the mRNA and the amino acid sequence. Rubric
   (three points, answer field holds the model answer): (1) the template strand is transcribed into a complementary mRNA
-  by base pairing; (2) the mRNA is read in groups of three (codons) and each codon specifies an amino acid per the
+  by base pairing (transcription is described as building an mRNA, never as "copying" the template); (2) the mRNA is read in groups of three (codons) and each codon specifies an amino acid per the
   table; (3) the order of amino acids is the protein's sequence, so the DNA sequence determines the protein. The model
   answer is computed from the scenario.
 
