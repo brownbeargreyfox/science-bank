@@ -5,7 +5,7 @@ Status: Proposal for Nina's input. Ordering is a recommendation, not a ranking s
 
 ## Where coverage stands
 
-38 standards are imported (Biology 1: 14, Biology 2: 12, Chemistry: 12). Six families are live:
+38 standards are imported (Biology 1: 14, Biology 2: 12, Chemistry: 12). Seven families are live:
 
 | Family | Standard(s) |
 |---|---|
@@ -15,8 +15,9 @@ Status: Proposal for Nina's input. Ordering is a recommendation, not a ranking s
 | `quantitative-conservation` | Chemistry C-PS1-7 |
 | `reaction-outcome` | Chemistry C-PS1-2 |
 | `chemical-system-stability` (bundle) | Chemistry C-PS1-5 + C-PS1-7 |
+| `dna-protein-synthesis` | Biology 1 B-LS1-1 (built 2026-10-02; Biology 1 only, classroom-only) |
 
-That is 5 standards with a family. Biology 2 has none. Every question in the bank comes from a family, so
+That is 6 standards with a family. Biology 2 has none. Every question in the bank comes from a family, so
 results tracking and variants (see `2026-09-29-results-and-variants-design.md`) only help standards that have
 one. This roadmap is the parallel track.
 
@@ -40,7 +41,7 @@ student sees, each template citing an SCDE observable-performance bullet, DOK fr
 
 | Standard | Topic | Nina's unit | Family shape | Notes |
 |---|---|---|---|---|
-| B-LS1-1 | DNA structure, protein synthesis | DNA/RNA, protein synthesis | Sequence-based: given a template strand, transcribe and translate; effects on the protein | Deterministic from a codon table. Shared with Biology 2 (repeat PE). The `genetics.py` module is a natural neighbor. |
+| B-LS1-1 | DNA structure, protein synthesis | DNA/RNA, protein synthesis | Sequence-based: given a template strand, transcribe and translate; effects on the protein | **Built** as `dna-protein-synthesis` (Biology 1 only; Biology 2's deeper wording needs its own templates). B-LS3-2 can reuse `CODONS`/`translate` from `protein_synthesis.py`. |
 | B-LS3-2 | Meiosis, variation, mutation | Mutations | Point-mutation outcome from a sequence (silent, missense, nonsense, frameshift) plus inheritance of variation | Reuses the codon table from B-LS1-1. Shared with Biology 2. |
 | B-LS1-6 | Macromolecules, matter and energy | Macromolecules | Classify monomer/polymer/element composition from structural data; dehydration synthesis and hydrolysis accounting | Needs a small curated molecule bank. |
 | B-LS2-5 | Carbon cycle | Carbon cycling | Flux/pool data table and process identification | Curated pool-and-flux dataset; ties to the approved carbon-cycle sample item. |

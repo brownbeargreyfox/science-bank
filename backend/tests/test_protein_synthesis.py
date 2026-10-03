@@ -291,3 +291,86 @@ def test_activity_stimulus_has_no_codon_table():
     out = _set("only-activity", "gene_activity_by_cell")
     tables = out["groups"][0]["stimulus"]["tables"]
     assert len(tables) == 1 and "gene" in tables[0]["rows"][0]
+
+
+# ---- family-wide guards --------------------------------------------------------------------
+
+BANNED = (
+    "mutation",
+    "mutate",
+    "frameshift",
+    "silent",
+    "missense",
+    "nonsense",
+    "initiation",
+    "elongation",
+    "termination",
+)
+ALL_KEYS = [t.key for t in ps.DnaProteinSynthesis.templates]
+
+
+def _full(seed: str) -> dict:
+    return generate_set(ps.DnaProteinSynthesis(), seed, len(ALL_KEYS))
+
+
+def _all_text(out: dict) -> list[str]:
+    texts = []
+    for g in out["groups"]:
+        texts += [g["stimulus"]["title"], g["stimulus"]["intro"]]
+        for q in g["questions"]:
+            texts += [q["stem"], q["answer"], q["explanation"]]
+            texts += [c["text"] + " " + c["rationale"] for c in q["choices"]]
+    return texts
+
+
+def test_templates_and_doks():
+    doks = {t.key: t.dok for t in ps.DnaProteinSynthesis.templates}
+    assert doks == {
+        "transcribe_mrna": 1,
+        "translate_mrna": 1,
+        "dna_to_protein": 2,
+        "gene_activity_by_cell": 2,
+        "explain_dna_to_protein": 3,
+    }
+
+
+def test_no_mutation_or_biochemistry_vocabulary_anywhere():
+    for seed in SEEDS:
+        blob = " ".join(_all_text(_full(seed))).lower()
+        for word in BANNED:
+            assert word not in blob, (seed, word)
+        assert "a single gene codes for a protein" not in blob
+
+
+def test_no_item_leaks_another_items_key_in_the_same_set():
+    for seed in SEEDS:
+        out = _full(seed)
+        group = out["groups"][0]
+        qs = {q["template_key"]: q for q in group["questions"]}
+        transcribe_key = _correct(qs["transcribe_mrna"])
+        translate_key = _correct(qs["translate_mrna"])
+        protein_key = _correct(qs["dna_to_protein"])
+        for key, q in qs.items():
+            visible = q["stem"] + " " + group["stimulus"]["intro"]
+            if key != "transcribe_mrna":
+                assert transcribe_key not in visible, (seed, key)
+            assert protein_key not in visible, (seed, key)
+            assert translate_key not in visible, (seed, key)
+        # the three sequence items use three different genes
+        strands = [STRAND.findall(qs[k]["stem"])[0][1] for k in ("transcribe_mrna", "translate_mrna", "dna_to_protein")]
+        assert len(set(strands)) == 3
+
+
+def test_a_full_set_shares_one_table_that_covers_every_sequence_item():
+    for seed in SEEDS:
+        out = _full(seed)
+        tables = out["groups"][0]["stimulus"]["tables"]
+        assert len(tables) == 2  # codon table and activity table
+        codon_rows = next(t for t in tables if "codon" in t["rows"][0])["rows"]
+        assert 10 <= len(codon_rows) <= 26
+
+
+def test_single_template_requests_include_only_what_they_need():
+    assert _set("one", "transcribe_mrna")["groups"][0]["stimulus"]["tables"] == []
+    only_activity = _set("one", "gene_activity_by_cell")["groups"][0]["stimulus"]["tables"]
+    assert [list(t["rows"][0]) for t in only_activity] == [["gene", "p", "q"]]
