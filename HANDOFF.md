@@ -25,7 +25,15 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
-- Latest deploy: `5e12510` (2026-10-02; merge of `feat/coverage-grid`, no migration; migration still `0005`): the
+- Latest deploy: `52126d9` (2026-10-03; merge of `feat/dna-protein-synthesis`, no migration; migration still `0005`):
+  the `dna-protein-synthesis` family for Biology 1 B-LS1-1 (see "Implemented families"). Verified live: `/readyz` 200
+  locally and publicly, startup log shows 7 families synced, the database lists `dna-protein-synthesis 1.0.0`,
+  Biology 1 B-LS1-1 is flagged as a family candidate (Biology 2 is not), and the family generates a set inside the
+  container. Not checked live: a signed-in Generate page for B-LS1-1 on production (not exercised in a browser), and
+  no questions have been saved from the new family yet. Rollback: image `science-bank-app:pre-dna-protein-52126d9`;
+  nothing in the database changed beyond the standards importer's flag update. From here, any change to this
+  family's output needs a version bump.
+- Earlier deploy: `5e12510` (2026-10-02; merge of `feat/coverage-grid`, no migration; migration still `0005`): the
   coverage grid (`/coverage`, `GET /api/coverage`; see "Coverage grid"). Verified live: `/readyz` 200 locally and
   publicly, the served bundle contains the new page strings, `/api/coverage` returns 401 when signed out, no errors in
   the app log. Not checked live: a signed-in view of the page on production (verified on a scratch stack only), a real
@@ -270,7 +278,7 @@ in `backend/app/services/engine/`.
 | `chemical-system-stability` | Chemistry C-PS1-5 + C-PS1-7 | 1.0.0 | One magnesium + hydrochloric-acid shared stimulus: rate evidence and quantitative conservation. |
 | `quantitative-conservation` | Chemistry C-PS1-7 | 1.0.1 | Curated reactions, moles/particles/mass as evidence for conservation. |
 | `reaction-outcome` | Chemistry C-PS1-2 | 1.0.0 | Curated main-group/combustion reactions: bond type, electrons lost/gained/shared, product formula, same-family reactivity trends. Classroom-only. |
-| `dna-protein-synthesis` | Biology 1 B-LS1-1 | 1.0.0 (built on branch `feat/dna-protein-synthesis`, not yet merged or deployed) | Template strand to mRNA, mRNA to amino acids with a displayed partial codon table, gene activity across two cell types, and a DOK 3 explanation. Classroom-only; no mutation-effect items (those belong to B-LS3-2, which can reuse `CODONS`/`translate`). |
+| `dna-protein-synthesis` | Biology 1 B-LS1-1 | 1.0.0 | Template strand to mRNA, mRNA to amino acids with a displayed partial codon table, gene activity across two cell types, and a DOK 3 explanation. Classroom-only; no mutation-effect items (those belong to B-LS3-2, which can reuse `CODONS`/`translate`). |
 
 Engine invariants are tested in `backend/tests/test_engine.py`:
 
