@@ -196,3 +196,42 @@ def test_trait_trend_includes_the_table_and_a_chart_that_points_at_it():
     assert len(stim["tables"]) == 1 and len(stim["charts"]) == 1
     chart = stim["charts"][0]
     assert chart["type"] == "line" and chart["table_index"] == 0 and len(chart["series"]) == 2
+
+
+# ---- items: effect_of_change, explain_adaptation -------------------------------------------
+
+
+def test_effect_of_change_key_follows_the_displayed_counts():
+    for seed in SEEDS:
+        out = _set(seed, "effect_of_change")
+        q = _only(out, "effect_of_change")
+        numbers = [int(x) for x in re.findall(r"generation (\d+)", q["stem"])]
+        l1, last = numbers[0], numbers[-1]  # the stem names the change generation twice, then the last generation
+        table = _generation_table(out)
+        a_label, b_label = (c["label"] for c in table["columns"][1:])
+        a_up = table["rows"][last]["a"] > table["rows"][l1]["a"]
+        winner = a_label if a_up else b_label
+        assert _correct(q) == f"{winner} became more common."
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4
+        named = [t for t in texts if t.endswith("became more common.") and not t.startswith(("Neither", "Both"))]
+        assert len(named) == 2 and "Both variants became more common." in texts
+
+
+def test_explain_adaptation_key_names_the_whole_chain_and_distinguishes_need_from_selection():
+    chain = ("heritable", "survived", "reproduced", "passed", "more common")
+    for seed in SEEDS[:60]:
+        out = _set(seed, "explain_adaptation")
+        q = _only(out, "explain_adaptation")
+        texts = [c["text"] for c in q["choices"]]
+        chain_texts = [t for t in texts if all(word in t for word in chain)]
+        assert chain_texts == [_correct(q)]  # exactly one choice carries the full chain
+        assert [t for t in texts if "need" in t] != [_correct(q)]
+        assert sum("needed" in t for t in texts) == 1  # only the needs-based distractor
+        assert "need" not in _correct(q) and "need" not in q["stem"]
+        assert "need" not in out["groups"][0]["stimulus"]["intro"]
+        needy = next(c for c in q["choices"] if "needed" in c["text"])
+        assert "do not change their traits because they need to" in needy["rationale"]
+        labels = [c["label"].lower() for c in _generation_table(out)["columns"][1:]]
+        assert not any(label in t.lower() for label in labels for t in texts)  # no variant is named
+        assert len(_correct(q)) <= max(len(c["text"]) for c in q["choices"] if not c["correct"])

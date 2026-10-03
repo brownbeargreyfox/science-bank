@@ -269,6 +269,45 @@ def draw_scenario(rng: Rng) -> dict[str, Any]:
     }
 
 
+ADAPTATION_KEY = (
+    "The population already had heritable variation in the trait. Individuals with one variant survived and reproduced "
+    "more in the new environment and passed the trait to their offspring, so that trait became more common over the "
+    "generations."
+)
+ADAPTATION_NEED = (
+    "Individuals in the population changed their trait because they needed it to survive in the new environment, and "
+    "those changes were then passed on to their offspring, so the trait became more common in the whole population over "
+    "the generations."
+)
+ADAPTATION_ENV = (
+    "The new environment changed the offspring directly, so every offspring was born with one variant whatever traits "
+    "its parents had, and in this way that variant became more common in the whole population over the generations."
+)
+ADAPTATION_ALWAYS = (
+    "One variant is better than the other in every environment, so individuals with it always survive and reproduce "
+    "more in any environment, and it becomes more common over the generations no matter what the environment is like."
+)
+ADAPTATION_WHY = {
+    "key": (
+        "Correct: it names the whole chain. The population had heritable variation, individuals with one variant "
+        "survived and reproduced more, they passed the trait to their offspring, and the trait became more common over "
+        "the generations."
+    ),
+    "need": (
+        "Individuals do not change their traits because they need to. The population changed because variants that "
+        "already existed survived and reproduced differently."
+    ),
+    "env": (
+        "The environment does not change an offspring's inherited traits directly. It affects which individuals "
+        "survive and reproduce."
+    ),
+    "always": (
+        "Which variant survives better depends on the environment. The table shows each variant increasing in a "
+        "different environment."
+    ),
+}
+
+
 # ---- family ------------------------------------------------------------------------------------
 
 _GENERATION_KEYS = {
@@ -306,6 +345,8 @@ class NaturalSelectionTrend(QuestionFamily):
     templates = (
         TemplateSpec("compare_survival", "Compare survival rates", 1, "multiple_choice", "evidence", 1),
         TemplateSpec("trait_trend", "Read a trend in a trait", 2, "multiple_choice", "reasoning", 1),
+        TemplateSpec("effect_of_change", "Effect of an environmental change", 2, "multiple_choice", "evidence", 0),
+        TemplateSpec("explain_adaptation", "Explain adaptation", 2, "multiple_choice", "reasoning", 2),
     )
 
     # ---- scenario and stimulus --------------------------------------------------------------
@@ -439,5 +480,55 @@ class NaturalSelectionTrend(QuestionFamily):
             ),
             answer=texts[direction],
             explanation=f"{facts} The fraction {direction}.",
+            choices=choices,
+        )
+
+    def _q_effect_of_change(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        case = _case(params)
+        l1, last = params["l1"], len(params["rows"]) - 1
+        label = {v: case["variants"][v]["label"] for v in ("a", "b")}
+        noun = {v: case["variants"][v]["noun"] for v in ("a", "b")}
+        winner = params["second_favors"]
+        loser = _other(winner)
+        rows = params["rows"]
+        texts = {
+            "a": f"{label['a']} became more common.",
+            "b": f"{label['b']} became more common.",
+            "neither": "Neither variant became more common; the fractions did not change.",
+            "both": "Both variants became more common.",
+        }
+        won = f"{noun[winner].capitalize()} went from {rows[l1][winner]} out of {SAMPLE} in generation {l1} to {rows[last][winner]} out of {SAMPLE} in generation {last}."
+        lost = f"{noun[loser].capitalize()} went from {rows[l1][loser]} out of {SAMPLE} in generation {l1} to {rows[last][loser]} out of {SAMPLE} in generation {last}, a decrease."
+        why = {
+            winner: f"Correct: {won}",
+            loser: f"Not supported: {lost}",
+            "neither": f"Not supported: the table shows the fractions changed. {won}",
+            "both": f"Not supported: every generation has {SAMPLE} individuals, so when one variant becomes more common the other becomes less common. {won}",
+        }
+        choices = [DraftChoice(texts[name], name == winner, why[name]) for name in texts]
+        return DraftQuestion(
+            stem=(
+                f"The environment changed after generation {l1}. Compare generation {l1} with generation {last}. Which "
+                "variant became more common after the change?"
+            ),
+            answer=texts[winner],
+            explanation=f"{won} {lost}",
+            choices=choices,
+        )
+
+    def _q_explain_adaptation(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        choices = [
+            DraftChoice(ADAPTATION_KEY, True, ADAPTATION_WHY["key"]),
+            DraftChoice(ADAPTATION_NEED, False, ADAPTATION_WHY["need"]),
+            DraftChoice(ADAPTATION_ENV, False, ADAPTATION_WHY["env"]),
+            DraftChoice(ADAPTATION_ALWAYS, False, ADAPTATION_WHY["always"]),
+        ]
+        return DraftQuestion(
+            stem=(
+                "After the environment changed, one of the two variants became more common in the population. "
+                "Which statement best explains why?"
+            ),
+            answer=ADAPTATION_KEY,
+            explanation=ADAPTATION_WHY["key"],
             choices=choices,
         )
