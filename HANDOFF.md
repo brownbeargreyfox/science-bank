@@ -1,6 +1,6 @@
 # Science Bank — Detailed Engineering Handoff
 
-Last updated: 2026-10-02
+Last updated: 2026-10-03
 
 ## Executive summary
 
@@ -542,18 +542,85 @@ TEST_DATABASE_URL=postgresql+psycopg://sb:sb@127.0.0.1:54330/sb_test .venv/bin/p
 
 The acceptance bar is zero skipped DB tests.
 
+## Working method and lessons (2026-10-02 and 2026-10-03 sessions)
+
+Four features shipped in these sessions (coverage grid `5e12510`, `dna-protein-synthesis` `52126d9`, `mutation-effects`
+`46e4a36`, `natural-selection-trend` `0c47781`), each by the same loop. Reuse it.
+
+1. **Brainstorm, then a spec** in `docs/superpowers/specs/YYYY-MM-DD-<topic>-design.md` (committed on `main`). Brandon
+   reviews and approves it. Approval of the idea is not approval of the spec; approval of the spec is not approval of
+   the plan.
+2. **A plan** in `docs/superpowers/plans/` with tasks, exact code, `Expected:` lines, a Global Constraints block and a
+   Review Focus block. For a new question family, build the code in a sandbox copy first (see below) so the plan holds
+   code that has run.
+3. **Build on a `feat/<topic>` branch**, one commit per task, TDD (watch each test fail first). A guard test that passes
+   on its first run must be proved with a planted mutation (a banned word, a leaked key, a row that totals 99) that makes
+   it fail, then restored.
+4. **Full suite** against a throwaway Postgres, zero skipped (400 tests at the last deploy).
+5. **Fresh-context review** of the whole branch by a separate reviewer (the most capable model). Re-grade its findings by
+   what a teacher or student would get. Critical and Important findings get one fix pass, each with a test that failed
+   first; minors are recorded as deferred.
+6. **Merge `--no-ff` to `main`, tag a rollback image, rebuild, verify, record in HANDOFF.** Only after Brandon says so.
+
+Commands that matter:
+
+```sh
+# throwaway test database (never production); port 54332
+docker run -d --rm --name sb-testdb -p 127.0.0.1:54332:5432 -e POSTGRES_USER=sb -e POSTGRES_PASSWORD=sb \
+  -e POSTGRES_DB=postgres postgres:16-alpine
+cd backend && TEST_DATABASE_URL=postgresql+psycopg://sb:sb@127.0.0.1:54332/sb_test .venv/bin/python -m pytest -q   # ~2.5 min
+.venv/bin/ruff check app tests
+.venv/bin/ruff format <only the files you touched>   # NOT `ruff format app tests`: it reformats chemical_systems.py and importer.py
+# deploy (after Brandon's yes)
+git checkout main && git merge --no-ff <branch>
+docker tag science-bank-app:latest science-bank-app:pre-<topic>-<shorthash>
+docker compose up -d --build        # then /readyz locally and publicly, `alembic current`, family count in the log
+```
+
+Sandbox technique for plans: copy `backend/` (without `.venv`) and `data/` to a scratch directory, run with
+`PYTHONPATH=<scratch>/backend backend/.venv/bin/python -m pytest`, and only then write the plan from the files that passed.
+
+Lessons from four independent reviews (each flagged the same classes of defect; check for them before asking for a review):
+
+- **Answer cues in multiple choice.** The key was the longest choice, the only one starting a certain way (methionine,
+  AUG), the only hedged or reasoned one, or the only one not contradicting the stem. Keep choices parallel in form and
+  length; test constant-text items for "key is not the unique longest or shortest".
+- **Distractors that contradict the stem**, and premises that are false in the world (ultraviolet light does not reach
+  mammalian gonads).
+- **A bound that is only sampled by a test is not enforced.** Enforce it in the generator (redraw) and keep the test.
+- **Wording from f-strings**: plurals ("1 amino acids"), capitals mid-sentence, articles, doubled negatives, nested
+  parentheses. Read generated text for each case and each direction.
+- **Test-helper traps**: a label that is a substring of another ("resistant bacteria" inside "non-resistant bacteria"), a
+  regex that captures the wrong repeated number, assertions that copy the module's own logic. Tests must recompute keys
+  from the displayed data with their own typed ground truth.
+- **The shared test database is shared across tests**: give each administration-recording test its own calendar year.
+- **Changing a deployed family's output requires a version bump and a golden-digest re-pin** in the same commit.
+
+State at the end of these sessions: `main` deployed as `0c47781` (the app image `science-bank-app:latest`); nine families
+registered; migration `0005`; 400 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
+Rollback images exist for every deploy (`science-bank-app:pre-*`).
+
+**Not verified in a real browser on production** (verified in the container and on scratch stacks only): the signed-in
+`/coverage` page, the Generate pages for B-LS1-1, B-LS3-2 and B-LS4-4, and how the two-series line chart renders for
+`natural-selection-trend`. Brandon should open each once.
+
 ## Immediate recommended work
 
-1. Use `quantitative-conservation` (Mole stoichiometry) for C-PS1-7 in a classroom unit, then use it
-   to design the first bundle-driven shared Chemistry stimulus set. This is classroom Chemistry work
-   and does not extend Biology EOCEP coverage.
-2. Nina should use the current families in an actual unit and record edits; revise templates only
-   with a family version bump and updated deterministic tests.
-3. Administration: Phase 2a operational visibility (Overview, Errors, Jobs, Audit) is being designed
-   in parallel. Follow with Phase 2b content management, then Phase 3 change requests; both reuse
-   `policy.can_modify` and `audit_events`.
-4. Expand `biology-1-eocep.json` progressively as each Biology 1 family is added. Treat the EOCEP
-   Assessment Specifications as item-writer constraints, not merely display text.
-5. Add scheduled off-host Postgres backups and a Uptime Kuma `/readyz` monitor.
-6. If moving toward a public product, do identity/workspaces before opening registration to
-   strangers; do not postpone data isolation until after content has accumulated.
+See `docs/superpowers/plans/2026-10-03-codex-handoff-next-work.md` for the ranked list, the open decisions that need
+Brandon, and the deferred minor issues per feature. In short:
+
+1. **EOCEP constraints** for the new Biology 1 families (B-LS1-1, B-LS3-2, B-LS4-4) from the EOCEP Biology 1 Assessment
+   Specifications, so EOCEP practice mode can be offered for them (today it is rejected for every family except
+   B-LS2-1 and B-LS3-3). Treat the specification as item-writer constraints, not display text.
+2. **Biology 2 B-LS4-3** (statistics and distributions of traits), reusing the `natural-selection-trend` data patterns.
+3. **A second B-LS3-2 family**: meiosis and mutagen/replication-error dataset items, and frameshifts that also end the
+   protein early (the current family excludes them by design).
+4. **Word study aid for Biology 1** (Workstream C): blocked on Brandon choosing who drafts the first 10 to 15 glossary
+   terms. Bundle 5, "Changes in Populations Over Time", is the agreed pilot.
+5. Nina should use the current families in a real unit and record edits; revise templates only with a family version
+   bump and updated deterministic tests.
+6. Administration: Phase 2a operational visibility (Overview, Errors, Jobs, Audit), then Phase 2b content management,
+   then Phase 3 change requests; both reuse `policy.can_modify` and `audit_events`.
+7. Switch on the backups (`ops/backup/README.md`; key generation and timers are Brandon's steps) and add an Uptime
+   Kuma `/readyz` monitor.
+8. If moving toward a public product, do identity and workspaces before opening registration to strangers.
