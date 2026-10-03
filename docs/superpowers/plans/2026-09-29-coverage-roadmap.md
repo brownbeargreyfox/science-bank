@@ -5,7 +5,7 @@ Status: Proposal for Nina's input. Ordering is a recommendation, not a ranking s
 
 ## Where coverage stands
 
-38 standards are imported (Biology 1: 14, Biology 2: 12, Chemistry: 12). Eight families are live:
+38 standards are imported (Biology 1: 14, Biology 2: 12, Chemistry: 12). Nine families are live:
 
 | Family | Standard(s) |
 |---|---|
@@ -17,8 +17,9 @@ Status: Proposal for Nina's input. Ordering is a recommendation, not a ranking s
 | `chemical-system-stability` (bundle) | Chemistry C-PS1-5 + C-PS1-7 |
 | `dna-protein-synthesis` | Biology 1 B-LS1-1 (built 2026-10-02; Biology 1 only, classroom-only) |
 | `mutation-effects` | Biology 1 B-LS3-2 (built 2026-10-03; sequence-level mutation effects only; meiosis and mutagen data items still to do) |
+| `natural-selection-trend` | Biology 1 B-LS4-4 (built 2026-10-03; Biology 1 only, classroom-only) |
 
-That is 7 standards with a family. Biology 2 has none. Every question in the bank comes from a family, so
+That is 8 standards with a family. Biology 2 has none. Every question in the bank comes from a family, so
 results tracking and variants (see `2026-09-29-results-and-variants-design.md`) only help standards that have
 one. This roadmap is the parallel track.
 
@@ -52,7 +53,7 @@ student sees, each template citing an SCDE observable-performance bullet, DOK fr
 ### Tier B — remaining Biology 1
 
 B-LS1-5 (photosynthesis), B-LS1-7 (cellular respiration), B-LS4-1 (evidence for evolution), B-LS4-2 (natural
-selection), B-LS4-4 (adaptation, flagged as a good candidate: gene-frequency change over generations), B-LS4-5
+selection), B-LS4-4 (adaptation, flagged as a good candidate: gene-frequency change over generations) **(built as `natural-selection-trend`; Biology 2 B-LS4-3 still needs its own templates)**, B-LS4-5
 (extinction and speciation). `natural-selection-trend` from the existing catalog serves both B-LS4-4 and
 Biology 2 B-LS4-3.
 

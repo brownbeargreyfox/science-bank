@@ -238,6 +238,17 @@ def test_eocep_mode_uses_imported_biology_1_constraints(client):
         },
     )
     assert denied_4.status_code == 422
+    bio_1_ns = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS4-4")
+    denied_5 = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": bio_1_ns["id"],
+            "family_key": "natural-selection-trend",
+            "quantity": 1,
+            "generation_mode": "eocep",
+        },
+    )
+    assert denied_5.status_code == 422
 
 
 def test_eocep_mode_excludes_constructed_response(client):
@@ -321,6 +332,7 @@ def test_standards_browse_and_detail(client):
         ("biology-1", "B-LS2-1"),
         ("biology-1", "B-LS3-2"),
         ("biology-1", "B-LS3-3"),
+        ("biology-1", "B-LS4-4"),
         ("chemistry", "C-PS1-2"),
         ("chemistry", "C-PS1-5"),
         ("chemistry", "C-PS1-7"),
@@ -358,6 +370,7 @@ def _generate(client, course_slug, code, family, **kw):
         ("chemistry", "C-PS1-2", "reaction-outcome"),
         ("biology-1", "B-LS1-1", "dna-protein-synthesis"),
         ("biology-1", "B-LS3-2", "mutation-effects"),
+        ("biology-1", "B-LS4-4", "natural-selection-trend"),
     ],
 )
 def test_preview_is_reproducible(client, course, code, family):
@@ -377,6 +390,8 @@ def test_family_must_match_exact_standard(client):
     _, body = _generate(client, "biology-2", "B-LS1-1", "dna-protein-synthesis")
     assert client.post("/api/generate/preview", json=body).status_code == 422
     _, body = _generate(client, "biology-2", "B-LS3-2", "mutation-effects")
+    assert client.post("/api/generate/preview", json=body).status_code == 422
+    _, body = _generate(client, "biology-2", "B-LS4-3", "natural-selection-trend")
     assert client.post("/api/generate/preview", json=body).status_code == 422
     _, body = _generate(client, "biology-1", "B-LS2-1", "population-carrying-capacity", doks=[4])
     assert client.post("/api/generate/preview", json=body).status_code == 422

@@ -59,7 +59,8 @@ standard usage.
   redrawn.
 - **Survival experiment** (for `compare_survival`): a second small table, "Survival through one season in the first
   environment", with columns *Variant*, *Started*, *Survived*. Started counts are multiples of 5 from 40 to 85,
-  `0 <= survived <= started`, and the two displayed survival rates (survived/started) differ by at least 0.15. Half of the
+  `0 <= survived <= started`, and the two displayed survival rates (survived/started) differ by at least 0.15. The two groups never
+  start with the same number (the "cannot be compared" choice says they differ). Half of the
   draws are **trap draws** where the variant with the higher rate has fewer survivors (so counts alone mislead); the other
   half have the higher-rate variant with more survivors.
 
@@ -101,9 +102,12 @@ key; rationales cite the displayed numbers.
   offspring be born with the trait whatever its parents had; one variant is better in every environment, so it always
   increases. The word "need" appears only in that distractor and its rationale.
 - **`predict_new_change`**: the stem states that the environment **reverses to its earlier conditions while all other
-  conditions stay the same**, and asks for direction only (no percentage and no generation). Choices name no variant: the
-  variant that was more common before the change will tend to become more common again (the key); the variant that is now
-  more common will keep increasing; both stay the same because traits are fixed; every individual will have the same trait.
+  conditions stay the same**, and asks for direction only (no percentage and no generation). Choices name no variant and are
+  parallel (each hedged with "will tend to" and each giving a "because" reason), so the key is never the shortest, longest,
+  or only hedged choice: the variant that *increased* before the change will tend to become more common again (the key;
+  "more common before" was dropped because the first-favoured variant often starts as the minority); the variant that is
+  now more common will tend to keep increasing; both will tend to stay the same because traits are fixed; every individual
+  will tend to end up with the same trait.
 - **`explain_with_data`**: asks for an explanation using the data, at the level of the population across generations and
   not of individuals changing because they need to. Rubric (4 points; model answer computed from the table): (1) the claim
   and the data (the fraction of the population with the variant rose from X to Y out of 100 over the generations after the
@@ -146,6 +150,10 @@ Create `backend/app/services/families/natural_selection.py` and `backend/tests/t
 `backend/tests/test_engine.py` (golden), `backend/tests/test_api.py` (generation matrix, EOCEP denial, Biology 2 mismatch,
 the with-family list), and docs (`HANDOFF.md`, the coverage roadmap). No migration, no frontend change (the line chart and
 tables already render).
+
+Lab-culture wording: the bacteria case says "growth cycle" instead of "season", its intro explains why resistant bacteria
+survive less well without Compound Zeta (they compete less well for food), and chart titles and the model answer never name
+one variant as the trait.
 
 ## Out of scope
 
