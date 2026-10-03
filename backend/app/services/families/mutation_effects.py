@@ -267,6 +267,8 @@ class MutationEffects(QuestionFamily):
         TemplateSpec(
             "new_protein_after_change", "Protein made from the changed gene", 2, "multiple_choice", "reasoning", 0
         ),
+        TemplateSpec("effect_on_protein", "Effect of a mutation on a protein", 2, "multiple_choice", "reasoning", 0),
+        TemplateSpec("inheritance_of_mutation", "Can a mutation be inherited?", 2, "multiple_choice", "reasoning", 1),
     )
 
     # ---- scenario and stimulus --------------------------------------------------------------
@@ -389,5 +391,98 @@ class MutationEffects(QuestionFamily):
                 f"{role['changed']['mrna']} and read to the first stop codon, which gives {correct}.",
                 edit,
             ),
+            choices=choices,
+        )
+
+    def _q_effect_on_protein(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        role = params["roles"]["effect"]
+        edit, category = role["edit"], role["category"]
+        original, changed = role["original"]["protein"], role["changed"]["protein"]
+        before, after = sequence_text(original), sequence_text(changed)
+        right = {
+            "unchanged": f"Correct: both strands give {before}. The changed codon still specifies the same amino acid.",
+            "one_changed": (
+                f"Correct: the original protein is {before} and the changed protein is {after}. Only one amino acid "
+                "differs."
+            ),
+            "ends_early": (
+                f"Correct: the changed protein is {after}. A new stop codon is read, so the protein ends after "
+                f"{len(changed)} amino acids instead of {len(original)}."
+            ),
+            "several_differ": (
+                f"Correct: the original protein is {before} and the changed protein is {after}. Several amino acids "
+                "after the change are different."
+            ),
+        }
+        choices = []
+        for name, text in EFFECT_TEXT.items():
+            if name == category:
+                why = right[name]
+            else:
+                why = (
+                    f"Not supported: the original protein is {before} and the changed protein is {after}, which does "
+                    "not match this statement."
+                )
+            choices.append(DraftChoice(text, name == category, _frameshift(why, edit)))
+        return DraftQuestion(
+            stem=(
+                f"A mutation changed the DNA template strand of {role['label']}. {_strands_sentence(role)} "
+                f"{SEQUENCE_MODEL} Use the codon table to compare the original and changed proteins. Which statement "
+                "describes how the change affects the protein?"
+            ),
+            answer=EFFECT_TEXT[category],
+            explanation=_frameshift(
+                f"The original protein is {before}. The changed protein is {after}. {EFFECT_TEXT[category]}", edit
+            ),
+            choices=choices,
+        )
+
+    def _q_inheritance_of_mutation(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        info = params["inheritance"]
+        organism, cell, mutagen = info["organism"], info["cell"], info["mutagen"]
+        if info["gamete"]:
+            word = cell.split(" ", 1)[1]
+            correct = f"The mutation can be inherited by offspring if the changed {word} takes part in fertilization."
+            right = (
+                "Correct: a mutation in a gamete is in the genetic material that offspring receive when that gamete "
+                "takes part in fertilization."
+            )
+            opposite = "The mutation will not be passed to offspring, because only body cells can carry mutations."
+            opposite_why = "Gametes carry genetic material to offspring, so a mutation in a gamete can be inherited."
+        else:
+            correct = (
+                "The mutation will not be passed to offspring, but cells that come from the changed body cell will "
+                "carry it."
+            )
+            right = (
+                "Correct: a mutation in a body cell stays in the cells that come from it. It is not in the gametes, so "
+                "offspring do not receive it."
+            )
+            opposite = "The mutation will be passed to all offspring, because every mutation is inherited."
+            opposite_why = (
+                "Only mutations in gametes can be passed to offspring. A body cell mutation is not in the gametes."
+            )
+        choices = [
+            DraftChoice(correct, True, right),
+            DraftChoice(opposite, False, opposite_why),
+            DraftChoice(
+                f"The mutation will appear in every cell of {organism} and in all of its offspring.",
+                False,
+                "A mutation starts in one cell and is only in the cells that come from it, so it is not in every cell.",
+            ),
+            DraftChoice(
+                f"{mutagen[0].upper()}{mutagen[1:]} cannot cause a mutation; only copying errors during replication "
+                "change DNA.",
+                False,
+                "A mutagen, such as ultraviolet light or X-rays, is an environmental factor that can change DNA.",
+            ),
+        ]
+        return DraftQuestion(
+            stem=(
+                f"{organism[0].upper()}{organism[1:]} is exposed to {mutagen}, a mutagen. The exposure causes a "
+                f"mutation in the DNA of {cell}. Which statement is supported?"
+            ),
+            answer=correct,
+            explanation=right,
             choices=choices,
         )

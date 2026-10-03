@@ -276,3 +276,64 @@ def test_new_protein_stimulus_states_the_table_rule():
     stim = _set("only-new-protein", "new_protein_after_change")["groups"][0]["stimulus"]
     assert "do not need to memorize" in stim["intro"]
     assert len(stim["tables"]) == 1 and "codon" in stim["tables"][0]["rows"][0]
+
+
+# ---- effect_on_protein ---------------------------------------------------------------------
+
+TEXT_TO_CATEGORY = {text: category for category, text in me.EFFECT_TEXT.items()}
+
+
+def test_effect_item_has_exactly_one_true_description_matching_the_independent_category():
+    seen = set()
+    for seed in SEEDS:
+        out = _set(seed, "effect_on_protein")
+        q = _only(out, "effect_on_protein")
+        original, changed = _strands(q)
+        table = _table(out)
+        before, read_before = _read("".join(TEMPLATE_PAIR[b] for b in original))
+        after, read_after = _read("".join(TEMPLATE_PAIR[b] for b in changed))
+        assert set(read_before) | set(read_after) <= set(table)
+        category = _category(before, after)
+        kind, _ = _single_edit_positions(original, changed)
+        assert category is not None and (category == "several_differ") == (kind != "substitution")
+        assert sorted(c["text"] for c in q["choices"]) == sorted(me.EFFECT_TEXT.values())
+        assert _correct(q) == me.EFFECT_TEXT[category]
+        seen.add(category)
+        # every other description is false by the independent predicates
+        for c in q["choices"]:
+            assert c["correct"] == (TEXT_TO_CATEGORY[c["text"]] == category)
+    assert seen == set(me.EFFECT_TEXT)
+
+
+def test_indel_effect_items_never_end_early():
+    for seed in SEEDS:
+        q = _only(_set(seed, "effect_on_protein"), "effect_on_protein")
+        original, changed = _strands(q)
+        kind, _ = _single_edit_positions(original, changed)
+        if kind != "substitution":
+            assert _correct(q) == me.EFFECT_TEXT["several_differ"]
+
+
+# ---- inheritance_of_mutation ---------------------------------------------------------------
+
+GAMETE_KEY = "The mutation can be inherited by offspring if the changed {cell_word} takes part in fertilization."
+BODY_KEY = "The mutation will not be passed to offspring, but cells that come from the changed body cell will carry it."
+
+
+def test_inheritance_key_follows_the_cell_kind():
+    seen = set()
+    for seed in SEEDS:
+        q = _only(_set(seed, "inheritance_of_mutation"), "inheritance_of_mutation")
+        stem = q["stem"]
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4
+        if "body cell" in stem:
+            assert _correct(q) == BODY_KEY
+            seen.add("body")
+        else:
+            word = "egg cell" if "egg cell" in stem else "sperm cell"
+            assert _correct(q) == GAMETE_KEY.format(cell_word=word)
+            seen.add(word)
+        assert any(m in stem for m in me.MUTAGENS) and any(o in stem.lower() for o in me.ORGANISMS)
+        assert all(c["rationale"] for c in q["choices"])
+    assert seen == {"body", "egg cell", "sperm cell"}
