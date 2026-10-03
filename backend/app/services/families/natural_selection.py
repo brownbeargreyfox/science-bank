@@ -347,6 +347,10 @@ class NaturalSelectionTrend(QuestionFamily):
         TemplateSpec("trait_trend", "Read a trend in a trait", 2, "multiple_choice", "reasoning", 1),
         TemplateSpec("effect_of_change", "Effect of an environmental change", 2, "multiple_choice", "evidence", 0),
         TemplateSpec("explain_adaptation", "Explain adaptation", 2, "multiple_choice", "reasoning", 2),
+        TemplateSpec("predict_new_change", "Predict a new change", 2, "multiple_choice", "reasoning", 3),
+        TemplateSpec(
+            "explain_with_data", "Explain natural selection with data", 3, "constructed_response", "reasoning", 0
+        ),
     )
 
     # ---- scenario and stimulus --------------------------------------------------------------
@@ -531,4 +535,69 @@ class NaturalSelectionTrend(QuestionFamily):
             answer=ADAPTATION_KEY,
             explanation=ADAPTATION_WHY["key"],
             choices=choices,
+        )
+
+    def _q_predict_new_change(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        case = _case(params)
+        first = case["envs"][params["env_first"]]
+        texts = {
+            "key": "The variant that was more common before the change will tend to become more common again.",
+            "keeps": "The variant that is now more common will keep increasing, because it has already been selected.",
+            "fixed": "Both variants will stay at the same fractions, because each individual's trait is fixed and nothing can change.",
+            "uniform": "Every individual will end up with the same trait, because the population can no longer vary.",
+        }
+        why = {
+            "key": (
+                "Correct: the earlier environment favored the variant that was more common before the change. When "
+                "those conditions return, that variant is again more likely to survive and reproduce, so its fraction "
+                "tends to rise."
+            ),
+            "keeps": "Which variant increases depends on the environment. The conditions that favored it have ended.",
+            "fixed": "The table shows the fractions changing from generation to generation, so the population does change.",
+            "uniform": "Both variants are still in the population, and individuals with each can still reproduce.",
+        }
+        choices = [DraftChoice(texts[name], name == "key", why[name]) for name in texts]
+        return DraftQuestion(
+            stem=(
+                f"Later, the environment goes back to its earlier conditions. {first['returns']} All other conditions "
+                "stay the same. Which prediction is best supported by the data?"
+            ),
+            answer=texts["key"],
+            explanation=why["key"],
+            choices=choices,
+        )
+
+    def _q_explain_with_data(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        case = _case(params)
+        l1, last = params["l1"], len(params["rows"]) - 1
+        rows = params["rows"]
+        winner = params["second_favors"]
+        loser = _other(winner)
+        noun_win, noun_lose = case["variants"][winner]["noun"], case["variants"][loser]["noun"]
+        second = case["envs"][params["env_second"]]
+        answer = (
+            f"Claim: after the environment changed, {noun_win} became more common, going from {rows[l1][winner]} out of "
+            f"{SAMPLE} in generation {l1} to {rows[last][winner]} out of {SAMPLE} in generation {last}. "
+            f"Heritable variation: the population already had both {noun_win} and {noun_lose}, and parents pass their "
+            f"{case['trait']} to their offspring. "
+            f"Survival and reproduction: {second['is']} In this environment, {noun_win} survived and reproduced more "
+            f"than {noun_lose}. "
+            "Over the generations: because the trait is inherited, each new generation had a larger fraction with the "
+            "trait. The individuals did not change their traits because they needed to; the population changed because "
+            "the inherited trait became more common."
+        )
+        return DraftQuestion(
+            stem=(
+                "Use the data to explain how the population changed after the environment changed. Name the variant that "
+                "became more common, and explain the change in the population across the generations, not as "
+                "individuals changing because they need to."
+            ),
+            answer=answer,
+            explanation=(
+                "Scoring guide (4 points): (1) a claim that names the variant that became more common and uses the "
+                "data; (2) the population already had heritable variation, and parents pass the trait to offspring; "
+                "(3) in the new environment individuals with that variant survived and reproduced more; (4) because "
+                "the trait is inherited, it became more common over the generations, and individuals did not change "
+                "because they needed to."
+            ),
         )

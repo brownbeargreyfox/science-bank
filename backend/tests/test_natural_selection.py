@@ -235,3 +235,52 @@ def test_explain_adaptation_key_names_the_whole_chain_and_distinguishes_need_fro
         labels = [c["label"].lower() for c in _generation_table(out)["columns"][1:]]
         assert not any(label in t.lower() for label in labels for t in texts)  # no variant is named
         assert len(_correct(q)) <= max(len(c["text"]) for c in q["choices"] if not c["correct"])
+
+
+# ---- items: predict_new_change, explain_with_data -------------------------------------------
+
+
+def test_predict_new_change_states_the_reversal_and_asks_only_for_direction():
+    for seed in SEEDS:
+        out = _set(seed, "predict_new_change")
+        q = _only(out, "predict_new_change")
+        params = out["groups"][0]["parameters"]
+        assert "goes back to its earlier conditions" in q["stem"]
+        assert "All other conditions stay the same." in q["stem"]
+        assert ns.CASES[params["case"]]["envs"][params["env_first"]]["returns"] in q["stem"]
+        blob = q["stem"] + " " + " ".join(c["text"] for c in q["choices"])
+        assert not any(ch.isdigit() for ch in blob) and "%" not in blob and "generation" not in blob.lower()
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4
+        assert (
+            _correct(q) == "The variant that was more common before the change will tend to become more common again."
+        )
+        # the key is true: the variant ahead when the change happened is the one the first environment favours
+        row = params["rows"][params["l1"]]
+        leader = "a" if row["a"] > row["b"] else "b"
+        assert leader == FAVORS[params["case"]][params["env_first"]]
+
+
+def test_explain_with_data_is_constructed_response_with_a_computed_model_answer():
+    for seed in SEEDS[:80]:
+        out = _set(seed, "explain_with_data")
+        q = _only(out, "explain_with_data")
+        params = out["groups"][0]["parameters"]
+        assert q["question_type"] == "constructed_response" and q["choices"] == [] and q["dok"] == 3
+        winner = FAVORS[params["case"]][params["env_second"]]
+        loser = "b" if winner == "a" else "a"
+        variants = ns.CASES[params["case"]]["variants"]
+        l1, last = params["l1"], len(params["rows"]) - 1
+        answer = q["answer"]
+        assert variants[winner]["noun"] in answer
+        assert f"from {params['rows'][l1][winner]} out of 100 in generation {l1}" in answer
+        assert f"to {params['rows'][last][winner]} out of 100 in generation {last}" in answer
+        for phrase in (
+            "heritable variation",
+            "survived and reproduced more",
+            "did not change their traits because they needed to",
+        ):
+            assert phrase in answer.lower()
+        assert variants[winner]["noun"] not in q["stem"] and variants[loser]["noun"] not in q["stem"]  # no leak
+        assert "not as individuals changing because they need to" in q["stem"]
+        assert q["explanation"].count("(1)") == 1 and "(4)" in q["explanation"]
