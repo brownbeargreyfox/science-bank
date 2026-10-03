@@ -1289,6 +1289,279 @@
         "title": "CourseOut",
         "type": "object"
       },
+      "CoverageCourse": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "title": "CoverageCourse",
+        "type": "object"
+      },
+      "CoverageGroup": {
+        "properties": {
+          "assessed": {
+            "title": "Assessed",
+            "type": "integer"
+          },
+          "bundle_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Bundle Id"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "standards": {
+            "items": {
+              "$ref": "#/components/schemas/CoverageStandard"
+            },
+            "title": "Standards",
+            "type": "array"
+          },
+          "total": {
+            "title": "Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "bundle_id",
+          "name",
+          "assessed",
+          "total",
+          "standards"
+        ],
+        "title": "CoverageGroup",
+        "type": "object"
+      },
+      "CoveragePage": {
+        "properties": {
+          "available_years": {
+            "items": {
+              "type": "integer"
+            },
+            "title": "Available Years",
+            "type": "array"
+          },
+          "course": {
+            "$ref": "#/components/schemas/CoverageCourse"
+          },
+          "groups": {
+            "items": {
+              "$ref": "#/components/schemas/CoverageGroup"
+            },
+            "title": "Groups",
+            "type": "array"
+          },
+          "scope": {
+            "$ref": "#/components/schemas/CoverageScope"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/CoverageSummary"
+          }
+        },
+        "required": [
+          "scope",
+          "available_years",
+          "course",
+          "groups",
+          "summary"
+        ],
+        "title": "CoveragePage",
+        "type": "object"
+      },
+      "CoverageScope": {
+        "properties": {
+          "end": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "End"
+          },
+          "kind": {
+            "enum": [
+              "school_year",
+              "all_time"
+            ],
+            "title": "Kind",
+            "type": "string"
+          },
+          "label": {
+            "title": "Label",
+            "type": "string"
+          },
+          "start": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Start"
+          },
+          "year": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Year"
+          }
+        },
+        "required": [
+          "kind",
+          "year",
+          "label",
+          "start",
+          "end"
+        ],
+        "title": "CoverageScope",
+        "type": "object"
+      },
+      "CoverageStandard": {
+        "properties": {
+          "accuracy": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Accuracy"
+          },
+          "also_in": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Also In",
+            "type": "array"
+          },
+          "attempted": {
+            "title": "Attempted",
+            "type": "integer"
+          },
+          "code": {
+            "title": "Code",
+            "type": "string"
+          },
+          "correct": {
+            "title": "Correct",
+            "type": "integer"
+          },
+          "domain_code": {
+            "title": "Domain Code",
+            "type": "string"
+          },
+          "expectation": {
+            "title": "Expectation",
+            "type": "string"
+          },
+          "families": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Families",
+            "type": "array"
+          },
+          "last_assessed": {
+            "anyOf": [
+              {
+                "format": "date",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Assessed"
+          },
+          "limited_responses": {
+            "title": "Limited Responses",
+            "type": "boolean"
+          },
+          "partial": {
+            "title": "Partial",
+            "type": "boolean"
+          },
+          "questions": {
+            "$ref": "#/components/schemas/QuestionCounts"
+          },
+          "standard_id": {
+            "title": "Standard Id",
+            "type": "integer"
+          },
+          "times_assessed": {
+            "title": "Times Assessed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "standard_id",
+          "code",
+          "expectation",
+          "domain_code",
+          "partial",
+          "also_in",
+          "families",
+          "questions",
+          "times_assessed",
+          "last_assessed",
+          "correct",
+          "attempted",
+          "accuracy",
+          "limited_responses"
+        ],
+        "title": "CoverageStandard",
+        "type": "object"
+      },
+      "CoverageSummary": {
+        "properties": {
+          "standards_assessed": {
+            "title": "Standards Assessed",
+            "type": "integer"
+          },
+          "standards_total": {
+            "title": "Standards Total",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "standards_total",
+          "standards_assessed"
+        ],
+        "title": "CoverageSummary",
+        "type": "object"
+      },
       "DciOut": {
         "properties": {
           "code": {
@@ -1995,6 +2268,39 @@
           "choices"
         ],
         "title": "PrintQuestion",
+        "type": "object"
+      },
+      "QuestionCounts": {
+        "properties": {
+          "approved": {
+            "title": "Approved",
+            "type": "integer"
+          },
+          "archived": {
+            "title": "Archived",
+            "type": "integer"
+          },
+          "generated": {
+            "title": "Generated",
+            "type": "integer"
+          },
+          "rejected": {
+            "title": "Rejected",
+            "type": "integer"
+          },
+          "reviewed": {
+            "title": "Reviewed",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "generated",
+          "reviewed",
+          "approved",
+          "rejected",
+          "archived"
+        ],
+        "title": "QuestionCounts",
         "type": "object"
       },
       "QuestionDetail": {
@@ -5720,6 +6026,81 @@
         "summary": "List Courses",
         "tags": [
           "standards"
+        ]
+      }
+    },
+    "/api/coverage": {
+      "get": {
+        "description": "What the viewer has assessed in a school year (or all time), by standard and bundle. Not what was taught.",
+        "operationId": "coverage_api_coverage_get",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "course_id",
+            "required": true,
+            "schema": {
+              "title": "Course Id",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "year",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Year"
+            }
+          },
+          {
+            "in": "cookie",
+            "name": "science_bank_session",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Science Bank Session"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CoveragePage"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Coverage",
+        "tags": [
+          "coverage"
         ]
       }
     },

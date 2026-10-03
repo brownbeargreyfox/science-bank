@@ -1,6 +1,6 @@
 # Science Bank — Detailed Engineering Handoff
 
-Last updated: 2026-09-24
+Last updated: 2026-10-02
 
 ## Executive summary
 
@@ -326,6 +326,31 @@ Design: `docs/superpowers/specs/2026-09-29-results-and-variants-design.md`. Plan
   too. Results and section edits lock the administration row.
 - **Coverage caveat.** Variants only exist for standards that have a question family (see
   `docs/superpowers/plans/2026-09-29-coverage-roadmap.md`).
+
+## Coverage grid (built 2026-10-02, branch `feat/coverage-grid`, not yet merged or deployed)
+
+Spec: `docs/superpowers/specs/2026-10-02-coverage-grid-design.md`. Plan: `docs/superpowers/plans/2026-10-02-coverage-grid-plan.md`.
+Workstream B of `2026-09-30-nina-feedback-roadmap.md`. No migration.
+
+- **Endpoint.** `GET /api/coverage?course_id=&year=` returns bundle groups (then "Other standards"), each standard with
+  question counts by all five statuses (department-wide, not date-scoped), times assessed, last assessed, summed
+  correct/attempted, accuracy (`null` with no data), and a limited-response hint. A standard in several bundles appears
+  under each with `also_in`, and is counted once in `summary`.
+- **Scope.** `year` omitted is the current school year (Aug 1 to Jul 31, server clock via `services/coverage.today`),
+  an integer 2000-2100 is that school year's start, `all` is explicit all-time; anything else is 422. The response
+  carries the resolved `scope` (kind, year, label, start, end) and `available_years`; the page prints the server's
+  label and dates and computes none itself.
+- **Visibility.** Administration figures use `visible_clauses(user)`, identical to `/api/results/summary`; a test
+  checks the per-standard `attempted` equals the summary's for regular, power and admin users.
+- **Page.** `/coverage` (rail item "Coverage", link from the Overview coverage widget). Course and school-year selects
+  live in the URL. Wording is "assessed", never "covered" or "mastered", and says assessed is not taught.
+- **Verified.** Backend: 314 tests pass on Postgres, none skipped. Browser (headless Chromium against a scratch
+  stack, 42 checks): no overflow or console errors at 1440, 1024, 768, 360px; scope line equals the API; 0 of 30 shows
+  0%, blank shows a dash, 9 attempted shows "Limited response count"; Jul 31 vs Aug 1 land in different years; bad
+  `?year=` shows the error notice; keyboard reaches both selects and Generate; print hides selects, rail and buttons;
+  a second teacher sees no administration figures but the same question counts; a bad `?year=`, an unknown `?course=`, failed or empty course lists all recover (link back, fallback course, error, empty state); row Generate links carry
+  `standard`, `bundle`, `family`. Not verified: a real touch device, Safari, Firefox.
+- **Known small things.** In all-time view an unassessed standard still reads "Not assessed in this period".
 
 ## EOCEP practice mode
 

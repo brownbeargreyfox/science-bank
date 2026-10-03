@@ -12,7 +12,12 @@ export function StandardsCoverageWidget({ courseId }: { courseId: number | null 
       id="dashboard-coverage"
       title="Standards coverage"
       className="lg:col-span-2"
-      actions={<span className="text-xs text-muted">Used means a teacher recorded results for it</span>}
+      actions={
+        <span className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">
+          Used means a teacher recorded results for it
+          <Link to={`/coverage${courseId ? `?course=${courseId}` : ""}`}>Open the coverage grid</Link>
+        </span>
+      }
     >
       <ErrorNotice error={error} />
       {pending ? (

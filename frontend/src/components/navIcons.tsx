@@ -15,6 +15,8 @@ import {
   Library24Regular,
   Settings24Filled,
   Settings24Regular,
+  TableSimple24Filled,
+  TableSimple24Regular,
   type FluentIcon,
 } from "@fluentui/react-icons";
 
@@ -27,6 +29,7 @@ export const NAV_ICONS: Record<string, { regular: FluentIcon; filled: FluentIcon
   "/": { regular: Home24Regular, filled: Home24Filled },
   "/standards": { regular: Library24Regular, filled: Library24Filled },
   "/bundles": { regular: Box24Regular, filled: Box24Filled },
+  "/coverage": { regular: TableSimple24Regular, filled: TableSimple24Filled },
   "/generate": { regular: Beaker24Regular, filled: Beaker24Filled },
   "/questions": { regular: Database24Regular, filled: Database24Filled },
   "/assessments": { regular: ClipboardTaskListLtr24Regular, filled: ClipboardTaskListLtr24Filled },

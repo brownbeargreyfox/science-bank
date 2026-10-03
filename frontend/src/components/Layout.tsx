@@ -12,6 +12,7 @@ const NAV = [
   { to: "/", label: "Overview", end: true },
   { to: "/standards", label: "Standards" },
   { to: "/bundles", label: "Bundles" },
+  { to: "/coverage", label: "Coverage" },
   { to: "/generate", label: "Generate" },
   { to: "/questions", label: "Question bank" },
   { to: "/assessments", label: "Assessments" },

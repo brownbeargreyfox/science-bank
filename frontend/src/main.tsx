@@ -19,6 +19,7 @@ import AdministrationPage from "./pages/AdministrationPage";
 import AssessmentsPage from "./pages/Assessments";
 import BundlesPage from "./pages/Bundles";
 import BundleGeneratePage from "./pages/BundleGenerate";
+import CoveragePage from "./pages/Coverage";
 import GeneratePage from "./pages/Generate";
 import OverviewPage from "./pages/Overview";
 import LoginPage from "./pages/Login";
@@ -44,6 +45,7 @@ const router = createBrowserRouter([
           { path: "/standards", element: <StandardsPage /> },
           { path: "/standards/:id", element: <StandardDetailPage /> },
           { path: "/bundles", element: <BundlesPage /> },
+          { path: "/coverage", element: <CoveragePage /> },
           { path: "/generate/bundle", element: <BundleGeneratePage /> },
           { path: "/generate", element: <GeneratePage /> },
           { path: "/questions", element: <QuestionsPage /> },

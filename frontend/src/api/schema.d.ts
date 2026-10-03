@@ -465,6 +465,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/coverage": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Coverage
+         * @description What the viewer has assessed in a school year (or all time), by standard and bundle. Not what was taught.
+         */
+        get: operations["coverage_api_coverage_get"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/families": {
         parameters: {
             query?: never;
@@ -1305,6 +1325,89 @@ export interface components {
             /** Use Year */
             use_year: string;
         };
+        /** CoverageCourse */
+        CoverageCourse: {
+            /** Id */
+            id: number;
+            /** Name */
+            name: string;
+        };
+        /** CoverageGroup */
+        CoverageGroup: {
+            /** Assessed */
+            assessed: number;
+            /** Bundle Id */
+            bundle_id: number | null;
+            /** Name */
+            name: string;
+            /** Standards */
+            standards: components["schemas"]["CoverageStandard"][];
+            /** Total */
+            total: number;
+        };
+        /** CoveragePage */
+        CoveragePage: {
+            /** Available Years */
+            available_years: number[];
+            course: components["schemas"]["CoverageCourse"];
+            /** Groups */
+            groups: components["schemas"]["CoverageGroup"][];
+            scope: components["schemas"]["CoverageScope"];
+            summary: components["schemas"]["CoverageSummary"];
+        };
+        /** CoverageScope */
+        CoverageScope: {
+            /** End */
+            end: string | null;
+            /**
+             * Kind
+             * @enum {string}
+             */
+            kind: "school_year" | "all_time";
+            /** Label */
+            label: string;
+            /** Start */
+            start: string | null;
+            /** Year */
+            year: number | null;
+        };
+        /** CoverageStandard */
+        CoverageStandard: {
+            /** Accuracy */
+            accuracy: number | null;
+            /** Also In */
+            also_in: string[];
+            /** Attempted */
+            attempted: number;
+            /** Code */
+            code: string;
+            /** Correct */
+            correct: number;
+            /** Domain Code */
+            domain_code: string;
+            /** Expectation */
+            expectation: string;
+            /** Families */
+            families: string[];
+            /** Last Assessed */
+            last_assessed: string | null;
+            /** Limited Responses */
+            limited_responses: boolean;
+            /** Partial */
+            partial: boolean;
+            questions: components["schemas"]["QuestionCounts"];
+            /** Standard Id */
+            standard_id: number;
+            /** Times Assessed */
+            times_assessed: number;
+        };
+        /** CoverageSummary */
+        CoverageSummary: {
+            /** Standards Assessed */
+            standards_assessed: number;
+            /** Standards Total */
+            standards_total: number;
+        };
         /** DciOut */
         DciOut: {
             /** Code */
@@ -1550,6 +1653,19 @@ export interface components {
             stem: string;
             /** Teacher Edited */
             teacher_edited?: boolean | null;
+        };
+        /** QuestionCounts */
+        QuestionCounts: {
+            /** Approved */
+            approved: number;
+            /** Archived */
+            archived: number;
+            /** Generated */
+            generated: number;
+            /** Rejected */
+            rejected: number;
+            /** Reviewed */
+            reviewed: number;
         };
         /** QuestionDetail */
         QuestionDetail: {
@@ -3258,6 +3374,40 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseOut"][];
+                };
+            };
+            /** @description Validation Error */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HTTPValidationError"];
+                };
+            };
+        };
+    };
+    coverage_api_coverage_get: {
+        parameters: {
+            query: {
+                course_id: number;
+                year?: string | null;
+            };
+            header?: never;
+            path?: never;
+            cookie?: {
+                science_bank_session?: string | null;
+            };
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Successful Response */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CoveragePage"];
                 };
             };
             /** @description Validation Error */

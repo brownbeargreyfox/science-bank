@@ -626,6 +626,68 @@ class ResultsSummaryPage(BaseModel):
     offset: int
 
 
+# ---- coverage ---------------------------------------------------------------------------------
+
+
+class CoverageScope(BaseModel):
+    kind: Literal["school_year", "all_time"]
+    year: int | None
+    label: str
+    start: date | None
+    end: date | None
+
+
+class QuestionCounts(BaseModel):
+    generated: int
+    reviewed: int
+    approved: int
+    rejected: int
+    archived: int
+
+
+class CoverageStandard(BaseModel):
+    standard_id: int
+    code: str
+    expectation: str
+    domain_code: str
+    partial: bool
+    also_in: list[str]
+    families: list[str]
+    questions: QuestionCounts
+    times_assessed: int
+    last_assessed: date | None
+    correct: int
+    attempted: int
+    accuracy: float | None
+    limited_responses: bool
+
+
+class CoverageGroup(BaseModel):
+    bundle_id: int | None
+    name: str
+    assessed: int
+    total: int
+    standards: list[CoverageStandard]
+
+
+class CoverageSummary(BaseModel):
+    standards_total: int
+    standards_assessed: int
+
+
+class CoverageCourse(BaseModel):
+    id: int
+    name: str
+
+
+class CoveragePage(BaseModel):
+    scope: CoverageScope
+    available_years: list[int]
+    course: CoverageCourse
+    groups: list[CoverageGroup]
+    summary: CoverageSummary
+
+
 class QuestionRef(BaseModel):
     id: int
     status: QuestionStatus

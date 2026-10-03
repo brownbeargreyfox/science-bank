@@ -133,3 +133,17 @@ export function useAdminUsers() {
 export function useSiteSettings() {
   return useQuery({ queryKey: SITE_SETTINGS_KEY, queryFn: () => unwrap(api.GET("/api/admin/settings")) });
 }
+
+/** The coverage grid for a course. `year` is a school-year start, "all", or null for the server's default year. */
+export function useCoveragePage(courseId: number | null, year: string | null) {
+  return useQuery({
+    queryKey: ["coverage", courseId, year],
+    queryFn: () =>
+      unwrap(
+        api.GET("/api/coverage", {
+          params: { query: cleanQuery({ course_id: courseId ?? 0, year: year ?? undefined }) },
+        }),
+      ),
+    enabled: courseId !== null,
+  });
+}
