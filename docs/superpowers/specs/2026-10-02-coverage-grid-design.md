@@ -62,7 +62,7 @@ limited_responses: bool           # shared limited_responses() helper
 
 Rules:
 
-- `questions` counts every question of the standard, variants included,, **department-wide** (the bank is broadly
+- `questions` counts every question of the standard, variants included, **department-wide** (the bank is broadly
   viewable, matching the question list). Counts are not date-scoped.
 - `times_assessed` / `last_assessed` / `correct` / `attempted` come from `AdministrationItem` joined to
   `Administration` with `visible_clauses(user)` plus the date range on `Administration.administered_on`, grouped by
