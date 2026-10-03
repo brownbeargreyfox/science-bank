@@ -6,6 +6,7 @@ from app.models import QuestionFamily as QuestionFamilyRow
 from app.services.engine.family import QuestionFamily
 from app.services.families.chemical_systems import ChemicalSystemStability
 from app.services.families.genetics import TraitProbability
+from app.services.families.mutation_effects import MutationEffects
 from app.services.families.population import PopulationCarryingCapacity
 from app.services.families.protein_synthesis import DnaProteinSynthesis
 from app.services.families.quantitative_conservation import QuantitativeConservation
@@ -22,6 +23,7 @@ FAMILIES: dict[str, QuestionFamily] = {
         ChemicalSystemStability(),
         ReactionOutcome(),
         DnaProteinSynthesis(),
+        MutationEffects(),
     )
 }
 

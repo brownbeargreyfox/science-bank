@@ -279,6 +279,7 @@ in `backend/app/services/engine/`.
 | `quantitative-conservation` | Chemistry C-PS1-7 | 1.0.1 | Curated reactions, moles/particles/mass as evidence for conservation. |
 | `reaction-outcome` | Chemistry C-PS1-2 | 1.0.0 | Curated main-group/combustion reactions: bond type, electrons lost/gained/shared, product formula, same-family reactivity trends. Classroom-only. |
 | `dna-protein-synthesis` | Biology 1 B-LS1-1 | 1.0.0 | Template strand to mRNA, mRNA to amino acids with a displayed partial codon table, gene activity across two cell types, and a DOK 3 explanation. Classroom-only; no mutation-effect items (those belong to B-LS3-2, which can reuse `CODONS`/`translate`). |
+| `mutation-effects` | Biology 1 B-LS3-2 | 1.0.0 (built on branch `feat/mutation-effects`, not yet merged or deployed) | One-nucleotide substitution, insertion, or deletion in a gene: identify it, find the protein from the changed gene with a displayed codon table, describe the effect (frameshift taught explicitly for indels), decide whether it can be inherited, and defend a claim. Classroom-only; meiosis and mutagen-dataset items are a later B-LS3-2 family. |
 
 Engine invariants are tested in `backend/tests/test_engine.py`:
 
