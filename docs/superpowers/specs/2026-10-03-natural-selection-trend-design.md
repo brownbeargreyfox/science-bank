@@ -32,7 +32,7 @@ variant wins (no "second variant always wins" cue).
 | Case | Variants | Event 1 | Event 2 | Kind |
 |---|---|---|---|---|
 | Ground beetles on a burned slope | dark / light shell | soil darkens after a fire: dark favoured | soil lightens as ash washes away: light favoured | abiotic |
-| Soil bacteria in a lab culture (fictional) | resistant / not resistant to Compound R-12 | R-12 added to the culture: resistant favoured | R-12 removed: not resistant favoured | abiotic |
+| Soil bacteria in a lab culture (fictional) | resistant / not resistant to Compound Zeta | Zeta added to the culture: resistant favoured | Zeta removed: not resistant favoured | abiotic |
 | Island finches | thick / thin beak | drought leaves mostly hard seeds: thick favoured | wet years bring soft seeds: thin favoured | abiotic |
 | Snowshoe-style hares (fictional "marsh hares") | white / brown winter fur | long snowy winters: white favoured | snow-free winters: brown favoured | abiotic |
 | Pond minnows (fictional) | quick / slow to flee | predatory fish added: quick favoured | predators removed: slow favoured | biotic |
@@ -54,7 +54,8 @@ standard usage.
   to an integer and the other set to `100 - count`.
 - **Constraints.** Every displayed row totals exactly 100. Counts stay in `[2, 98]`. Each transition moves the favoured
   variant's count by at least 3. The first-environment favourite starts at 18 to 32 individuals, rises by at least 25 over
-  phase 1, and by the last generation has fallen by at least 20 from its peak. A draw that breaks any constraint is
+  phase 1 to at least 60 (clearly ahead when the change happens), and by the last generation has fallen by at least 20 from
+  that peak to at most 45 (clearly behind), so "more common before" and "more common now" are never near 50/50. A draw that breaks any constraint is
   redrawn.
 - **Survival experiment** (for `compare_survival`): a second small table, "Survival through one season in the first
   environment", with columns *Variant*, *Started*, *Survived*. Started counts are multiples of 5 from 40 to 85,
@@ -101,8 +102,8 @@ key; rationales cite the displayed numbers.
   increases. The word "need" appears only in that distractor and its rationale.
 - **`predict_new_change`**: the stem states that the environment **reverses to its earlier conditions while all other
   conditions stay the same**, and asks for direction only (no percentage and no generation). Choices name no variant: the
-  variant that is now more common will keep increasing; the variant that is now less common will tend to increase; both stay
-  the same because traits are fixed; every individual will have the same trait. The key is the second.
+  variant that was more common before the change will tend to become more common again (the key); the variant that is now
+  more common will keep increasing; both stay the same because traits are fixed; every individual will have the same trait.
 - **`explain_with_data`**: asks for an explanation using the data, at the level of the population across generations and
   not of individuals changing because they need to. Rubric (4 points; model answer computed from the table): (1) the claim
   and the data (the fraction of the population with the variant rose from X to Y out of 100 over the generations after the
