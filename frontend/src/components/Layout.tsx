@@ -1,7 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
-import { PanelLeftContract24Regular, PanelLeftExpand24Regular } from "@fluentui/react-icons";
-import { Navigate, NavLink, Outlet, useLocation, useNavigate } from "react-router";
+import {
+  PanelLeftContract24Regular,
+  PanelLeftExpand24Regular,
+} from "@fluentui/react-icons";
+import {
+  Navigate,
+  NavLink,
+  Outlet,
+  useLocation,
+  useNavigate,
+} from "react-router";
 import { api, unwrap } from "../api/client";
 import { ME_KEY, queryClient, useMe } from "../api/queries";
 import { ROLE_LABEL } from "../api/types";
@@ -12,12 +21,17 @@ const NAV = [
   { to: "/", label: "Overview", end: true },
   { to: "/standards", label: "Standards" },
   { to: "/bundles", label: "Bundles" },
+  { to: "/coverage", label: "Coverage" },
   { to: "/generate", label: "Generate" },
   { to: "/questions", label: "Question bank" },
   { to: "/assessments", label: "Assessments" },
   { to: "/results", label: "Results" },
 ];
-const ADMIN_NAV: (typeof NAV)[number] = { to: "/admin/users", label: "Admin", end: false };
+const ADMIN_NAV: (typeof NAV)[number] = {
+  to: "/admin/users",
+  label: "Admin",
+  end: false,
+};
 
 /** Gate for every signed-in route. A 401 anywhere flips `me` to null and lands here. */
 export function RequireAuth() {
@@ -27,7 +41,10 @@ export function RequireAuth() {
   if (me.isError)
     return (
       <div className="mx-auto max-w-lg p-6">
-        <ErrorNotice error={me.error} title="Science Bank could not reach the server." />
+        <ErrorNotice
+          error={me.error}
+          title="Science Bank could not reach the server."
+        />
       </div>
     );
   if (!me.data) {
@@ -70,7 +87,9 @@ function Brand() {
         />
         <path d="M9.6 19h10.8" stroke="#f2b400" strokeWidth="2.4" />
       </svg>
-      <span className="whitespace-nowrap text-lg font-bold tracking-tight">Science Bank</span>
+      <span className="whitespace-nowrap text-lg font-bold tracking-tight">
+        Science Bank
+      </span>
     </span>
   );
 }
@@ -99,7 +118,15 @@ function usePinnedRail(): [boolean, () => void] {
   return [pinned, toggle];
 }
 
-function NavIcon({ to, active, className }: { to: string; active: boolean; className?: string }) {
+function NavIcon({
+  to,
+  active,
+  className,
+}: {
+  to: string;
+  active: boolean;
+  className?: string;
+}) {
   const icons = NAV_ICONS[to];
   if (!icons) return null;
   const Icon = active ? icons.filled : icons.regular;
@@ -118,10 +145,17 @@ export function AppLayout() {
       {me.data ? (
         <span className="hidden text-right leading-tight sm:block">
           <span className="block font-bold">{me.data.username}</span>
-          <span className="block text-xs opacity-90">{ROLE_LABEL[me.data.role]}</span>
+          <span className="block text-xs opacity-90">
+            {ROLE_LABEL[me.data.role]}
+          </span>
         </span>
       ) : null}
-      <button type="button" className="btn btn-sm" onClick={() => logout.mutate()} disabled={logout.isPending}>
+      <button
+        type="button"
+        className="btn btn-sm"
+        onClick={() => logout.mutate()}
+        disabled={logout.isPending}
+      >
         Log out
       </button>
     </span>
@@ -154,7 +188,11 @@ export function AppLayout() {
       </header>
 
       {open ? (
-        <nav id="mobile-nav" aria-label="Main" className="no-print border-b border-line bg-surface lg:hidden">
+        <nav
+          id="mobile-nav"
+          aria-label="Main"
+          className="no-print border-b border-line bg-surface lg:hidden"
+        >
           <ul>
             {items.map((n) => (
               <li key={n.to}>
@@ -167,7 +205,11 @@ export function AppLayout() {
                 >
                   {({ isActive }) => (
                     <>
-                      <NavIcon to={n.to} active={isActive} className="rail-icon" />
+                      <NavIcon
+                        to={n.to}
+                        active={isActive}
+                        className="rail-icon"
+                      />
                       <span>{n.label}</span>
                     </>
                   )}
@@ -178,14 +220,22 @@ export function AppLayout() {
         </nav>
       ) : null}
 
-      <nav aria-label="Main" className="rail no-print hidden lg:flex lg:flex-col" data-pinned={pinned}>
+      <nav
+        aria-label="Main"
+        className="rail no-print hidden lg:flex lg:flex-col"
+        data-pinned={pinned}
+      >
         <ul className="flex-1 pt-1.5">
           {items.map((n) => (
             <li key={n.to}>
               <NavLink to={n.to} end={n.end} className="rail-item">
                 {({ isActive }) => (
                   <>
-                    <NavIcon to={n.to} active={isActive} className="rail-icon" />
+                    <NavIcon
+                      to={n.to}
+                      active={isActive}
+                      className="rail-icon"
+                    />
                     <span className="rail-label">{n.label}</span>
                   </>
                 )}
@@ -200,11 +250,19 @@ export function AppLayout() {
           onClick={togglePinned}
         >
           {pinned ? (
-            <PanelLeftContract24Regular className="rail-icon" aria-hidden="true" />
+            <PanelLeftContract24Regular
+              className="rail-icon"
+              aria-hidden="true"
+            />
           ) : (
-            <PanelLeftExpand24Regular className="rail-icon" aria-hidden="true" />
+            <PanelLeftExpand24Regular
+              className="rail-icon"
+              aria-hidden="true"
+            />
           )}
-          <span className="rail-label">{pinned ? "Unpin menu" : "Keep menu open"}</span>
+          <span className="rail-label">
+            {pinned ? "Unpin menu" : "Keep menu open"}
+          </span>
         </button>
       </nav>
 
@@ -212,7 +270,9 @@ export function AppLayout() {
         id="main"
         tabIndex={-1}
         className={`min-w-0 px-4 py-6 outline-none sm:px-6 lg:py-8 ${
-          pinned ? "lg:pl-[calc(var(--rail-expanded)+2.5rem)]" : "lg:pl-[calc(var(--rail-collapsed)+2.5rem)]"
+          pinned
+            ? "lg:pl-[calc(var(--rail-expanded)+2.5rem)]"
+            : "lg:pl-[calc(var(--rail-collapsed)+2.5rem)]"
         } lg:pr-10`}
       >
         <div className="mx-auto max-w-6xl">
