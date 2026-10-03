@@ -337,3 +337,33 @@ def test_inheritance_key_follows_the_cell_kind():
         assert any(m in stem for m in me.MUTAGENS) and any(o in stem.lower() for o in me.ORGANISMS)
         assert all(c["rationale"] for c in q["choices"])
     assert seen == {"body", "egg cell", "sperm cell"}
+
+
+# ---- defend_claim_about_change -------------------------------------------------------------
+
+COUNTERCLAIMS = {
+    "unchanged": "Every change in the DNA sequence changes the protein.",
+    "other": "A change of one nucleotide cannot change the protein.",
+}
+
+
+def test_claim_item_is_constructed_response_with_a_computed_model_answer_and_the_right_counterclaim():
+    for seed in SEEDS[:80]:
+        out = _set(seed, "defend_claim_about_change")
+        q = _only(out, "defend_claim_about_change")
+        assert q["question_type"] == "constructed_response" and q["choices"] == [] and q["dok"] == 3
+        original, changed = _strands(q)
+        mrna_original = "".join(TEMPLATE_PAIR[b] for b in original)
+        mrna_changed = "".join(TEMPLATE_PAIR[b] for b in changed)
+        before, _ = _read(mrna_original)
+        after, _ = _read(mrna_changed)
+        category = _category(before, after)
+        kind, _ = _single_edit_positions(original, changed)
+        assert f"5′-{mrna_original}-3′" in q["answer"] and f"5′-{mrna_changed}-3′" in q["answer"]
+        assert " → ".join(before) in q["answer"] and " → ".join(after) in q["answer"]
+        assert f"this {kind}" in q["answer"]
+        counter = COUNTERCLAIMS["unchanged" if category == "unchanged" else "other"]
+        assert counter in q["stem"]
+        assert "the displayed strands and codon table, and the derived amino acid sequences" in q["stem"]
+        assert q["explanation"].count("(1)") == 1 and "(4)" in q["explanation"]
+        assert ("frameshift" in q["answer"].lower()) == (kind != "substitution")

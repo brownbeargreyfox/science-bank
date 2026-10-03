@@ -269,6 +269,14 @@ class MutationEffects(QuestionFamily):
         ),
         TemplateSpec("effect_on_protein", "Effect of a mutation on a protein", 2, "multiple_choice", "reasoning", 0),
         TemplateSpec("inheritance_of_mutation", "Can a mutation be inherited?", 2, "multiple_choice", "reasoning", 1),
+        TemplateSpec(
+            "defend_claim_about_change",
+            "Make and defend a claim about a mutation",
+            3,
+            "constructed_response",
+            "reasoning",
+            2,
+        ),
     )
 
     # ---- scenario and stimulus --------------------------------------------------------------
@@ -485,4 +493,53 @@ class MutationEffects(QuestionFamily):
             answer=correct,
             explanation=right,
             choices=choices,
+        )
+
+    def _q_defend_claim_about_change(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        role = params["roles"]["claim"]
+        edit, category = role["edit"], role["category"]
+        original, changed = role["original"]["protein"], role["changed"]["protein"]
+        effect = {
+            "unchanged": "does not change the protein",
+            "one_changed": "changes one amino acid in the protein",
+            "ends_early": "makes the protein end early",
+            "several_differ": "changes several amino acids after the change",
+        }[category]
+        counterclaim = (
+            "Every change in the DNA sequence changes the protein."
+            if category == "unchanged"
+            else "A change of one nucleotide cannot change the protein."
+        )
+        rebuttal = (
+            "The counterclaim is wrong: although the DNA sequence changed, the changed codon still specifies the same "
+            "amino acid in the table, so this change did not alter the protein."
+            if category == "unchanged"
+            else "The counterclaim is wrong: the evidence shows that changing one nucleotide produced a different protein."
+        )
+        answer = (
+            f"Claim: this {edit['type']} ({_edit_sentence(edit)}) {effect}. "
+            f"Evidence: the original template strand {strand_text(role['original']['template'], '3', '5')} is "
+            f"transcribed into the mRNA {strand_text(role['original']['mrna'], '5', '3')}, which the table translates as "
+            f"{sequence_text(original)}. The changed template strand {strand_text(role['changed']['template'], '3', '5')} "
+            f"is transcribed into {strand_text(role['changed']['mrna'], '5', '3')}, which the table translates as "
+            f"{sequence_text(changed)}. "
+            "Reasoning: a change in the DNA sequence changes the mRNA codons, and the codons set the amino acid sequence, "
+            "so a mutation can produce a protein that differs between cells or organisms. "
+            f"{rebuttal}"
+        )
+        return DraftQuestion(
+            stem=(
+                f"A mutation changed the DNA template strand of {role['label']}. {_strands_sentence(role)} "
+                f"{SEQUENCE_MODEL} Make a claim about what the change did to the protein, and defend it with evidence "
+                "from the displayed strands and codon table, and the derived amino acid sequences. A classmate says: "
+                f'"{counterclaim}" Explain how your evidence answers this counterclaim.'
+            ),
+            answer=_frameshift(answer, edit),
+            explanation=_frameshift(
+                "Scoring guide (4 points): (1) a claim that names the type of change and its effect on the protein; "
+                "(2) evidence from the displayed strands and codon table, and the derived amino acid sequences; "
+                "(3) reasoning that the changed DNA changes the mRNA codons, which can change the amino acids and so "
+                "produce genetic variation; (4) an answer to the counterclaim that uses the evidence.",
+                edit,
+            ),
         )
