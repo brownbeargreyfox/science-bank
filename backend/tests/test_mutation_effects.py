@@ -367,3 +367,99 @@ def test_claim_item_is_constructed_response_with_a_computed_model_answer_and_the
         assert "the displayed strands and codon table, and the derived amino acid sequences" in q["stem"]
         assert q["explanation"].count("(1)") == 1 and "(4)" in q["explanation"]
         assert ("frameshift" in q["answer"].lower()) == (kind != "substitution")
+
+
+# ---- family-wide guards --------------------------------------------------------------------
+
+BANNED = (
+    "silent",
+    "missense",
+    "nonsense",
+    "initiation",
+    "elongation",
+    "termination",
+    "prophase",
+    "metaphase",
+    "anaphase",
+    "telophase",
+)
+ALL_KEYS = [t.key for t in me.MutationEffects.templates]
+
+
+def _full(seed: str) -> dict:
+    return generate_set(me.MutationEffects(), seed, len(ALL_KEYS))
+
+
+def _items(out: dict):
+    for g in out["groups"]:
+        yield from g["questions"]
+
+
+def _all_text(out: dict) -> list[str]:
+    texts = []
+    for g in out["groups"]:
+        texts += [g["stimulus"]["title"], g["stimulus"]["intro"]]
+        for q in g["questions"]:
+            texts += [q["stem"], q["answer"], q["explanation"]]
+            texts += [c["text"] + " " + c["rationale"] for c in q["choices"]]
+    return texts
+
+
+def test_templates_and_doks():
+    assert {t.key: t.dok for t in me.MutationEffects.templates} == {
+        "identify_mutation_type": 1,
+        "new_protein_after_change": 2,
+        "effect_on_protein": 2,
+        "inheritance_of_mutation": 2,
+        "defend_claim_about_change": 3,
+    }
+
+
+def test_vocabulary_guard():
+    for seed in SEEDS:
+        blob = " ".join(_all_text(_full(seed))).lower()
+        for word in BANNED:
+            assert word not in blob, (seed, word)
+
+
+def test_frameshift_is_taught_for_every_indel_item_and_never_for_a_substitution_item():
+    for seed in SEEDS:
+        for q in _items(_full(seed)):
+            if q["template_key"] == "inheritance_of_mutation":
+                continue
+            original, changed = _strands(q)
+            kind, _ = _single_edit_positions(original, changed)
+            parts = [q["explanation"]] + [c["rationale"] for c in q["choices"]]
+            if q["question_type"] == "constructed_response":
+                parts.append(q["answer"])  # a multiple-choice answer is only the key's text
+            for text in parts:
+                assert ("frameshift" in text.lower()) == (kind != "substitution"), (seed, q["template_key"], text[:80])
+
+
+def test_no_item_leaks_another_items_key_in_the_same_set():
+    for seed in SEEDS:
+        out = _full(seed)
+        group = out["groups"][0]
+        qs = {q["template_key"]: q for q in group["questions"]}
+        protein_key = _correct(qs["new_protein_after_change"])
+        for key, q in qs.items():
+            visible = q["stem"] + " " + group["stimulus"]["intro"]
+            if key != "new_protein_after_change":
+                assert protein_key not in visible, (seed, key)
+        # the four strand items use four different genes
+        strand_items = (
+            "identify_mutation_type",
+            "new_protein_after_change",
+            "effect_on_protein",
+            "defend_claim_about_change",
+        )
+        originals = [_strands(qs[k])[0] for k in strand_items]
+        assert len(set(originals)) == 4
+
+
+def test_a_full_set_has_one_codon_table_within_bounds_and_single_template_sets_only_what_they_need():
+    for seed in SEEDS:
+        tables = _full(seed)["groups"][0]["stimulus"]["tables"]
+        assert len(tables) == 1 and 12 <= len(tables[0]["rows"]) <= 36
+    assert _set("one", "identify_mutation_type")["groups"][0]["stimulus"]["tables"] == []
+    assert _set("one", "inheritance_of_mutation")["groups"][0]["stimulus"]["tables"] == []
