@@ -215,6 +215,20 @@ _PROTEIN_WHY = {
 }
 
 
+CATEGORY_TEXT = {
+    "p_only": "active in cell type P only",
+    "q_only": "active in cell type Q only",
+    "both": "active in both cell types",
+    "neither": "not active in either cell type",
+}
+
+
+def activity_category(row: dict[str, Any]) -> str:
+    return {(True, False): "p_only", (False, True): "q_only", (True, True): "both", (False, False): "neither"}[
+        (row["p"], row["q"])
+    ]
+
+
 def sequence_text(names: list[str]) -> str:
     return " → ".join(names)
 
@@ -241,6 +255,7 @@ class DnaProteinSynthesis(QuestionFamily):
             "articulating_explanation",
             0,
         ),
+        TemplateSpec("gene_activity_by_cell", "Genes in two cell types", 2, "multiple_choice", "reasoning", 3),
     )
 
     # ---- scenario and stimulus --------------------------------------------------------------
@@ -259,6 +274,29 @@ class DnaProteinSynthesis(QuestionFamily):
                     "caption": "Codon table (mRNA codons, read 5′ to 3′)",
                     "columns": [{"key": "codon", "label": "mRNA codon"}, {"key": "amino_acid", "label": "Amino acid"}],
                     "rows": params["codon_table"],
+                }
+            )
+        if "gene_activity_by_cell" in keys:
+            intro.append(
+                "Cell types P and Q come from the same organism and contain the same DNA. A gene is active in a cell "
+                "when the cell uses it to make a protein."
+            )
+            tables.append(
+                {
+                    "caption": "Gene activity in two cell types",
+                    "columns": [
+                        {"key": "gene", "label": "Gene"},
+                        {"key": "p", "label": "Cell type P"},
+                        {"key": "q", "label": "Cell type Q"},
+                    ],
+                    "rows": [
+                        {
+                            "gene": r["gene"],
+                            "p": "Active" if r["p"] else "Not active",
+                            "q": "Active" if r["q"] else "Not active",
+                        }
+                        for r in params["activity"]
+                    ],
                 }
             )
         return {
@@ -377,4 +415,39 @@ class DnaProteinSynthesis(QuestionFamily):
                 "according to the table; (3) the order of amino acids is the protein's sequence, so the DNA sequence "
                 "determines the protein."
             ),
+        )
+
+    def _q_gene_activity_by_cell(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        rows = params["activity"]
+        actual = {r["gene"]: activity_category(r) for r in rows}
+        key_gene = rng.choice([r["gene"] for r in rows])
+        choices = []
+        for r in rows:
+            gene = r["gene"]
+            if gene == key_gene:
+                text = f"{gene} is {CATEGORY_TEXT[actual[gene]]}."
+                choices.append(
+                    DraftChoice(text, True, f"Correct: the table shows {gene} is {CATEGORY_TEXT[actual[gene]]}.")
+                )
+            else:
+                wrong = rng.choice([c for c in CATEGORY_TEXT if c != actual[gene]])
+                choices.append(
+                    DraftChoice(
+                        f"{gene} is {CATEGORY_TEXT[wrong]}.",
+                        False,
+                        f"The table shows {gene} is {CATEGORY_TEXT[actual[gene]]}, not {CATEGORY_TEXT[wrong]}.",
+                    )
+                )
+        correct = next(c.text for c in choices if c.correct)
+        return DraftQuestion(
+            stem=(
+                "The table shows which genes are active in two cell types, P and Q, from the same organism. Which "
+                "statement is supported by the table?"
+            ),
+            answer=correct,
+            explanation=(
+                "Both cell types contain all four genes because they share the same DNA. They differ in which genes "
+                f"are active, so they can make different proteins. {correct}"
+            ),
+            choices=choices,
         )

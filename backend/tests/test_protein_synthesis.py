@@ -256,3 +256,38 @@ def test_explain_item_is_constructed_response_with_a_computed_model_answer():
         assert f"5′-{mrna}-3′" in q["answer"] and " → ".join(names) in q["answer"]
         assert q["explanation"].count("(1)") == 1 and "(3)" in q["explanation"]
         assert "do not need to memorize" in out["groups"][0]["stimulus"]["intro"]
+
+
+# ---- gene_activity_by_cell -----------------------------------------------------------------
+
+PHRASE = {
+    "active in cell type P only": (True, False),
+    "active in cell type Q only": (False, True),
+    "active in both cell types": (True, True),
+    "not active in either cell type": (False, False),
+}
+
+
+def test_activity_item_has_exactly_one_supported_statement():
+    for seed in SEEDS:
+        out = _set(seed, "gene_activity_by_cell")
+        q = _only(out, "gene_activity_by_cell")
+        stim = out["groups"][0]["stimulus"]
+        table = next(t for t in stim["tables"] if "gene" in t["rows"][0])
+        truth = {r["gene"]: (r["p"] == "Active", r["q"] == "Active") for r in table["rows"]}
+        supported = []
+        for c in q["choices"]:
+            m = re.fullmatch(r"(Gene [A-D]) is (.+)\.", c["text"])
+            assert m and m.group(2) in PHRASE, c["text"]
+            if PHRASE[m.group(2)] == truth[m.group(1)]:
+                supported.append(c["text"])
+            assert c["correct"] == (PHRASE[m.group(2)] == truth[m.group(1)])
+        assert len(supported) == 1 and supported[0] == _correct(q)
+        assert len({c["text"].split(" is ")[0] for c in q["choices"]}) == 4  # one claim per gene
+        assert "same DNA" in stim["intro"]
+
+
+def test_activity_stimulus_has_no_codon_table():
+    out = _set("only-activity", "gene_activity_by_cell")
+    tables = out["groups"][0]["stimulus"]["tables"]
+    assert len(tables) == 1 and "gene" in tables[0]["rows"][0]
