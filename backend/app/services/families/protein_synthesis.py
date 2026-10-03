@@ -232,6 +232,15 @@ class DnaProteinSynthesis(QuestionFamily):
     templates = (
         TemplateSpec("transcribe_mrna", "Transcribe a template strand", 1, "multiple_choice", "evidence", 4),
         TemplateSpec("translate_mrna", "Translate an mRNA", 1, "multiple_choice", "evidence", 5),
+        TemplateSpec("dna_to_protein", "From a template strand to a protein", 2, "multiple_choice", "evidence", 2),
+        TemplateSpec(
+            "explain_dna_to_protein",
+            "Explain how DNA determines a protein",
+            3,
+            "constructed_response",
+            "articulating_explanation",
+            0,
+        ),
     )
 
     # ---- scenario and stimulus --------------------------------------------------------------
@@ -315,4 +324,57 @@ class DnaProteinSynthesis(QuestionFamily):
                 f"({g['codons'][-1]}) ends the chain."
             ),
             choices=choices,
+        )
+
+    def _q_dna_to_protein(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        g = params["genes"]["protein"]
+        options = protein_options(g)
+        correct = sequence_text(g["protein"])
+        choices = [
+            DraftChoice(
+                correct,
+                True,
+                "Correct: the template is transcribed into mRNA, and the mRNA codons are translated with the table.",
+            )
+        ] + [
+            DraftChoice(sequence_text(options[k]), False, _PROTEIN_WHY[k])
+            for k in ("template_as_mrna", "reversed", "no_start")
+        ]
+        return DraftQuestion(
+            stem=(
+                f"The DNA template strand of {g['label']} is {strand_text(g['template'], '3', '5')}. The gene is "
+                "transcribed into mRNA, and the mRNA is translated using the codon table shown. Which amino acid "
+                "sequence does this gene produce?"
+            ),
+            answer=correct,
+            explanation=(
+                f"Transcription gives the mRNA {g['mrna']}. Its codons ({', '.join(g['codons'])}) specify {correct}; "
+                "the stop codon ends the chain."
+            ),
+            choices=choices,
+        )
+
+    def _q_explain_dna_to_protein(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        g = params["genes"]["protein"]
+        protein = sequence_text(g["protein"])
+        return DraftQuestion(
+            stem=(
+                f"Use the codon table to explain how the DNA template strand of {g['label']}, "
+                f"{strand_text(g['template'], '3', '5')}, determines the amino acid sequence of its protein. In your "
+                "explanation, write the mRNA that is transcribed (5′ to 3′) and the amino acid sequence that is "
+                "produced."
+            ),
+            answer=(
+                f"Transcription copies the template strand into mRNA by base pairing (A–U, T–A, G–C, C–G), so "
+                f"{strand_text(g['template'], '3', '5')} is transcribed into {strand_text(g['mrna'], '5', '3')}. The "
+                f"mRNA is read in codons ({', '.join(g['codons'])}), and the table shows the amino acid each codon "
+                f"specifies: {protein}; the stop codon ends the chain. The order of amino acids is the protein's "
+                "sequence, so the order of nucleotides in the gene determines the protein."
+            ),
+            explanation=(
+                "Scoring guide (3 points): (1) the template strand is transcribed into a complementary mRNA by base "
+                "pairing; (2) the mRNA is read in groups of three (codons) and each codon specifies an amino acid "
+                "according to the table; (3) the order of amino acids is the protein's sequence, so the DNA sequence "
+                "determines the protein."
+            ),
         )

@@ -211,3 +211,48 @@ def test_translate_stimulus_states_the_table_rule_and_has_no_activity_table():
     stim = out["groups"][0]["stimulus"]
     assert "do not need to memorize" in stim["intro"]
     assert len(stim["tables"]) == 1 and "codon" in stim["tables"][0]["rows"][0]
+
+
+# ---- dna_to_protein and explain_dna_to_protein ---------------------------------------------
+
+
+def test_dna_to_protein_key_is_the_two_step_result_and_table_is_complete():
+    for seed in SEEDS:
+        out = _set(seed, "dna_to_protein")
+        q = _only(out, "dna_to_protein")
+        left, template, right = STRAND.findall(q["stem"])[0]
+        assert (left, right) == ("3", "5")
+        mrna = "".join(TEMPLATE_PAIR[b] for b in template)
+        table = _table(out)
+        names = []
+        for codon in _triples(mrna):
+            assert codon in table
+            if table[codon] == "Stop":
+                break
+            names.append(CODE[codon])
+        expected = " → ".join(names)
+        assert _correct(q) == expected
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4 and sum(t == expected for t in texts) == 1
+        # the template read directly as codons is offered, and every codon it uses is in the table
+        misread = _triples(template.replace("T", "U"))
+        assert set(misread) <= set(table) and "Stop" not in {table[c] for c in misread}
+        assert " → ".join(CODE[c] for c in misread) in texts
+
+
+def test_explain_item_is_constructed_response_with_a_computed_model_answer():
+    for seed in SEEDS[:60]:
+        out = _set(seed, "explain_dna_to_protein")
+        q = _only(out, "explain_dna_to_protein")
+        assert q["question_type"] == "constructed_response" and q["choices"] == [] and q["dok"] == 3
+        left, template, right = STRAND.findall(q["stem"])[0]
+        mrna = "".join(TEMPLATE_PAIR[b] for b in template)
+        table = _table(out)
+        names = []
+        for codon in _triples(mrna):
+            if table[codon] == "Stop":
+                break
+            names.append(CODE[codon])
+        assert f"5′-{mrna}-3′" in q["answer"] and " → ".join(names) in q["answer"]
+        assert q["explanation"].count("(1)") == 1 and "(3)" in q["explanation"]
+        assert "do not need to memorize" in out["groups"][0]["stimulus"]["intro"]
