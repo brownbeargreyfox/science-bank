@@ -31,7 +31,7 @@ proteins are named. Mutagen examples are limited to ultraviolet light and X-rays
 - **Translation starts at the displayed start codon (AUG) and proceeds in groups of three until the first in-frame
   Stop.** This sentence is part of every item that translates, and every stem or stimulus shows enough downstream
   sequence for the result to be determinate.
-- Each gene is: `AUG` + 4 or 5 sense codons + one stop codon + a **downstream tail** of 6 to 8 further codons (any
+- Each gene is: `AUG` + 3 or 4 sense codons + one stop codon + a **downstream tail** of 4 to 5 further codons (any
   codons, including stops, which are never read in the original). The tail gives indel draws somewhere to read.
 - A **determinate** translation is one that meets a first in-frame Stop within the displayed full codons. A draw is
   rejected when any translation the item needs (original, changed, or a distractor) never meets a Stop within the
@@ -76,8 +76,9 @@ Reuses `CODONS`, `AMINO_ACIDS`, `translate`-style reading, `transcribe`/`templat
 from `protein_synthesis.py` (imported, not copied). New: a curated inheritance table (below). The codon table follows
 the B-LS1-1 rules: alphabetical, every codon any translation in the set reads (original, changed, distractors) plus 2
 or 3 extras, `AUG` labelled `Methionine (start)`, stops labelled `Stop`, the stimulus tells students to use the
-displayed table and not to memorize codons. Table size is bounded in the implementation plan after a prototype
-(target at most 32 rows).
+displayed table and not to memorize codons. Table size is bounded at 36 rows including the 2 or 3 extras: a
+prototype over 1500 seeds needed at most 31 codons with this gene shape, while genes of 4 to 5 sense codons with a 6 to 8
+codon tail needed up to 39 and were rejected as too long to display.
 
 ## Scenario
 
@@ -178,4 +179,5 @@ templates, real genes, proteins, or diseases.
 
 ## Open items
 
-None blocking. The draw caps and the codon-table row bound are set from a prototype in the implementation plan.
+None blocking. Prototype figures (1500 seeds): effect role needs about 14 draws on average (167 at worst), protein role
+about 11 (92), claim role about 3 (19); the draw cap of 400 leaves a wide margin.
