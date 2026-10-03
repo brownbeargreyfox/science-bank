@@ -259,4 +259,4 @@ def test_a_standard_in_two_bundles_is_counted_once_in_the_summary(anon):
 def test_families_come_from_the_registry(client):
     s = row(coverage(client, year="2017"))
     assert "population-carrying-capacity" in s["families"]
-    assert row(coverage(client, year="2017"), "B-LS1-1")["families"] == []
+    assert row(coverage(client, year="2017"), "B-LS1-5")["families"] == []

@@ -216,6 +216,17 @@ def test_eocep_mode_uses_imported_biology_1_constraints(client):
         },
     )
     assert denied_2.status_code == 422
+    bio_1_dna = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS1-1")
+    denied_3 = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": bio_1_dna["id"],
+            "family_key": "dna-protein-synthesis",
+            "quantity": 1,
+            "generation_mode": "eocep",
+        },
+    )
+    assert denied_3.status_code == 422
 
 
 def test_eocep_mode_excludes_constructed_response(client):
@@ -295,6 +306,7 @@ def test_standards_browse_and_detail(client):
     assert client.get("/api/standards", params={"q": "Punnett"}).json()  # topic/terminology search
     with_family = client.get("/api/standards", params={"with_family_only": True}).json()
     assert sorted((s["course_slug"], s["code"]) for s in with_family) == [
+        ("biology-1", "B-LS1-1"),
         ("biology-1", "B-LS2-1"),
         ("biology-1", "B-LS3-3"),
         ("chemistry", "C-PS1-2"),
@@ -332,6 +344,7 @@ def _generate(client, course_slug, code, family, **kw):
         ("chemistry", "C-PS1-5", "reaction-rate"),
         ("chemistry", "C-PS1-7", "quantitative-conservation"),
         ("chemistry", "C-PS1-2", "reaction-outcome"),
+        ("biology-1", "B-LS1-1", "dna-protein-synthesis"),
     ],
 )
 def test_preview_is_reproducible(client, course, code, family):
@@ -347,6 +360,8 @@ def test_family_must_match_exact_standard(client):
     _, body = _generate(client, "biology-1", "B-LS2-1", "reaction-rate")
     assert client.post("/api/generate/preview", json=body).status_code == 422
     _, body = _generate(client, "biology-2", "B-LS3-3", "trait-probability")
+    assert client.post("/api/generate/preview", json=body).status_code == 422
+    _, body = _generate(client, "biology-2", "B-LS1-1", "dna-protein-synthesis")
     assert client.post("/api/generate/preview", json=body).status_code == 422
     _, body = _generate(client, "biology-1", "B-LS2-1", "population-carrying-capacity", doks=[4])
     assert client.post("/api/generate/preview", json=body).status_code == 422

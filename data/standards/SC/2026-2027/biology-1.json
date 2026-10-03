@@ -65,7 +65,8 @@
           "question_sentence_stems": [
             "The _______ structures help _______ to function because _______.",
             "The _______ structures are present in _______ and are related to the function _______."
-          ]
+          ],
+          "question_family_candidate": true
         },
         {
           "code": "B-LS1-4",

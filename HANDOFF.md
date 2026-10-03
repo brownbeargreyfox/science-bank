@@ -270,6 +270,7 @@ in `backend/app/services/engine/`.
 | `chemical-system-stability` | Chemistry C-PS1-5 + C-PS1-7 | 1.0.0 | One magnesium + hydrochloric-acid shared stimulus: rate evidence and quantitative conservation. |
 | `quantitative-conservation` | Chemistry C-PS1-7 | 1.0.1 | Curated reactions, moles/particles/mass as evidence for conservation. |
 | `reaction-outcome` | Chemistry C-PS1-2 | 1.0.0 | Curated main-group/combustion reactions: bond type, electrons lost/gained/shared, product formula, same-family reactivity trends. Classroom-only. |
+| `dna-protein-synthesis` | Biology 1 B-LS1-1 | 1.0.0 (built on branch `feat/dna-protein-synthesis`, not yet merged or deployed) | Template strand to mRNA, mRNA to amino acids with a displayed partial codon table, gene activity across two cell types, and a DOK 3 explanation. Classroom-only; no mutation-effect items (those belong to B-LS3-2, which can reuse `CODONS`/`translate`). |
 
 Engine invariants are tested in `backend/tests/test_engine.py`:
 

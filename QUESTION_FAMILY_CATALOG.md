@@ -181,6 +181,8 @@ storage, versioning, the generation UI flow) is proven out. Candidate first scen
 **B-LS1-1** (DNA→protein structure-function explanation) since it's the single most-repeated PE
 across the bundling guides (appears as a partial-connection PE in nearly every Biology 1 and
 Biology 2 bundle) — building its scenario bank well will pay off across many bundles.
+Built as `dna-protein-synthesis` (2026-10-02), Biology 1 only; see
+`docs/superpowers/specs/2026-10-02-dna-protein-synthesis-design.md`.
 
 ---
 
