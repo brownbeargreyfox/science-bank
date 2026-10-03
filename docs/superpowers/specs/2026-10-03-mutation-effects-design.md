@@ -128,8 +128,15 @@ Single-standard family: bound only to `SC / biology-1 / B-LS3-2`; no template de
   counterclaim. The counterclaim is "Every change in the DNA sequence changes the protein" when the effect is
   *unchanged*, and "A change of one nucleotide cannot change the protein" otherwise. Rubric (4 points, model answer
   computed): (1) a claim naming the type of change and its effect on the protein; (2) evidence from the displayed strands
-  and the amino acid sequences; (3) reasoning that the changed DNA changes the mRNA codons, which may change the amino
-  acids, producing genetic variation; (4) an answer to the counterclaim using that evidence.
+  and codon table, and the derived amino acid sequences; (3) reasoning that the changed DNA changes the mRNA codons, which may change the amino
+  acids, producing genetic variation (for an insertion or deletion, that the shifted codon grouping is a frameshift); (4) an answer to the counterclaim using that evidence.
+
+### Teaching frameshift explicitly
+
+For every insertion or deletion, each rationale, explanation, and model answer says plainly that adding or removing one
+nucleotide shifts the way the codons are grouped, which is a **frameshift**, and then explains the resulting downstream
+amino acid differences from the displayed sequences. The explanation stays at the level of codon grouping; it adds no
+mechanistic detail about how the cell reads or repairs DNA.
 
 ## Engine invariants and tests
 
