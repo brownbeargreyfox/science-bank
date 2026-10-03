@@ -21,6 +21,7 @@ CASES: dict[str, dict[str, Any]] = {
     "beetles": {
         "organism": "ground beetles",
         "trait": "shell color",
+        "period": "season",
         "intro": (
             "A population of ground beetles lives on a hillside. Shell color varies among the beetles, and parents pass "
             "their shell color to their offspring. Birds that eat beetles find it harder to see beetles that match the soil."
@@ -47,11 +48,12 @@ CASES: dict[str, dict[str, Any]] = {
     "bacteria": {
         "organism": "soil bacteria",
         "trait": "resistance to Compound Zeta",
+        "period": "growth cycle",
         "intro": (
             "A lab culture contains a fictional soil bacterium. Some of the bacteria are resistant to Compound Zeta, a "
-            "fictional chemical that stops the growth of bacteria that are not resistant. Resistance is passed from parent "
-            "cells to the cells they produce. When Compound Zeta is absent, resistant bacteria grow more slowly than "
-            "bacteria that are not resistant."
+            "fictional chemical that most bacteria that are not resistant cannot survive. Resistance is passed from "
+            "parent cells to the cells they produce. When Compound Zeta is absent, resistant bacteria compete less well "
+            "for food, so fewer of them survive and divide than bacteria that are not resistant."
         ),
         "variants": {
             "a": {"label": "Resistant bacteria", "noun": "resistant bacteria"},
@@ -75,6 +77,7 @@ CASES: dict[str, dict[str, Any]] = {
     "finches": {
         "organism": "finches",
         "trait": "beak thickness",
+        "period": "season",
         "intro": (
             "A population of finches lives on an island. Beak thickness varies among the finches, and parents pass their "
             "beak thickness to their offspring. Finches with thick beaks crack hard seeds more easily, and finches with "
@@ -102,6 +105,7 @@ CASES: dict[str, dict[str, Any]] = {
     "hares": {
         "organism": "marsh hares",
         "trait": "winter fur color",
+        "period": "season",
         "intro": (
             "A population of marsh hares lives in a cold region. Winter fur color varies among the hares, and parents pass "
             "their fur color to their offspring. Predators find it harder to see hares that match the ground."
@@ -128,6 +132,7 @@ CASES: dict[str, dict[str, Any]] = {
     "minnows": {
         "organism": "pond minnows",
         "trait": "reaction speed",
+        "period": "season",
         "intro": (
             "A population of minnows lives in a pond. Some minnows react quickly to danger and others react slowly, and "
             "parents pass their reaction speed to their offspring. Reacting quickly uses extra energy."
@@ -154,6 +159,7 @@ CASES: dict[str, dict[str, Any]] = {
     "shrubs": {
         "organism": "desert shrubs",
         "trait": "root depth",
+        "period": "season",
         "intro": (
             "A population of desert shrubs grows on a plain. Root depth varies among the shrubs, and parents pass their "
             "root depth to their offspring. Deep roots reach water far below the surface, and shallow roots take up "
@@ -222,7 +228,9 @@ def draw_survival(rng: Rng, fav1: float, unf1: float, trap: bool) -> dict[str, A
             started_fav, started_other = rng.choice(SIZES), rng.choice(SIZES)
         survived_fav = min(started_fav, max(0, round(started_fav * (fav1 + rng.uniform(-0.03, 0.03)))))
         survived_other = min(started_other, max(0, round(started_other * (unf1 + rng.uniform(-0.03, 0.03)))))
-        if survived_fav / started_fav - survived_other / started_other < 0.15 or survived_fav == survived_other:
+        if started_fav == started_other or survived_fav == survived_other:
+            continue
+        if survived_fav / started_fav - survived_other / started_other < 0.15:
             continue
         if trap != (survived_fav < survived_other):
             continue
@@ -382,7 +390,7 @@ class NaturalSelectionTrend(QuestionFamily):
             charts.append(
                 {
                     "type": "line",
-                    "title": f"{case['organism'].capitalize()} with each {case['trait']} over the generations",
+                    "title": f"{case['organism'].capitalize()} of each variant over the generations",
                     "x": {"key": "generation", "label": "Generation"},
                     "y": {"label": f"Individuals out of {SAMPLE}", "min": 0},
                     "series": [{"key": "a", "label": a["label"]}, {"key": "b", "label": b["label"]}],
@@ -392,7 +400,7 @@ class NaturalSelectionTrend(QuestionFamily):
         if "compare_survival" in keys:
             tables.append(
                 {
-                    "caption": "Survival through one season in the first environment",
+                    "caption": f"Survival through one {case['period']} in the first environment",
                     "columns": [
                         {"key": "variant", "label": "Variant"},
                         {"key": "started", "label": "Started"},
@@ -449,7 +457,7 @@ class NaturalSelectionTrend(QuestionFamily):
         choices = [DraftChoice(texts[name], name == winner, why[name]) for name in texts]
         return DraftQuestion(
             stem=(
-                "Scientists counted how many individuals of each variant started a season and how many survived. "
+                f"Scientists counted how many individuals of each variant started one {case['period']} and how many survived. "
                 f"{case['envs'][params['env_first']]['is']} Which statement is supported by the survival table?"
             ),
             answer=texts[winner],
@@ -541,14 +549,14 @@ class NaturalSelectionTrend(QuestionFamily):
         case = _case(params)
         first = case["envs"][params["env_first"]]
         texts = {
-            "key": "The variant that was more common before the change will tend to become more common again.",
-            "keeps": "The variant that is now more common will keep increasing, because it has already been selected.",
-            "fixed": "Both variants will stay at the same fractions, because each individual's trait is fixed and nothing can change.",
-            "uniform": "Every individual will end up with the same trait, because the population can no longer vary.",
+            "key": "The variant that increased before the change will tend to become more common again, because the earlier conditions favor it.",
+            "keeps": "The variant that is now more common will tend to keep increasing, because it has already been selected by the environment.",
+            "fixed": "Both variants will tend to stay at the same fractions from now on, because each individual's trait is fixed and cannot change.",
+            "uniform": "Every individual will tend to end up with the same trait, because the population can no longer vary in that trait.",
         }
         why = {
             "key": (
-                "Correct: the earlier environment favored the variant that was more common before the change. When "
+                "Correct: the variant that increased before the change was the one the earlier environment favored. When "
                 "those conditions return, that variant is again more likely to survive and reproduce, so its fraction "
                 "tends to rise."
             ),
@@ -578,8 +586,8 @@ class NaturalSelectionTrend(QuestionFamily):
         answer = (
             f"Claim: after the environment changed, {noun_win} became more common, going from {rows[l1][winner]} out of "
             f"{SAMPLE} in generation {l1} to {rows[last][winner]} out of {SAMPLE} in generation {last}. "
-            f"Heritable variation: the population already had both {noun_win} and {noun_lose}, and parents pass their "
-            f"{case['trait']} to their offspring. "
+            f"Heritable variation: the population already had both {noun_win} and {noun_lose}, and each variant is "
+            "inherited from parent to offspring. "
             f"Survival and reproduction: {second['is']} In this environment, {noun_win} survived and reproduced more "
             f"than {noun_lose}. "
             "Over the generations: because the trait is inherited, each new generation had a larger fraction with the "

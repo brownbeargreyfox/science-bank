@@ -253,13 +253,12 @@ def test_predict_new_change_states_the_reversal_and_asks_only_for_direction():
         assert not any(ch.isdigit() for ch in blob) and "%" not in blob and "generation" not in blob.lower()
         texts = [c["text"] for c in q["choices"]]
         assert len(set(texts)) == len(texts) == 4
-        assert (
-            _correct(q) == "The variant that was more common before the change will tend to become more common again."
+        assert _correct(q).startswith(
+            "The variant that increased before the change will tend to become more common again"
         )
-        # the key is true: the variant ahead when the change happened is the one the first environment favours
-        row = params["rows"][params["l1"]]
-        leader = "a" if row["a"] > row["b"] else "b"
-        assert leader == FAVORS[params["case"]][params["env_first"]]
+        # the key is true: the variant that increased before the change is the one the first environment favours
+        rows, first = params["rows"], FAVORS[params["case"]][params["env_first"]]
+        assert rows[params["l1"]][first] - rows[0][first] >= 25
 
 
 def test_explain_with_data_is_constructed_response_with_a_computed_model_answer():
@@ -390,3 +389,47 @@ def test_a_full_set_has_the_generation_table_chart_and_survival_table_only_when_
     assert len(stim["charts"]) == 1 and stim["charts"][0]["table_index"] == 0
     only_cr = _set("cr-only", "explain_with_data")["groups"][0]["stimulus"]
     assert len(only_cr["tables"]) == 1 and "in each generation" in only_cr["tables"][0]["caption"]
+
+
+# ---- review fixes --------------------------------------------------------------------------
+
+
+def test_survival_groups_never_start_with_the_same_number():
+    for seed in SEEDS:
+        rows = _scenario(seed)["survival"]["rows"]
+        assert rows[0]["started"] != rows[1]["started"], seed  # "different numbers" must be true
+
+
+def test_predict_choices_are_parallel_and_the_key_has_one_referent():
+    for seed in SEEDS[:40]:
+        q = _only(_set(seed, "predict_new_change"), "predict_new_change")
+        texts = [c["text"] for c in q["choices"]]
+        assert all("because" in t and "will tend to" in t for t in texts), texts  # no hedge or reason gives it away
+        key = _correct(q)
+        assert "increased before the change" in key and "more common before" not in key
+        lengths = sorted(len(t) for t in texts)
+        assert len(key) != lengths[0] and len(key) != lengths[-1]  # the key is neither the shortest nor the longest
+
+
+def test_the_lab_culture_reads_as_a_lab_culture_and_titles_name_no_variant():
+    seen_bacteria = seen_other = 0
+    for seed in SEEDS:
+        out = _set(seed, "compare_survival", "explain_with_data")
+        params = out["groups"][0]["parameters"]
+        case = ns.CASES[params["case"]]
+        survival_q = _only(out, "compare_survival")
+        titles = [c["title"] for c in out["groups"][0]["stimulus"]["charts"]]
+        assert all(
+            case["trait"] not in title for title in titles
+        )  # "each resistance to Compound Zeta" names one variant
+        answer = _only(out, "explain_with_data")["answer"]
+        assert case["trait"] not in answer and "inherited from parent to offspring" in answer
+        caption = _survival_table(out)["caption"]
+        if params["case"] == "bacteria":
+            seen_bacteria += 1
+            assert "growth cycle" in caption and "season" not in caption + survival_q["stem"]
+            assert "grow more slowly" not in out["groups"][0]["stimulus"]["intro"]
+        else:
+            seen_other += 1
+            assert "season" in caption
+    assert seen_bacteria > 10 and seen_other > 100
