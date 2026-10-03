@@ -6,6 +6,7 @@ from the numbers in the displayed tables.
 
 import json
 import re
+from collections import Counter
 
 from app.services.engine.core import Rng
 from app.services.engine.family import generate_set
@@ -284,3 +285,108 @@ def test_explain_with_data_is_constructed_response_with_a_computed_model_answer(
         assert variants[winner]["noun"] not in q["stem"] and variants[loser]["noun"] not in q["stem"]  # no leak
         assert "not as individuals changing because they need to" in q["stem"]
         assert q["explanation"].count("(1)") == 1 and "(4)" in q["explanation"]
+
+
+# ---- family-wide guards ----------------------------------------------------------------------
+
+BANNED_ALWAYS = (
+    "allele frequency",
+    "gene frequency",
+    "genetic drift",
+    "gene flow",
+    "hardy",
+    "speciation",
+    "infection",
+    "disease",
+    "patient",
+    "treatment",
+    "medicine",
+    "drug",
+    "hospital",
+    "human",
+    "antibiotic",
+)
+ALL_KEYS = [t.key for t in ns.NaturalSelectionTrend.templates]
+MC_KEYS = [t.key for t in ns.NaturalSelectionTrend.templates if t.question_type == "multiple_choice"]
+
+
+def _full(seed: str) -> dict:
+    return generate_set(ns.NaturalSelectionTrend(), seed, len(ALL_KEYS))
+
+
+def _all_text(out: dict) -> list[str]:
+    texts = []
+    for g in out["groups"]:
+        texts += [g["stimulus"]["title"], g["stimulus"]["intro"]]
+        for t in g["stimulus"]["tables"]:
+            texts += [t["caption"]] + [c["label"] for c in t["columns"]]
+        for q in g["questions"]:
+            texts += [q["stem"], q["answer"], q["explanation"]]
+            texts += [c["text"] + " " + c["rationale"] for c in q["choices"]]
+    return texts
+
+
+def test_templates_and_doks():
+    assert {t.key: t.dok for t in ns.NaturalSelectionTrend.templates} == {
+        "compare_survival": 1,
+        "trait_trend": 2,
+        "effect_of_change": 2,
+        "explain_adaptation": 2,
+        "predict_new_change": 2,
+        "explain_with_data": 3,
+    }
+
+
+def test_vocabulary_and_health_guard():
+    for seed in SEEDS:
+        blob = " ".join(_all_text(_full(seed))).lower()
+        for word in BANNED_ALWAYS:
+            assert word not in blob, (seed, word)
+
+
+def test_every_displayed_row_total_and_survival_count_is_valid_in_the_rendered_stimulus():
+    for seed in SEEDS:
+        out = _full(seed)
+        for table in out["groups"][0]["stimulus"]["tables"]:
+            for row in table["rows"]:
+                if "survived" in row:
+                    assert 0 <= row["survived"] <= row["started"]
+                else:
+                    assert row["a"] + row["b"] == 100
+
+
+def test_the_correct_answer_position_varies_for_every_multiple_choice_template():
+    for key in MC_KEYS:
+        positions = Counter()
+        for seed in SEEDS:
+            positions[_only(_set(seed, key), key)["answer"][0]] += 1
+        assert set(positions) == {"A", "B", "C", "D"}, (key, positions)
+        assert max(positions.values()) <= 0.40 * len(SEEDS), (key, positions)
+
+
+def test_no_item_leaks_another_items_key_in_the_same_set():
+    for seed in SEEDS:
+        out = _full(seed)
+        group = out["groups"][0]
+        qs = {q["template_key"]: q for q in group["questions"]}
+        for key, q in qs.items():
+            visible = q["stem"] + " " + group["stimulus"]["intro"]
+            for other_key, other in qs.items():
+                if other_key != key and other["choices"]:
+                    assert _correct(other) not in visible, (seed, key, other_key)
+        # the explanation item names no variant, so it does not hand over the effect_of_change key
+        for c in qs["explain_adaptation"]["choices"]:
+            assert not any(
+                v["label"].lower() in c["text"].lower()
+                for v in ns.CASES[group["parameters"]["case"]]["variants"].values()
+            )
+
+
+def test_a_full_set_has_the_generation_table_chart_and_survival_table_only_when_needed():
+    out = _full("full")
+    stim = out["groups"][0]["stimulus"]
+    captions = [t["caption"] for t in stim["tables"]]
+    assert any("in each generation" in c for c in captions) and any(c.startswith("Survival") for c in captions)
+    assert len(stim["charts"]) == 1 and stim["charts"][0]["table_index"] == 0
+    only_cr = _set("cr-only", "explain_with_data")["groups"][0]["stimulus"]
+    assert len(only_cr["tables"]) == 1 and "in each generation" in only_cr["tables"][0]["caption"]
