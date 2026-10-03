@@ -29,6 +29,7 @@ GOLDEN = {
     "quantitative-conservation": "9535ce78f745e6e146410d1aff037790f1b0b4d26104e2d98b0a5be907934ff3",
     "chemical-system-stability": "9cb9b999a7cd607847ea9c8c2adfc64bf29f6d91b378d3371d3348160d3537ff",
     "reaction-outcome": "ee1df82b94db39de882f05d6606220a458d53d9006f617ee737d5d50b81cc009",
+    "dna-protein-synthesis": None,
 }
 
 

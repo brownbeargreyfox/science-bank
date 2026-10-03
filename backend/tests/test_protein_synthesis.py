@@ -4,8 +4,10 @@ Ground truth below is typed by amino acid and by base pair, not imported from th
 """
 
 import json
+import re
 
 from app.services.engine.core import Rng
+from app.services.engine.family import generate_set
 from app.services.families import protein_synthesis as ps
 
 SEEDS = [f"dps-{i}" for i in range(200)]
@@ -127,3 +129,85 @@ def test_activity_table_covers_each_category_once():
         rows = _scenario(seed)["activity"]
         assert [r["gene"] for r in rows] == ["Gene A", "Gene B", "Gene C", "Gene D"]
         assert sorted((r["p"], r["q"]) for r in rows) == [(False, False), (False, True), (True, False), (True, True)]
+
+
+STRAND = re.compile(r"([35])′-([ACGTU]+)-([35])′")
+
+
+def _set(seed: str, *keys: str) -> dict:
+    return generate_set(ps.DnaProteinSynthesis(), seed, len(keys), template_keys=list(keys))
+
+
+def _only(out: dict, key: str) -> dict:
+    return next(q for g in out["groups"] for q in g["questions"] if q["template_key"] == key)
+
+
+def _correct(q: dict) -> str:
+    return next(c["text"] for c in q["choices"] if c["correct"])
+
+
+def _table(out: dict) -> dict[str, str]:
+    tables = out["groups"][0]["stimulus"]["tables"]
+    return {r["codon"]: r["amino_acid"] for r in next(t for t in tables if "codon" in t["rows"][0])["rows"]}
+
+
+# ---- registration and catalog --------------------------------------------------------------
+
+
+def test_family_is_registered_and_bound_to_biology_1_only():
+    from app.services.families.registry import FAMILIES
+
+    fam = FAMILIES["dna-protein-synthesis"]
+    assert fam.version == "1.0.0"
+    assert [(b.state, b.course_slug, b.code) for b in fam.bindings] == [("SC", "biology-1", "B-LS1-1")]
+    assert all(t.standard_code is None for t in fam.templates)
+
+
+# ---- transcribe_mrna -----------------------------------------------------------------------
+
+
+def test_transcribe_key_is_the_complement_of_the_displayed_template():
+    for seed in SEEDS:
+        q = _only(_set(seed, "transcribe_mrna"), "transcribe_mrna")
+        left, template, right = STRAND.findall(q["stem"])[0]
+        assert (left, right) == ("3", "5")
+        expected = "5′-" + "".join(TEMPLATE_PAIR[b] for b in template) + "-3′"
+        assert _correct(q) == expected
+        texts = [c["text"] for c in q["choices"]]
+        assert len(texts) == len(set(texts)) == 4
+        assert all(re.fullmatch(r"5′-[ACGTU]+-3′", t) for t in texts)
+        assert sum(t == expected for t in texts) == 1
+
+
+def test_transcribe_stimulus_has_no_codon_or_activity_table():
+    out = _set("only-transcribe", "transcribe_mrna")
+    assert out["groups"][0]["stimulus"]["tables"] == []
+
+
+# ---- translate_mrna ------------------------------------------------------------------------
+
+
+def test_translate_key_follows_the_displayed_mrna_and_table():
+    for seed in SEEDS:
+        out = _set(seed, "translate_mrna")
+        q = _only(out, "translate_mrna")
+        left, mrna, right = STRAND.findall(q["stem"])[0]
+        assert (left, right) == ("5", "3") and mrna.startswith("AUG")
+        table = _table(out)
+        names = []
+        for codon in _triples(mrna):
+            assert codon in table, f"{codon} missing from the displayed table"
+            if table[codon] == "Stop":
+                break
+            names.append(CODE[codon])
+        assert _correct(q) == " → ".join(names)
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4
+        assert sum(t == " → ".join(names) for t in texts) == 1
+
+
+def test_translate_stimulus_states_the_table_rule_and_has_no_activity_table():
+    out = _set("only-translate", "translate_mrna")
+    stim = out["groups"][0]["stimulus"]
+    assert "do not need to memorize" in stim["intro"]
+    assert len(stim["tables"]) == 1 and "codon" in stim["tables"][0]["rows"][0]
