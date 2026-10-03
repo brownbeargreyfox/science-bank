@@ -363,7 +363,8 @@
             ]
           },
           "topics": ["meiosis", "genetic variation", "mutation", "crossing over", "independent assortment"],
-          "terminology": ["allele", "cellular division", "centromere", "chromatid", "chromosome", "codon", "crossing over", "daughter cell", "deletion", "diploid", "DNA", "egg cell", "epigenetic", "fertilization", "frameshift", "gamete", "gene", "gene expression", "gene mutation", "genetic code", "genetic variation", "genome", "haploid", "homologous chromosome", "independent assortment", "inherited", "insertion", "meiosis", "meiosis I", "meiosis II", "monosomy", "multicellular", "mutagen", "mutation", "nondisjunction", "offspring", "parent", "parent cell", "point mutation", "replication", "sexual reproduction", "somatic cell", "sperm cell", "substitution", "trait", "trisomy"]
+          "terminology": ["allele", "cellular division", "centromere", "chromatid", "chromosome", "codon", "crossing over", "daughter cell", "deletion", "diploid", "DNA", "egg cell", "epigenetic", "fertilization", "frameshift", "gamete", "gene", "gene expression", "gene mutation", "genetic code", "genetic variation", "genome", "haploid", "homologous chromosome", "independent assortment", "inherited", "insertion", "meiosis", "meiosis I", "meiosis II", "monosomy", "multicellular", "mutagen", "mutation", "nondisjunction", "offspring", "parent", "parent cell", "point mutation", "replication", "sexual reproduction", "somatic cell", "sperm cell", "substitution", "trait", "trisomy"],
+          "question_family_candidate": true
         },
         {
           "code": "B-LS3-3",

@@ -5,8 +5,10 @@ independently of the module under test); reading, predicates, and edit detection
 """
 
 import json
+import re
 
 from app.services.engine.core import Rng
+from app.services.engine.family import generate_set
 from app.services.families import mutation_effects as me
 from tests.test_protein_synthesis import CODE, TEMPLATE_PAIR
 
@@ -180,3 +182,97 @@ def test_inheritance_scenario_is_curated():
     assert cells == {"a body cell (somatic cell)", "an egg cell", "a sperm cell"}
     assert organisms == {"a mouse", "a fruit fly", "a zebrafish"}
     assert mutagens == {"ultraviolet light", "X-rays"}
+
+
+STRAND = re.compile(r"([35])′-([ACGTU]+)-([35])′")
+
+
+def _set(seed: str, *keys: str) -> dict:
+    return generate_set(me.MutationEffects(), seed, len(keys), template_keys=list(keys))
+
+
+def _only(out: dict, key: str) -> dict:
+    return next(q for g in out["groups"] for q in g["questions"] if q["template_key"] == key)
+
+
+def _correct(q: dict) -> str:
+    return next(c["text"] for c in q["choices"] if c["correct"])
+
+
+def _strands(q: dict):
+    found = STRAND.findall(q["stem"])
+    assert [(a, c) for a, _, c in found] == [("3", "5"), ("3", "5")], q["stem"]
+    return found[0][1], found[1][1]
+
+
+def _table(out: dict) -> dict[str, str]:
+    tables = out["groups"][0]["stimulus"]["tables"]
+    return {r["codon"]: r["amino_acid"] for r in next(t for t in tables if "codon" in t["rows"][0])["rows"]}
+
+
+# ---- registration --------------------------------------------------------------------------
+
+
+def test_family_is_registered_and_bound_to_biology_1_only():
+    from app.services.families.registry import FAMILIES
+
+    fam = FAMILIES["mutation-effects"]
+    assert fam.version == "1.0.0"
+    assert [(b.state, b.course_slug, b.code) for b in fam.bindings] == [("SC", "biology-1", "B-LS3-2")]
+    assert all(t.standard_code is None for t in fam.templates)
+
+
+# ---- identify_mutation_type ----------------------------------------------------------------
+
+TYPE_TEXT = {
+    "substitution": "A substitution: one nucleotide was replaced by another.",
+    "insertion": "An insertion: one nucleotide was added.",
+    "deletion": "A deletion: one nucleotide was removed.",
+}
+NO_MUTATION = "No mutation occurred, because the protein is not changed."
+
+
+def test_identify_key_follows_the_displayed_strands_and_offers_the_four_texts_once():
+    for seed in SEEDS:
+        q = _only(_set(seed, "identify_mutation_type"), "identify_mutation_type")
+        original, changed = _strands(q)
+        kind, _ = _single_edit_positions(original, changed)
+        assert _correct(q) == TYPE_TEXT[kind]
+        texts = sorted(c["text"] for c in q["choices"])
+        assert texts == sorted([*TYPE_TEXT.values(), NO_MUTATION])
+        assert any(cause in q["stem"] for cause in me.CAUSES)
+        assert "frameshift" in q["explanation"].lower() or kind == "substitution"
+
+
+def test_identify_stimulus_has_no_table():
+    assert _set("only-identify", "identify_mutation_type")["groups"][0]["stimulus"]["tables"] == []
+
+
+# ---- new_protein_after_change --------------------------------------------------------------
+
+
+def test_new_protein_key_is_the_changed_protein_read_with_the_displayed_table():
+    for seed in SEEDS:
+        out = _set(seed, "new_protein_after_change")
+        q = _only(out, "new_protein_after_change")
+        original, changed = _strands(q)
+        table = _table(out)
+        mrna_original = "".join(TEMPLATE_PAIR[b] for b in original)
+        mrna_changed = "".join(TEMPLATE_PAIR[b] for b in changed)
+        before, read_before = _read(mrna_original)
+        after, read_after = _read(mrna_changed)
+        assert after is not None and after != before
+        assert set(read_before) | set(read_after) <= set(table)
+        assert _correct(q) == " → ".join(after)
+        texts = [c["text"] for c in q["choices"]]
+        assert len(set(texts)) == len(texts) == 4 and sum(t == " → ".join(after) for t in texts) == 1
+        assert " → ".join(before) in texts  # the unchanged protein is offered as a wrong answer
+        misread, read_misread = _read(changed.replace("T", "U"))
+        assert misread is not None and set(read_misread) <= set(table)
+        assert "Translation starts at the start codon (AUG)" in q["stem"]
+
+
+def test_new_protein_stimulus_states_the_table_rule():
+    stim = _set("only-new-protein", "new_protein_after_change")["groups"][0]["stimulus"]
+    assert "do not need to memorize" in stim["intro"]
+    assert len(stim["tables"]) == 1 and "codon" in stim["tables"][0]["rows"][0]

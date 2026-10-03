@@ -9,7 +9,8 @@ biochemical mechanisms, no named genes or proteins, and no naming of silent, mis
 
 from typing import Any
 
-from app.services.engine.core import GenerationError, Rng
+from app.services.engine.core import Binding, DraftChoice, DraftQuestion, GenerationError, Rng, TemplateSpec
+from app.services.engine.family import QuestionFamily
 from app.services.families.protein_synthesis import (
     AMINO_ACIDS,
     CODONS,
@@ -18,6 +19,8 @@ from app.services.families.protein_synthesis import (
     START,
     STOP_CODONS,
     codons_of,
+    sequence_text,
+    strand_text,
     table_label,
     template_for,
     transcribe,
@@ -208,3 +211,183 @@ def draw_scenario(rng: Rng) -> dict[str, Any]:
         },
         "codon_table": [{"codon": c, "amino_acid": table_label(c)} for c in sorted(needed | set(extras))],
     }
+
+
+# ---- family --------------------------------------------------------------------------------
+
+SEQUENCE_MODEL = "Translation starts at the start codon (AUG) and continues in groups of three nucleotides until the first stop codon."
+FRAMESHIFT_NOTE = (
+    "Adding or removing one nucleotide shifts the way the codons are grouped. This is a frameshift: the codons after "
+    "the change are read in a different grouping, so the amino acids after the change are different."
+)
+_BASE_INTRO = (
+    "A mutation is a change in the DNA sequence of a gene. The gene's template strand is transcribed into mRNA, and the "
+    "mRNA codons specify the amino acids of a protein."
+)
+_TABLE_RULE = "Use the codon table shown. You do not need to memorize codons."
+_TABLE_KEYS = {"new_protein_after_change", "effect_on_protein", "defend_claim_about_change"}
+
+
+def _is_indel(edit: dict[str, Any]) -> bool:
+    return edit["type"] != "substitution"
+
+
+def _frameshift(text: str, edit: dict[str, Any]) -> str:
+    return f"{text} {FRAMESHIFT_NOTE}" if _is_indel(edit) else text
+
+
+def _edit_sentence(edit: dict[str, Any]) -> str:
+    if edit["type"] == "substitution":
+        return f"nucleotide {edit['position']} was changed from {edit['old']} to {edit['new']}"
+    if edit["type"] == "deletion":
+        return f"nucleotide {edit['position']} ({edit['old']}) was removed"
+    return f"the nucleotide {edit['new']} was added between nucleotide {edit['position']} and nucleotide {edit['position'] + 1}"
+
+
+def _strands_sentence(role: dict[str, Any]) -> str:
+    return (
+        f"Original template strand: {strand_text(role['original']['template'], '3', '5')}. "
+        f"Changed template strand: {strand_text(role['changed']['template'], '3', '5')}."
+    )
+
+
+class MutationEffects(QuestionFamily):
+    key = "mutation-effects"
+    version = "1.0.0"
+    title = "Mutations: effects on a protein"
+    description = (
+        "Compare an original and a changed DNA template strand: identify the substitution, insertion, or deletion, find "
+        "the protein made from the changed gene with a displayed codon table, describe its effect, decide whether a "
+        "mutation can be inherited, and defend a claim about what the change did."
+    )
+    stimulus_kind = "mutation_effects"
+    bindings = (Binding("SC", "biology-1", "B-LS3-2"),)
+    templates = (
+        TemplateSpec("identify_mutation_type", "Identify the kind of mutation", 1, "multiple_choice", "evidence", 1),
+        TemplateSpec(
+            "new_protein_after_change", "Protein made from the changed gene", 2, "multiple_choice", "reasoning", 0
+        ),
+    )
+
+    # ---- scenario and stimulus --------------------------------------------------------------
+
+    def build_scenario(self, rng: Rng) -> dict[str, Any]:
+        return draw_scenario(rng)
+
+    def render_stimulus(self, params: dict[str, Any], template_keys: list[str]) -> dict[str, Any]:
+        keys = set(template_keys)
+        intro = [_BASE_INTRO]
+        tables = []
+        if keys & _TABLE_KEYS:
+            intro += [SEQUENCE_MODEL, _TABLE_RULE]
+            tables.append(
+                {
+                    "caption": "Codon table (mRNA codons, read 5′ to 3′)",
+                    "columns": [{"key": "codon", "label": "mRNA codon"}, {"key": "amino_acid", "label": "Amino acid"}],
+                    "rows": params["codon_table"],
+                }
+            )
+        return {
+            "title": "Mutations and proteins",
+            "intro": " ".join(intro),
+            "sections": [],
+            "tables": tables,
+            "charts": [],
+        }
+
+    # ---- items ------------------------------------------------------------------------------
+
+    def build_question(self, template: TemplateSpec, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        return getattr(self, f"_q_{template.key}")(params, rng)
+
+    def _q_identify_mutation_type(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        role = params["roles"]["classify"]
+        edit = role["edit"]
+        texts = {
+            "substitution": "A substitution: one nucleotide was replaced by another.",
+            "insertion": "An insertion: one nucleotide was added.",
+            "deletion": "A deletion: one nucleotide was removed.",
+        }
+        why_not = {
+            ("substitution", "insertion"): "The strands have the same number of nucleotides, so none was added.",
+            ("substitution", "deletion"): "The strands have the same number of nucleotides, so none was removed.",
+            (
+                "insertion",
+                "substitution",
+            ): "The strands are different lengths, so a nucleotide was added, not just replaced.",
+            ("insertion", "deletion"): "The changed strand is longer, so a nucleotide was added, not removed.",
+            (
+                "deletion",
+                "substitution",
+            ): "The strands are different lengths, so a nucleotide was removed, not just replaced.",
+            ("deletion", "insertion"): "The changed strand is shorter, so a nucleotide was removed, not added.",
+        }
+        choices = []
+        for kind, text in texts.items():
+            if kind == edit["type"]:
+                why = f"Correct: comparing the strands, {_edit_sentence(edit)}."
+            else:
+                why = why_not[(edit["type"], kind)]
+            choices.append(DraftChoice(text, kind == edit["type"], _frameshift(why, edit)))
+        choices.append(
+            DraftChoice(
+                "No mutation occurred, because the protein is not changed.",
+                False,
+                _frameshift(
+                    "The DNA sequence changed, so a mutation occurred. A mutation is a change in the DNA sequence, "
+                    "whether or not the protein changes.",
+                    edit,
+                ),
+            )
+        )
+        correct = texts[edit["type"]]
+        return DraftQuestion(
+            stem=(
+                f"The DNA of a cell was changed by {params['cause']}. The template strands of {role['label']} before "
+                f"and after the change are shown. {_strands_sentence(role)} Which statement describes the change?"
+            ),
+            answer=correct,
+            explanation=_frameshift(
+                f"Comparing the strands, {_edit_sentence(edit)}, so this is a {edit['type']}.", edit
+            ),
+            choices=choices,
+        )
+
+    def _q_new_protein_after_change(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
+        role = params["roles"]["protein"]
+        edit = role["edit"]
+        original, changed = role["original"]["protein"], role["changed"]["protein"]
+        options = role["distractors"]
+        correct = sequence_text(changed)
+        why = {
+            "original": "This is the protein made from the original strand. The changed strand is read codon by codon, and it makes a different protein.",
+            "site_left_out": "This leaves out the amino acid at the change instead of reading the changed strand codon by codon.",
+            "misread": "This reads the DNA template strand directly as if it were mRNA. The template must first be transcribed into its complementary mRNA.",
+        }
+        choices = [
+            DraftChoice(
+                correct,
+                True,
+                _frameshift(
+                    "Correct: the changed strand is transcribed into mRNA, and the mRNA is read from the start codon to "
+                    "the first stop codon using the table.",
+                    edit,
+                ),
+            )
+        ] + [
+            DraftChoice(sequence_text(options[k]), False, _frameshift(why[k], edit))
+            for k in ("original", "site_left_out", "misread")
+        ]
+        return DraftQuestion(
+            stem=(
+                f"A mutation changed the DNA template strand of {role['label']}. {_strands_sentence(role)} "
+                f"{SEQUENCE_MODEL} Use the codon table to find the amino acid sequence made from the changed gene."
+            ),
+            answer=correct,
+            explanation=_frameshift(
+                f"The original protein is {sequence_text(original)}. The changed strand is transcribed into "
+                f"{role['changed']['mrna']} and read to the first stop codon, which gives {correct}.",
+                edit,
+            ),
+            choices=choices,
+        )
