@@ -163,9 +163,6 @@ def test_codon_table_is_exact_and_self_contained():
         for name in ("protein", "effect", "claim"):
             r = s["roles"][name]
             needed |= set(_read(r["original"]["mrna"])[1]) | set(_read(r["changed"]["mrna"])[1])
-        misread = _read(s["roles"]["protein"]["changed"]["template"].replace("T", "U"))
-        assert misread[0] is not None
-        needed |= set(misread[1])
         assert needed <= set(codons)
         assert len(set(codons) - needed) in (2, 3)
 
@@ -176,6 +173,8 @@ def test_inheritance_scenario_is_curated():
         i = _scenario(seed)["inheritance"]
         assert set(i) == {"organism", "cell", "gamete", "mutagen"}
         assert i["gamete"] == (i["cell"] in ("an egg cell", "a sperm cell"))
+        if i["gamete"]:
+            assert i["mutagen"] == "X-rays"  # ultraviolet light does not reach the gonads
         cells.add(i["cell"])
         organisms.add(i["organism"])
         mutagens.add(i["mutagen"])
@@ -267,8 +266,6 @@ def test_new_protein_key_is_the_changed_protein_read_with_the_displayed_table():
         texts = [c["text"] for c in q["choices"]]
         assert len(set(texts)) == len(texts) == 4 and sum(t == " → ".join(after) for t in texts) == 1
         assert " → ".join(before) in texts  # the unchanged protein is offered as a wrong answer
-        misread, read_misread = _read(changed.replace("T", "U"))
-        assert misread is not None and set(read_misread) <= set(table)
         assert "Translation starts at the start codon (AUG)" in q["stem"]
 
 
@@ -317,7 +314,9 @@ def test_indel_effect_items_never_end_early():
 # ---- inheritance_of_mutation ---------------------------------------------------------------
 
 GAMETE_KEY = "The mutation can be inherited by offspring if the changed {cell_word} takes part in fertilization."
-BODY_KEY = "The mutation will not be passed to offspring, but cells that come from the changed body cell will carry it."
+BODY_KEY = (
+    "The mutation cannot be inherited by offspring, but cells that come from the changed body cell will carry it."
+)
 
 
 def test_inheritance_key_follows_the_cell_kind():
@@ -463,3 +462,36 @@ def test_a_full_set_has_one_codon_table_within_bounds_and_single_template_sets_o
         assert len(tables) == 1 and 12 <= len(tables[0]["rows"]) <= 36
     assert _set("one", "identify_mutation_type")["groups"][0]["stimulus"]["tables"] == []
     assert _set("one", "inheritance_of_mutation")["groups"][0]["stimulus"]["tables"] == []
+
+
+# ---- review fixes --------------------------------------------------------------------------
+
+
+def test_new_protein_choices_do_not_cue_the_key():
+    for seed in SEEDS:
+        q = _only(_set(seed, "new_protein_after_change"), "new_protein_after_change")
+        key = _correct(q)
+        texts = [c["text"] for c in q["choices"]]
+        assert all(t.startswith("Methionine") for t in texts), (seed, texts)  # no start-codon giveaway
+        lengths = [len(t.split(" → ")) for t in texts]
+        key_length = len(key.split(" → "))
+        assert sum(n == key_length for n in lengths) >= 2, (seed, texts)  # the key is not the only one of its length
+
+
+def test_inheritance_choices_do_not_cue_the_key_or_contradict_the_stem():
+    for seed in SEEDS:
+        q = _only(_set(seed, "inheritance_of_mutation"), "inheritance_of_mutation")
+        key = _correct(q)
+        assert len(key) <= max(len(c["text"]) for c in q["choices"] if not c["correct"]), (seed, "key is the longest")
+        assert all("cannot cause a mutation" not in c["text"] for c in q["choices"])  # the stem says it caused one
+        cell_is_gamete = "egg cell" in q["stem"] or "sperm cell" in q["stem"]
+        if cell_is_gamete:
+            assert "X-rays" in q["stem"] and "ultraviolet" not in q["stem"], (seed, q["stem"])
+
+
+def test_the_codon_table_bound_is_enforced_not_just_sampled():
+    for seed in ["mut-3207", "mut-5985", "mut-6137", "mut-7055", "mut-13549"]:
+        rows = _full(seed)["groups"][0]["stimulus"]["tables"][0]["rows"]
+        assert len(rows) <= 36, (seed, len(rows))
+    for i in range(1500):
+        assert len(_scenario(f"bound-{i}")["codon_table"]) <= 36

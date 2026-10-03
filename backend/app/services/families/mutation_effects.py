@@ -27,6 +27,8 @@ from app.services.families.protein_synthesis import (
 )
 
 MAX_DRAWS = 400
+MAX_SCENARIOS = 20
+MAX_TABLE_ROWS = 36
 ALL_CODONS = tuple(sorted(CODONS))
 EDIT_KINDS = ("substitution", "insertion", "deletion")
 CATEGORY_KINDS = {
@@ -86,10 +88,6 @@ def effect_of(original: list[str], changed: list[str]) -> str | None:
     return true[0] if len(true) == 1 else None
 
 
-def _all_distinct(options: list[list[str]]) -> bool:
-    return len({tuple(o) for o in options}) == len(options)
-
-
 # ---- edits and genes -----------------------------------------------------------------------
 
 
@@ -124,6 +122,38 @@ def make_edit(rng: Rng, template: str, n_sense: int, kind: str) -> dict[str, Any
         return None
     changed = template[:index] + new + template[index:]
     return {"type": kind, "index": index, "position": index, "old": None, "new": new, "changed": changed}
+
+
+def protein_distractors(original: list[str], changed: list[str], site: int) -> dict[str, list[str]] | None:
+    """Three plausible wrong proteins. Each starts with methionine and one has the key's length, so neither the start
+    nor the length gives the key away. Returns None when fewer than three valid candidates exist."""
+    if changed == original:
+        return None
+    candidates: dict[str, list[str]] = {}
+    if len(changed) > len(original):
+        candidates["extended_original"] = original + changed[len(original) :]
+    candidates["original"] = original
+    if len(changed) < len(original) and changed == original[: len(changed)]:
+        candidates["one_longer"] = original[: len(changed) + 1]
+        if len(changed) >= 3:
+            candidates["rearranged"] = [changed[0], changed[2], changed[1], *changed[3:]]
+    candidates["site_left_out"] = original[:site] + original[site + 1 :]
+    if site < len(changed):
+        candidates["one_site"] = original[:site] + [changed[site]] + original[site + 1 :]
+        other = site + 1 if site + 1 < len(original) else site - 1
+        if other >= 1:
+            candidates["misplaced"] = original[:other] + [changed[site]] + original[other + 1 :]
+    chosen: dict[str, list[str]] = {}
+    seen = {tuple(changed)}
+    for name, sequence in candidates.items():
+        if sequence and tuple(sequence) not in seen:
+            chosen[name] = sequence
+            seen.add(tuple(sequence))
+        if len(chosen) == 3:
+            break
+    if len(chosen) < 3 or not any(len(s) == len(changed) for s in chosen.values()):
+        return None
+    return chosen
 
 
 def draw_gene(rng: Rng) -> dict[str, Any]:
@@ -167,19 +197,10 @@ def draw_role(
             continue
         used = set(read_original) | set(read_changed)
         if distractors:
-            misread, read_misread = read_protein(changed_template.replace("T", "U"))
-            if misread is None:
-                continue
-            site = edit["index"] // 3
-            options = {
-                "original": original,
-                "site_left_out": original[:site] + original[site + 1 :],
-                "misread": misread,
-            }
-            if not _all_distinct([changed, *options.values()]):
+            options = protein_distractors(original, changed, edit["index"] // 3)
+            if options is None:
                 continue
             role["distractors"] = options
-            used |= set(read_misread)
         role["original"]["protein"], role["changed"]["protein"] = original, changed
         role["category"] = found
         role["codons_read"] = sorted(used)
@@ -188,29 +209,37 @@ def draw_role(
 
 
 def draw_scenario(rng: Rng) -> dict[str, Any]:
-    labels = rng.sample(list(GENE_LABELS), 4)
-    roles = {
-        "classify": draw_role(rng, labels[0], translate=False),
-        "protein": draw_role(rng, labels[1], distractors=True),
-        "effect": draw_role(rng, labels[2], category=rng.choice(list(EFFECT_TEXT))),
-        "claim": draw_role(rng, labels[3]),
-    }
-    needed: set[str] = set()
-    for name in ("protein", "effect", "claim"):
-        needed |= set(roles[name]["codons_read"])
-    extras = rng.sample(sorted(set(SENSE_CODONS) - needed), rng.randint(2, 3))
-    cell = rng.choice(CELLS)
-    return {
-        "roles": roles,
-        "cause": rng.choice(CAUSES),
-        "inheritance": {
-            "organism": rng.choice(ORGANISMS),
-            "cell": cell,
-            "gamete": cell != CELLS[0],
-            "mutagen": rng.choice(MUTAGENS),
-        },
-        "codon_table": [{"codon": c, "amino_acid": table_label(c)} for c in sorted(needed | set(extras))],
-    }
+    for _ in range(MAX_SCENARIOS):
+        labels = rng.sample(list(GENE_LABELS), 4)
+        roles = {
+            "classify": draw_role(rng, labels[0], translate=False),
+            "protein": draw_role(rng, labels[1], distractors=True),
+            "effect": draw_role(rng, labels[2], category=rng.choice(list(EFFECT_TEXT))),
+            "claim": draw_role(rng, labels[3]),
+        }
+        needed: set[str] = set()
+        for name in ("protein", "effect", "claim"):
+            needed |= set(roles[name]["codons_read"])
+        if len(needed) + 3 > MAX_TABLE_ROWS:  # leave room for up to three extra codons
+            continue
+        extras = rng.sample(sorted(set(SENSE_CODONS) - needed), rng.randint(2, 3))
+        cell = rng.choice(CELLS)
+        gamete = cell != CELLS[0]
+        return {
+            "roles": roles,
+            "cause": rng.choice(CAUSES),
+            "inheritance": {
+                "organism": rng.choice(ORGANISMS),
+                "cell": cell,
+                "gamete": gamete,
+                # Ultraviolet light does not reach the gonads, so a gamete is exposed to X-rays only.
+                "mutagen": "X-rays" if gamete else rng.choice(MUTAGENS),
+            },
+            "codon_table": [{"codon": c, "amino_acid": table_label(c)} for c in sorted(needed | set(extras))],
+        }
+    raise GenerationError(
+        f"mutation-effects: no scenario within {MAX_TABLE_ROWS} table rows after {MAX_SCENARIOS} draws"
+    )
 
 
 # ---- family --------------------------------------------------------------------------------
@@ -370,9 +399,19 @@ class MutationEffects(QuestionFamily):
         options = role["distractors"]
         correct = sequence_text(changed)
         why = {
-            "original": "This is the protein made from the original strand. The changed strand is read codon by codon, and it makes a different protein.",
+            "extended_original": (
+                "This keeps the original protein and only adds amino acids at the end. The codons after the change are "
+                "read differently, so the amino acids after the change are not the original ones."
+            ),
+            "original": (
+                "This is the protein made from the original strand. The changed strand is read codon by codon, and it "
+                "makes a different protein."
+            ),
+            "one_longer": "The changed strand has a stop codon sooner than this answer shows, so the protein is shorter.",
+            "rearranged": "The amino acids are not in the order the codons give. Each codon is read in order from the start.",
             "site_left_out": "This leaves out the amino acid at the change instead of reading the changed strand codon by codon.",
-            "misread": "This reads the DNA template strand directly as if it were mRNA. The template must first be transcribed into its complementary mRNA.",
+            "one_site": "This changes only one amino acid. The amino acids after the change are read from the changed strand too.",
+            "misplaced": "The changed amino acid is in the wrong position. Each codon is read in order from the start.",
         }
         choices = [
             DraftChoice(
@@ -385,8 +424,8 @@ class MutationEffects(QuestionFamily):
                 ),
             )
         ] + [
-            DraftChoice(sequence_text(options[k]), False, _frameshift(why[k], edit))
-            for k in ("original", "site_left_out", "misread")
+            DraftChoice(sequence_text(sequence), False, _frameshift(why[name], edit))
+            for name, sequence in options.items()
         ]
         return DraftQuestion(
             stem=(
@@ -448,6 +487,7 @@ class MutationEffects(QuestionFamily):
     def _q_inheritance_of_mutation(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
         info = params["inheritance"]
         organism, cell, mutagen = info["organism"], info["cell"], info["mutagen"]
+        animal = f"the {organism.split(' ', 1)[1]}"
         if info["gamete"]:
             word = cell.split(" ", 1)[1]
             correct = f"The mutation can be inherited by offspring if the changed {word} takes part in fertilization."
@@ -455,36 +495,47 @@ class MutationEffects(QuestionFamily):
                 "Correct: a mutation in a gamete is in the genetic material that offspring receive when that gamete "
                 "takes part in fertilization."
             )
-            opposite = "The mutation will not be passed to offspring, because only body cells can carry mutations."
-            opposite_why = "Gametes carry genetic material to offspring, so a mutation in a gamete can be inherited."
+            wrong = [
+                (
+                    "The mutation cannot be inherited by offspring, because mutations only change body cells.",
+                    "Gametes carry genetic material to offspring, so a mutation in a gamete can be inherited.",
+                ),
+                (
+                    f"The mutation will be in every cell of {animal}, but offspring will not inherit it.",
+                    "A mutation starts in one cell and is only in the cells that come from it, so it is not in every cell.",
+                ),
+                (
+                    f"The mutation will be inherited by all offspring, whether or not the changed {word} takes part in "
+                    "fertilization.",
+                    f"Offspring can inherit the mutation only if the changed {word} takes part in fertilization.",
+                ),
+            ]
         else:
             correct = (
-                "The mutation will not be passed to offspring, but cells that come from the changed body cell will "
+                "The mutation cannot be inherited by offspring, but cells that come from the changed body cell will "
                 "carry it."
             )
             right = (
                 "Correct: a mutation in a body cell stays in the cells that come from it. It is not in the gametes, so "
                 "offspring do not receive it."
             )
-            opposite = "The mutation will be passed to all offspring, because every mutation is inherited."
-            opposite_why = (
-                "Only mutations in gametes can be passed to offspring. A body cell mutation is not in the gametes."
-            )
-        choices = [
-            DraftChoice(correct, True, right),
-            DraftChoice(opposite, False, opposite_why),
-            DraftChoice(
-                f"The mutation will appear in every cell of {organism} and in all of its offspring.",
-                False,
-                "A mutation starts in one cell and is only in the cells that come from it, so it is not in every cell.",
-            ),
-            DraftChoice(
-                f"{mutagen[0].upper()}{mutagen[1:]} cannot cause a mutation; only copying errors during replication "
-                "change DNA.",
-                False,
-                "A mutagen, such as ultraviolet light or X-rays, is an environmental factor that can change DNA.",
-            ),
-        ]
+            wrong = [
+                (
+                    "The mutation can be inherited by offspring, because every mutation is passed on to the next "
+                    "generation.",
+                    "Only mutations in gametes can be passed to offspring. A body cell mutation is not in the gametes.",
+                ),
+                (
+                    f"The mutation will be in every cell of {animal}, but offspring will not inherit it.",
+                    "A mutation starts in one cell and is only in the cells that come from it, so it is not in every cell.",
+                ),
+                (
+                    f"The mutation will be inherited by all offspring of {animal}, because the changed body cell is "
+                    "part of the organism that produces them.",
+                    "Offspring receive genetic material only through gametes, and this mutation is not in a gamete.",
+                ),
+            ]
+        choices = [DraftChoice(correct, True, right)] + [DraftChoice(text, False, why) for text, why in wrong]
         return DraftQuestion(
             stem=(
                 f"{organism[0].upper()}{organism[1:]} is exposed to {mutagen}, a mutagen. The exposure causes a "

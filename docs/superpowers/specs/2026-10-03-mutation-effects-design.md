@@ -76,7 +76,7 @@ Reuses `CODONS`, `AMINO_ACIDS`, `translate`-style reading, `transcribe`/`templat
 from `protein_synthesis.py` (imported, not copied). New: a curated inheritance table (below). The codon table follows
 the B-LS1-1 rules: alphabetical, every codon any translation in the set reads (original, changed, distractors) plus 2
 or 3 extras, `AUG` labelled `Methionine (start)`, stops labelled `Stop`, the stimulus tells students to use the
-displayed table and not to memorize codons. Table size is bounded at 36 rows including the 2 or 3 extras: a
+displayed table and not to memorize codons. Table size is bounded at 36 rows including the 2 or 3 extras, and the bound is enforced (a scenario whose needed codons would exceed 33 is redrawn): a
 prototype over 1500 seeds needed at most 31 codons with this gene shape, while genes of 4 to 5 sense codons with a 6 to 8
 codon tail needed up to 39 and were rejected as too long to display.
 
@@ -91,7 +91,7 @@ Independent genes per role, so no item's stem leaks another item's key: `classif
 - `effect`: any type, with its category from the table above (substitution cases are drawn evenly among unchanged, one
   changed, ends early, and indels give several differ).
 - `claim`: any type and category; used by the constructed-response item.
-- `inheritance`: an organism (a mouse, a maple tree, a fruit fly), a cell kind (body cell or gamete: egg cell or sperm
+- `inheritance`: an organism (a mouse, a fruit fly, a zebrafish; animals only, so the somatic/gamete distinction is clean), a cell kind (body cell or gamete: egg cell or sperm
   cell), and a mutagen.
 
 ## Templates
@@ -114,16 +114,22 @@ Single-standard family: bound only to `SC / biology-1 / B-LS3-2`; no template de
   fourth choice is a stated misconception: a changed DNA sequence is a mutation whether or not the protein changes.
 - **`new_protein_after_change`**: stem shows both strands (original and changed) and the table, and states the
   sequence-model sentence. Choices are amino acid sequences joined with arrows. The key is the changed protein. Distractors:
-  the original protein (nothing changed); the original with the amino acid at the change site left out; the changed strand
-  read directly as codons. Each distractor's codons are in the table and none equals the key or another choice.
+  the original protein (nothing changed); wrong sequences drawn from: the original protein, the original with the amino acid at the change site left out, the
+  original with extra amino acids added at the end (indels), the protein one amino acid too long (a substitution that
+  makes a Stop), the changed amino acid in the wrong place, and the key's amino acids rearranged. Three are chosen so that
+  every choice starts with methionine and at least one has the key's length (no start or length giveaway); none equals the
+  key or another choice. The earlier "changed strand read directly as codons" distractor was dropped: it always began with
+  tyrosine, which the stated start-codon rule rules out at a glance.
 - **`effect_on_protein`**: stem shows both strands and the table. Four fixed-wording choices, each true only for its
   category: "The protein is unchanged."; "Exactly one amino acid is different."; "The protein ends early, because a new Stop
   codon is read."; "Several amino acids after the change are different." The key is the category the scenario computed;
   the other three are false by the predicates above.
 - **`inheritance_of_mutation`**: stem names the organism, the cell kind, and the mutagen exposure. The key is "can be
   passed to offspring" for a gamete that takes part in fertilization, and "will not be passed to offspring, although cells
-  that come from the changed body cell carry it" for a body cell. Distractors: the opposite claim; "every cell of the
-  organism and all of its offspring will have the mutation"; "the mutagen cannot change DNA".
+  that come from the changed body cell carry it" for a body cell. Distractors are parallel in form and length (the key is never the
+  longest or the only hedged choice) and none contradicts the stem: the opposite claim; "in every cell, but offspring will not
+  inherit it"; "all offspring inherit it whether or not ...". A gamete is exposed to X-rays only, because ultraviolet light
+  does not reach the gonads.
 - **`defend_claim_about_change`**: stem shows both strands and the table and asks the student to make and defend a claim
   about what the change did to the protein, using the sequences and the table as evidence, and to answer a stated
   counterclaim. The counterclaim is "Every change in the DNA sequence changes the protein" when the effect is
