@@ -1,11 +1,12 @@
 """Linked variants: preview persists nothing, save re-derives from signed tokens, distinctness and locking."""
 
+import json
 import time
 from types import SimpleNamespace
 
 from sqlalchemy import func, select, update
 
-from app.models import AuditEvent, GenerationRun, Question
+from app.models import AuditEvent, GenerationRun, Question, Stimulus
 from tests.conftest import login_as
 from tests.test_api import _generate
 from tests.test_permissions import _edit_body, make_question
@@ -265,7 +266,35 @@ def test_eocep_dna_parent_produces_a_variant_without_strand_ends(anon, db):
     db.expire_all()
     variant = db.get(Question, vid)
     assert variant.provenance["options"]["generation_mode"] == "eocep"
-    assert "′" not in variant.current_version.stem
+    version = variant.current_version
+    stimulus = db.get(Stimulus, variant.stimulus_id)
+    everything = json.dumps(
+        [version.stem, version.choices, version.answer, version.explanation, stimulus.body], ensure_ascii=False
+    )
+    assert "′" not in everything and "Codon table (mRNA codons)" in everything
+
+
+def test_eocep_mutation_parent_produces_a_variant_that_keeps_the_scope_note(anon, db):
+    login_as(anon, "regular")
+    _, body = _generate(
+        anon,
+        "biology-1",
+        "B-LS3-2",
+        "mutation-effects",
+        seed="eocep-mutation",
+        generation_mode="eocep",
+        quantity=1,
+        template_keys=["identify_mutation_type"],
+    )
+    parent_id = anon.post("/api/generate/save", json=body).json()["question_ids"][0]
+    vid, _ = make_variant(anon, parent_id)
+    db.expire_all()
+    options = db.get(Question, vid).provenance["options"]
+    assert options["generation_mode"] == "eocep"
+    assert (
+        options["eocep_scope_note"]
+        == "Covers the mutation part of this standard only; meiosis items are not yet available."
+    )
 
 
 def test_audit_event_names_ids_and_counts_but_no_content(anon, db):

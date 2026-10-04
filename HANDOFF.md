@@ -427,7 +427,9 @@ EOCEP mode was completed for the currently EOCEP-eligible implemented Biology 1 
 | B-LS4-4 | natural-selection-trend | Assessment Specifications p. 19 | No allele-frequency calculations, Hardy-Weinberg or chi-square. |
 
 Enforcement: each entry's `banned_terms` is scanned in `tests/test_eocep_families.py` over many
-seeds. The `allowed_terminology` lists are reference only (the source says terms "could be used").
+seeds. The `allowed_terminology` lists are reference only (the source says terms "could be used"). The scan covers generated
+text only: the standards' observable-performance wording is official SCDE text attached afterwards and is not scanned
+(a test pins that `generate_set` attaches none).
 Do not claim EOCEP support for other Biology 1 standards until their constraints are imported and
 tested the same way. `eocep_constraints` is not stored in saved-question provenance; only
 `options.generation_mode` and, for B-LS3-2, `options.eocep_scope_note` are stored.

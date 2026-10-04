@@ -178,18 +178,31 @@ def test_dna_eocep_states_direction_in_words_and_not_primes():
                 assert re.fullmatch(r"[ACGU]+", next(c["text"] for c in question["choices"] if c["correct"]))
 
 
-def test_dna_eocep_reversed_distractors_are_explained_without_ends():
-    rationales = set()
-    for seed in SEEDS:
-        out = generate_set(
-            FAMILIES["dna-protein-synthesis"], seed, 8, template_keys=["translate_mrna", "dna_to_protein"], eocep=True
-        )
+def test_dna_eocep_reversed_protein_rationale_gives_direction_in_words_not_prime_notation():
+    banned = _constraints()["B-LS1-1"]["banned_terms"]
+    family = FAMILIES["dna-protein-synthesis"]
+
+    def reversed_rationales(eocep):
+        found = set()
+        for seed in SEEDS:
+            out = generate_set(family, seed, 8, template_keys=["translate_mrna", "dna_to_protein"], eocep=eocep)
+            for group in out["groups"]:
+                for question in group["questions"]:
+                    found |= {c["rationale"] for c in question["choices"] if "reverse" in c["rationale"]}
+        return found
+
+    classroom, eocep = reversed_rationales(False), reversed_rationales(True)
+    assert classroom and eocep
+    assert all("5'" in r.replace("′", "'") for r in classroom)  # positive control: Classroom keeps the notation
+    assert all("first codon" in r and not _hits(r, banned) for r in eocep)
+    assert not classroom & eocep
+
+
+def test_the_scan_reads_generated_text_which_has_no_observable_wording_yet():
+    # The observable-performance wording is official SCDE text attached after generate_set (in generate_for_request);
+    # the scan therefore does not cover it. If generate_set ever attaches it, revisit _student_text and banned_terms.
+    for key in FAMILY_STANDARD:
+        out = generate_set(FAMILIES[key], "observables", 8, eocep=True)
         for group in out["groups"]:
             for question in group["questions"]:
-                rationales |= {
-                    choice["rationale"] for choice in question["choices"] if "reverse" in choice["rationale"]
-                }
-    assert rationales == {
-        "The amino acids are in reverse order. "
-        "Codons are read in order from the first codon, at the left end of the mRNA."
-    }
+                assert set(question["observable"]) == {"category", "index"}, key
