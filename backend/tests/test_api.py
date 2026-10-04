@@ -336,6 +336,26 @@ def test_only_b_ls3_2_carries_eocep_scope_note(client):
     assert noted == {("biology-1", "B-LS3-2")}
 
 
+def test_saved_eocep_question_records_its_mode_and_scope_note(client, db):
+    from app.models import Question
+
+    standard = _std(client, "biology-1", "B-LS3-2")
+    body = {
+        "standard_id": standard["id"],
+        "family_key": "mutation-effects",
+        "quantity": 1,
+        "seed": "saved-eocep",
+        "generation_mode": "eocep",
+    }
+    saved = client.post("/api/generate/save", json=body)
+    assert saved.status_code == 201, saved.text
+    question = db.get(Question, saved.json()["question_ids"][0])
+    assert question.provenance["options"]["generation_mode"] == "eocep"
+    assert question.provenance["options"]["eocep_scope_note"] == standard["eocep_scope_note"]
+    classroom = client.post("/api/generate/preview", json={**body, "generation_mode": "classroom"}).json()
+    assert "eocep_scope_note" not in classroom["options"]
+
+
 def test_eocep_mode_excludes_constructed_response(client):
     standards = client.get("/api/standards").json()
     bio1 = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS3-3")
