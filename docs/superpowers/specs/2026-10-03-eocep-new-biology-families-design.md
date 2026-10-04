@@ -1,8 +1,10 @@
 # EOCEP Constraints for the New Biology 1 Families — Design
 
-Date: 2026-10-03
+Date: 2026-10-03 (amended 2026-10-04)
 
-Status: Design approved in chat (Brandon, 2026-10-03); written specification awaiting review.
+Status: Amended 2026-10-04 after a chat with Brandon that settled five decisions (listed below). Written specification
+awaiting Brandon's review. The earlier version of this spec (commit `9f1b2d1`) excluded three B-LS1-1 templates instead of
+fixing them, had no content scan, no B-LS3-2 scope note, and no family code change; this amendment replaces it.
 
 ## Goal
 
@@ -10,17 +12,30 @@ Enable existing EOCEP Practice mode for the three deployed Biology 1 families th
 
 | Standard | Family | EOCEP selected-response templates |
 |---|---|---|
-| B-LS1-1 | `dna-protein-synthesis` | `gene_activity_by_cell` only |
+| B-LS1-1 | `dna-protein-synthesis` | `transcribe_mrna`, `translate_mrna`, `dna_to_protein`, `gene_activity_by_cell` |
 | B-LS3-2 | `mutation-effects` | `identify_mutation_type`, `new_protein_after_change`, `effect_on_protein`, `inheritance_of_mutation` |
 | B-LS4-4 | `natural-selection-trend` | `compare_survival`, `trait_trend`, `effect_of_change`, `explain_adaptation`, `predict_new_change` |
 
 The source is *EOCEP Biology 1 Assessment Specifications 2025–2026*, committed as
-`SCDoE Targets/State Assessment Specifications_EOCEP Biology 1_2025-2026.pdf`. This work imports its item-writer
-constraints into `biology-1-eocep.json`, then uses the existing server-side EOCEP template filter. It does not change
-question content, family code, the frontend, schema, or a deployed family version.
+`SCDoE Targets/State Assessment Specifications_EOCEP Biology 1_2025-2026.pdf`. Page numbers below are the printed numbers
+in the page headers (PDF file page = printed page + 2).
 
 EOCEP Practice remains targeted practice, not a claim that any one family fully represents a standard or the state
-assessment. In particular, `mutation-effects` does not add the separate B-LS3-2 meiosis-model work.
+assessment.
+
+## Decisions (Brandon, 2026-10-04)
+
+1. **Enforcement is by test (not runtime, not a vocabulary allowlist).** Each standard's "items may not" rules are
+   imported as machine-checkable `banned_terms`, and tests scan generated EOCEP output for them.
+2. **B-LS3-2 is offered with a visible scope note**: the family covers the mutation part of the standard only; meiosis
+   items are not yet available.
+3. **The term lists are reference only, and items are not reworded to them.** The source heads each list "Terminology
+   That Could Be Used": it names terms items may use, not the only terms allowed. Words such as "egg cell", "sperm cell",
+   "inherited" and "variant" are plain-language and not prohibited. Only the "may not" rules are enforced.
+4. **B-LS1-1 gets a narrow, family-level "no strand ends" rendering in EOCEP mode.** The EOCEP rules bar `3'/5'` in items
+   that measure B-LS1-1, and every sequence template prints strand ends today. Rather than drop those templates or alter
+   Classroom items, the family renders without ends when it is told it is in EOCEP mode.
+5. **Reading order is unchanged by the new rendering**: classroom output stays byte-identical.
 
 ## Source-derived constraints
 
@@ -43,17 +58,13 @@ item may not require:
 
 Its requirements record that a codon chart is provided when needed, students apply the DNA/RNA base-pair rule and
 translate sequences using that chart, students understand the general protein-synthesis process and ER/Golgi roles,
-and may show understanding of differentiation's result in specialized systems.
+and may show understanding of differentiation's result in specialized systems of cells.
 
-The three selected-response sequence templates are declared under
-`excluded_templates["dna-protein-synthesis"]`: `transcribe_mrna`, `translate_mrna`, and `dna_to_protein`. Their current
-student-facing output uses prohibited `3′/5′` notation. The existing universal constructed-response exclusion blocks
-`explain_dna_to_protein`; it need not be repeated in JSON. `gene_activity_by_cell` is the only enabled template: it is
-selected response, uses no prohibited notation, does not identify a real cell type or protein, and directly practises
-the permitted differentiation result.
+`excluded_templates` for this standard is empty. All four selected-response templates are enabled; the existing universal
+constructed-response exclusion blocks `explain_dna_to_protein`.
 
-An explicit EOCEP request for any blocked template must return 422. An unfiltered EOCEP request must generate only
-`gene_activity_by_cell`. Classroom output remains byte-for-byte unchanged.
+`banned_terms`: `3'`, `5'` (matching the typographic prime `′` as well as the apostrophe, so `3′`, `5′`, `3'-`, and
+`5' end` are all caught), `intron`, `exon`, `Okazaki`, `initiation`, `elongation`, `termination`, `codon wheel`.
 
 ### B-LS3-2 (source page 15)
 
@@ -64,14 +75,16 @@ The JSON entry records the complete page-15 terminology list: `allele`, `centrom
 `nondisjunction`, `offspring`, `parent cell`, `point mutation`, `replication`, `sexual reproduction`, `somatic cell`,
 `substitution`, `trait`, and `trisomy`. Its prohibitions are: do not require definition, identification, or sequencing
 of named phases in meiosis I or II; and do not use the codon wheel. Its requirements record that a codon chart is
-supplied when necessary; viable replication errors bypass DNA proofreading; and the assessment may use/ask about meiosis
-models and their represented event order.
+supplied when necessary; viable replication errors bypass DNA proofreading; and students use models of meiosis and
+recognize and sequence the events they represent.
 
-No `mutation-effects` selected-response template is excluded. They already use a displayed **codon chart**, never a
-wheel, and do not name or sequence meiosis phases. The generic constructed-response exclusion blocks
-`defend_claim_about_change`. The imported requirement about meiosis models describes assessment scope that this
-sequence-mutation family does not attempt; it neither authorizes nonexistent meiosis items nor makes EOCEP Practice a
-complete B-LS3-2 assessment.
+No `mutation-effects` selected-response template is excluded. They use a displayed codon **chart**, never a wheel, and
+do not name or sequence meiosis phases. The generic constructed-response exclusion blocks `defend_claim_about_change`.
+The meiosis-model requirement describes assessment scope this family does not attempt; it neither authorizes nonexistent
+meiosis items nor makes EOCEP Practice a complete B-LS3-2 assessment. The entry therefore carries a `scope_note`:
+"Covers the mutation part of this standard only; meiosis items are not yet available."
+
+`banned_terms`: `prophase`, `metaphase`, `anaphase`, `telophase`, `codon wheel`.
 
 ### B-LS4-4 (source page 19)
 
@@ -81,24 +94,53 @@ The JSON entry records the complete page-19 terminology list: `abiotic`, `adapta
 `trait`, and `variation`. Its prohibitions are allele-frequency calculation, Hardy-Weinberg knowledge, and Chi-square
 knowledge. The source states no additional B-LS4-4 requirement.
 
-No `natural-selection-trend` selected-response template is excluded. It already reasons from counts/fractions of a
-sampled population, never calculates allele frequency, and never mentions Hardy-Weinberg or Chi-square. The generic
-constructed-response exclusion blocks `explain_with_data`.
+No `natural-selection-trend` selected-response template is excluded. It reasons from counts of a sampled population,
+never calculates allele frequency, and never mentions Hardy-Weinberg or Chi-square. The generic constructed-response
+exclusion blocks `explain_with_data`.
 
-## Enforcement and data contract
+`banned_terms`: `allele frequenc` (stem match), `Hardy-Weinberg`, `Hardy Weinberg`, `chi-square`, `chi square`.
 
-`data/standards/SC/2026-2027/biology-1-eocep.json` gains exactly these three constraint objects, with the existing
-five fields: `source_pages`, `allowed_terminology`, `prohibitions`, `requirements`, and `excluded_templates`. The source
-file, authority, and course slug stay unchanged.
+## Data contract
 
-The existing importer persists each object to `standards.eocep_constraints`. The existing
-`services.generation.eocep_blocked_templates` combines the standard/family-specific exclusions with the universal
-constructed-response exclusion. `generate_for_request` already rejects an explicitly requested blocked template and
-substitutes the permitted set for an unfiltered EOCEP request; this work verifies those behaviours rather than adding a
-parallel filter.
+`data/standards/SC/2026-2027/biology-1-eocep.json` gains three constraint objects with the existing five fields
+(`source_pages`, `allowed_terminology`, `prohibitions`, `requirements`, `excluded_templates`) plus:
 
-Because all newly enabled template output is existing output and classroom generation is unchanged, this is a
-constraints-data change, not a generator-output change. No family version or golden digest changes.
+- `banned_terms` (list of strings, above), used by tests only; and
+- `scope_note` (string, optional), present for B-LS3-2 only.
+
+The two already-enabled standards (B-LS2-1, B-LS3-3) are not changed. The source file, authority, and course slug stay
+unchanged. The importer stores each object whole in `standards.eocep_constraints`, so the new fields need no importer
+change; a test confirms they round-trip. Every generation response in EOCEP mode already returns the constraints and
+stores them in the generation options, which carries `scope_note` into provenance.
+
+## Generation: EOCEP rendering for B-LS1-1
+
+`services.generation` stops rejecting these three standards (the rejection depends only on imported constraints, so the
+JSON entries are what enable them). Biology 2 and standards without constraints are still rejected. Unfiltered EOCEP
+requests still use every template that is not constructed response or listed in `excluded_templates`.
+
+The generation mode reaches the families as an optional render setting. The contract, not the mechanism, is fixed here
+(the plan chooses the mechanism):
+
+- Seed derivation is unchanged, so one seed produces the same scenarios, items, keys and distractor kinds in both modes.
+- Only `dna-protein-synthesis` reads the setting. `mutation-effects`, `natural-selection-trend` and every other family
+  ignore it and produce byte-identical output in both modes.
+- In EOCEP mode `dna-protein-synthesis` prints every strand, caption, stem, rationale and explanation without `3'`, `5'`
+  or `′` notation, and says direction in words ("read left to right"). The codon table caption reads "Codon table
+  (mRNA codons)". Distractor rationales that say "from the 5′ end" are reworded ("from the first codon").
+- Each direction-dependent distractor (for example "reversed") is rechecked in the no-ends form; any that becomes
+  ambiguous or that cues the key is replaced in EOCEP mode with a form that does not.
+- The family version becomes **1.1.0** and its golden digest in `tests/test_engine.py` is re-pinned in the same commit.
+  Classroom question content is unchanged (a test proves it); the version string is the only classroom difference.
+- Variants honour the parent's saved generation mode, so a variant of an EOCEP question is rendered without ends too.
+
+## UI
+
+The mode selector already exists. The Generate page shows a standard's `scope_note` near the mode selector when EOCEP is
+selected and the standard has one, in the same plain wording as the rest of the page's EOCEP help text. The plan confirms
+whether the page already receives the constraints before a preview; if not, the standard-detail response gains a
+read-only `eocep_scope_note` and the generated API types (`frontend/openapi.json`, `frontend/src/api/schema.d.ts`) are
+regenerated. No other UI change.
 
 ## Tests
 
@@ -106,25 +148,41 @@ Update the importer/idempotency expected EOCEP count from 2 to 5. Replace the th
 is denied with tests that, for each standard:
 
 - receive 200 and return the persisted source constraints in an EOCEP preview;
-- generate only selected-response items when no template is requested;
-- produce only the permitted template keys above over a multi-item preview;
-- reject the constructed-response template with 422;
-- for B-LS1-1, reject each of the three `3′/5′` sequence templates with 422 and prove the remaining activity template
-  succeeds; and
-- keep a classroom request for every excluded B-LS1-1 template successful, proving EOCEP filtering does not alter
-  classroom generation.
+- generate only selected-response items when no template is requested, over a multi-item preview;
+- reject the constructed-response template with 422; and
+- keep Biology 2 and unlisted standards rejected.
 
-Add structural assertions over the three JSON entries: exact source pages, the source-specific prohibitions, and the
-expected exclusion lists. These catch a typo or a silently permissive empty object without duplicating the production
-filter's logic.
+New guards:
 
-The existing generic EOCEP test continues to prove that `question_types: ["constructed_response"]` is rejected, rather
-than silently converted to another type.
+- **Banned-term scan, per family.** Over many seeds, every template and every question type the mode allows, scan all
+  student-facing text (stem, intro, stimulus title, captions, table cells, choices, rationales, explanation) for the
+  standard's `banned_terms` (case-insensitive, whole-word where the term is a word). Each scan is proved by planting a
+  banned word and watching the test fail, then restoring.
+- **B-LS1-1 EOCEP scan is the substantive one**: it must fail against 1.0.0 output (which prints `3′/5′`) and pass
+  against 1.1.0.
+- **Codon chart sufficiency for B-LS1-1.** In EOCEP mode every codon the student must read appears in the displayed
+  table, since EOCEP students are not expected to recall codons.
+- **Classroom byte-identity for `dna-protein-synthesis`.** The same seeds, in Classroom mode, give the same items as 1.0.0
+  (a stored fixture of 1.0.0 output), apart from the version field.
+- **Other families unchanged in EOCEP mode**: `mutation-effects` and `natural-selection-trend` give identical questions in
+  Classroom and EOCEP mode for the same seed and the permitted templates.
+- **Scope note**: the B-LS3-2 EOCEP preview returns it and the saved provenance contains it; B-LS1-1 and B-LS4-4 have
+  none.
+- **Structural assertions over the three JSON entries**: exact source pages, the expected `banned_terms`, and empty
+  exclusion lists, so a typo or a silently permissive entry fails.
+- Variant of an EOCEP B-LS1-1 question contains no strand ends.
+
+Before review, check the work against the recurring defect classes in `HANDOFF.md` (answer cues, contradicting
+distractors, false premises, unenforced bounds, wording slips, test helpers that copy the module's logic).
 
 ## Out of scope
 
-- Rewording B-LS1-1 sequence items to remove `3′/5′` notation. That is a broader family/engine design and would change a
-  deployed family, requiring a version bump and new golden digest.
+- Rewording items to the EOCEP term lists, or mode-aware vocabulary (decision 3).
+- A runtime content check inside the engine, and a vocabulary allowlist.
 - New B-LS3-2 meiosis-model templates, its separate mutagen/replication dataset family, or truncating frameshifts.
-- New Biology 1 questions, migrations, frontend changes, changes to the two already EOCEP-enabled families, or a claim
-  of full EOCEP equivalence.
+- ER, Golgi and other new B-LS1-1 item types the EOCEP source allows.
+- Migrations, new Biology 1 questions, changes to the two already EOCEP-enabled families, changes to the deferred minor
+  issues, re-verifying the source pages already recorded for B-LS2-1 and B-LS3-3, or any claim of full EOCEP equivalence.
+- The earlier implementation plan (`2026-10-04-eocep-new-biology-families-plan.md`) and the uncommitted edits to
+  `biology-1-eocep.json` and `backend/tests/test_api.py` match the superseded design (they exclude three B-LS1-1
+  templates). They are replaced after this spec is approved, through the plan step, not by this document.
