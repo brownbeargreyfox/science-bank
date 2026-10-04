@@ -42,8 +42,8 @@ assessment.
 
 ### B-LS1-1 (source pages 3–4)
 
-The JSON entry records the complete page-3 terminology list: `adenine`, `amino acid`, `anticodon`, `chromosome`,
-`cytoplasm`, `cytosine`, `deoxyribose`, `differentiation`, `DNA`, `double helix`, `endoplasmic reticulum (SER & RER)`,
+The JSON entry records the complete page-3 terminology list (37 terms): `adenine`, `amino acid`, `anticodon`, `chromosome`,
+`codon`, `cytoplasm`, `cytosine`, `deoxyribose`, `differentiation`, `DNA`, `double helix`, `endoplasmic reticulum (SER & RER)`,
 `enzyme`, `gene`, `Golgi apparatus`, `guanine`, `mRNA`, `mutation`, `nucleic acid`, `nucleotide`, `nucleus`, `nuclear
 membrane`, `peptide bond`, `polypeptide`, `protein synthesis`, `ribose`, `ribosome`, `RNA`, `rRNA`, `start codon`,
 `stop codon`, `thymine`, `transcription`, `translation`, `tRNA`, `uracil`, and `vesicle`. Its prohibitions state that an
@@ -69,7 +69,7 @@ constructed-response exclusion blocks `explain_dna_to_protein`.
 
 ### B-LS3-2 (source page 15)
 
-The JSON entry records the complete page-15 terminology list: `allele`, `centromere`, `chromatid`, `chromosome`,
+The JSON entry records the complete page-15 terminology list (37 terms): `allele`, `centromere`, `chromatid`, `chromosome`,
 `codon (chart)`, `crossing over`, `daughter cell`, `deletion`, `diploid`, `DNA`, `fertilization`, `frameshift`,
 `gamete`, `gene`, `gene mutation`, `genetic code`, `genetic variation`, `haploid`, `homologous chromosome`,
 `independent assortment`, `insertion`, `meiosis`, `meiosis I`, `meiosis II`, `monosomy`, `mutagen`, `mutation`,
@@ -89,7 +89,7 @@ meiosis items nor makes EOCEP Practice a complete B-LS3-2 assessment. The entry 
 
 ### B-LS4-4 (source page 19)
 
-The JSON entry records the complete page-19 terminology list: `abiotic`, `adaptation`, `advantageous trait`, `biotic`,
+The JSON entry records the complete page-19 terminology list (20 terms): `abiotic`, `adaptation`, `advantageous trait`, `biotic`,
 `coevolution`, `convergent evolution`, `distribution`, `diverge`, `ecosystem`, `fitness`, `gene`, `gene frequency`,
 `gene pool`, `geographic isolation`, `natural selection`, `phenotypic variation`, `population`, `survival rate`,
 `trait`, and `variation`. Its prohibitions are allele-frequency calculation, Hardy-Weinberg knowledge, and Chi-square
