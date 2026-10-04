@@ -36,7 +36,7 @@ def test_import_counts_and_idempotency(db):
         "courses": 3,
         "standards": 38,
         "bundles": 15,
-        "eocep_constraints": 2,
+        "eocep_constraints": 5,
     }
     assert sorted(db.execute(select(Standard.id, Standard.content_sha256)).all()) == before
     # PE codes shared by Biology 1 and 2 are distinct rows with their own boundaries
@@ -54,6 +54,58 @@ def test_import_counts_and_idempotency(db):
         .where(Standard.course_id != Bundle.course_id)
     )
     assert mismatched == 0
+
+
+def test_new_eocep_constraints_are_imported_as_the_source_states_them(db):
+    from app.models import Course, Standard
+
+    standards = {
+        code: standard
+        for code, standard in db.execute(
+            select(Standard.code, Standard)
+            .join(Course)
+            .where(Course.slug == "biology-1", Standard.code.in_(("B-LS1-1", "B-LS3-2", "B-LS4-4")))
+        )
+    }
+
+    dna = standards["B-LS1-1"].eocep_constraints
+    assert dna["source_pages"] == [3, 4]
+    assert len(dna["allowed_terminology"]) == 37 and "codon" in dna["allowed_terminology"]
+    assert dna["banned_terms"] == [
+        "3'",
+        "5'",
+        "intron",
+        "exon",
+        "Okazaki",
+        "initiation",
+        "elongation",
+        "termination",
+        "codon wheel",
+    ]
+    assert dna["excluded_templates"] == {} and "scope_note" not in dna
+    assert "A codon chart will be included in an item when needed as a reference." in dna["requirements"]
+
+    mutation = standards["B-LS3-2"].eocep_constraints
+    assert mutation["source_pages"] == [15]
+    assert len(mutation["allowed_terminology"]) == 37
+    assert mutation["banned_terms"] == ["prophase", "metaphase", "anaphase", "telophase", "codon wheel"]
+    assert mutation["excluded_templates"] == {}
+    assert (
+        mutation["scope_note"] == "Covers the mutation part of this standard only; meiosis items are not yet available."
+    )
+
+    selection = standards["B-LS4-4"].eocep_constraints
+    assert selection["source_pages"] == [19]
+    assert len(selection["allowed_terminology"]) == 20
+    assert selection["banned_terms"] == [
+        "allele frequenc",
+        "Hardy-Weinberg",
+        "Hardy Weinberg",
+        "chi-square",
+        "chi square",
+    ]
+    assert selection["requirements"] == [] and selection["excluded_templates"] == {}
+    assert "scope_note" not in selection
 
 
 # ---- auth ------------------------------------------------------------------------------------
@@ -216,39 +268,6 @@ def test_eocep_mode_uses_imported_biology_1_constraints(client):
         },
     )
     assert denied_2.status_code == 422
-    bio_1_dna = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS1-1")
-    denied_3 = client.post(
-        "/api/generate/preview",
-        json={
-            "standard_id": bio_1_dna["id"],
-            "family_key": "dna-protein-synthesis",
-            "quantity": 1,
-            "generation_mode": "eocep",
-        },
-    )
-    assert denied_3.status_code == 422
-    bio_1_mut = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS3-2")
-    denied_4 = client.post(
-        "/api/generate/preview",
-        json={
-            "standard_id": bio_1_mut["id"],
-            "family_key": "mutation-effects",
-            "quantity": 1,
-            "generation_mode": "eocep",
-        },
-    )
-    assert denied_4.status_code == 422
-    bio_1_ns = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS4-4")
-    denied_5 = client.post(
-        "/api/generate/preview",
-        json={
-            "standard_id": bio_1_ns["id"],
-            "family_key": "natural-selection-trend",
-            "quantity": 1,
-            "generation_mode": "eocep",
-        },
-    )
-    assert denied_5.status_code == 422
 
 
 def test_eocep_mode_excludes_constructed_response(client):
