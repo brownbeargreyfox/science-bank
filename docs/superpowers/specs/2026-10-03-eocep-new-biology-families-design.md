@@ -111,8 +111,9 @@ exclusion blocks `explain_with_data`.
 
 The two already-enabled standards (B-LS2-1, B-LS3-3) are not changed. The source file, authority, and course slug stay
 unchanged. The importer stores each object whole in `standards.eocep_constraints`, so the new fields need no importer
-change; a test confirms they round-trip. Every generation response in EOCEP mode already returns the constraints and
-stores them in the generation options, which carries `scope_note` into provenance.
+change; a test confirms they round-trip. The constraints themselves are not stored in a saved question's provenance
+(only `options.generation_mode` is), so for a standard with a `scope_note` the generation also records it as
+`options.eocep_scope_note`, which is what reaches provenance; the standard summary exposes it as `eocep_scope_note`.
 
 ## Generation: EOCEP rendering for B-LS1-1
 
