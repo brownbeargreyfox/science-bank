@@ -4,6 +4,14 @@
   "source_authority": "South Carolina Department of Education",
   "source_file": "SCDoE Targets/State Assessment Specifications_EOCEP Biology 1_2025-2026.pdf",
   "constraints": {
+    "B-LS1-1": {
+      "source_pages": [3, 4],
+      "allowed_terminology": ["adenine", "amino acid", "anticodon", "chromosome", "codon", "cytoplasm", "cytosine", "deoxyribose", "differentiation", "DNA", "double helix", "endoplasmic reticulum (SER & RER)", "enzyme", "gene", "Golgi apparatus", "guanine", "mRNA", "mutation", "nucleic acid", "nucleotide", "nucleus", "nuclear membrane", "peptide bond", "polypeptide", "protein synthesis", "ribose", "ribosome", "RNA", "rRNA", "start codon", "stop codon", "thymine", "transcription", "translation", "tRNA", "uracil", "vesicle"],
+      "prohibitions": ["identify specific cell types/proteins without a description of the cell type/protein and its function", "refer to protein structures beyond primary structure (sequence of amino acids)", "require student knowledge of post-translational modification", "require students to recall which codons produce specific amino acids", "require students to identify the biochemistry of protein synthesis, e.g., RNA polymerase", "use or reference the codon wheel", "use the terms intron, exon, 3'/5', Okazaki fragment, initiation, elongation, termination"],
+      "requirements": ["A codon chart will be included in an item when needed as a reference.", "Students are expected to understand and apply the base pair rule for DNA and RNA.", "Students are expected to understand and translate codon sequences using the codon chart.", "Students are expected to understand the general steps/process of protein synthesis.", "Students are expected to know the roles of the ER and Golgi apparatus in protein production: i.e., ER modifies proteins and the Golgi apparatus packages them for transport.", "Students may be expected to show understanding of the role of differentiation in the functioning of specialized systems of cells (i.e., the results of the process of differentiation)."],
+      "excluded_templates": {},
+      "banned_terms": ["3'", "5'", "intron", "exon", "Okazaki", "initiation", "elongation", "termination", "codon wheel"]
+    },
     "B-LS2-1": {
       "source_pages": [11, 12],
       "allowed_terminology": ["biotic factor", "abiotic factor", "carrying capacity", "competition", "limiting factor", "population", "predation", "resource"],
@@ -11,12 +19,29 @@
       "requirements": ["use models communicating data or information on carrying capacity and limiting factors"],
       "excluded_templates": {}
     },
+    "B-LS3-2": {
+      "source_pages": [15],
+      "allowed_terminology": ["allele", "centromere", "chromatid", "chromosome", "codon (chart)", "crossing over", "daughter cell", "deletion", "diploid", "DNA", "fertilization", "frameshift", "gamete", "gene", "gene mutation", "genetic code", "genetic variation", "haploid", "homologous chromosome", "independent assortment", "insertion", "meiosis", "meiosis I", "meiosis II", "monosomy", "mutagen", "mutation", "nondisjunction", "offspring", "parent cell", "point mutation", "replication", "sexual reproduction", "somatic cell", "substitution", "trait", "trisomy"],
+      "prohibitions": ["require students to define, identify, or sequence the names of phases in meiosis I and II (e.g., prophase I, metaphase I, etc.)", "require students to use the codon wheel"],
+      "requirements": ["A codon chart will be provided, when necessary.", "References to viable errors occurring during replication are defined as errors that bypass DNA proofreading (the cell cycle successfully moves past G2).", "Students are required to use models of meiosis to construct explanations of new genetic combinations.", "Students must be able to recognize and sequence the events represented in models of meiosis."],
+      "excluded_templates": {},
+      "banned_terms": ["prophase", "metaphase", "anaphase", "telophase", "codon wheel"],
+      "scope_note": "Covers the mutation part of this standard only; meiosis items are not yet available."
+    },
     "B-LS3-3": {
       "source_pages": [15, 16],
       "allowed_terminology": ["allele", "codominance", "complete dominance", "genotype", "phenotype", "probability", "Punnett square", "ratio"],
       "prohibitions": ["construct or complete a pedigree", "construct or complete a dihybrid cross", "specific genetic disorders", "Hardy-Weinberg", "Chi-square"],
       "requirements": ["may calculate monohybrid ratios or probabilities", "may analyze a completed dihybrid cross"],
       "excluded_templates": {}
+    },
+    "B-LS4-4": {
+      "source_pages": [19],
+      "allowed_terminology": ["abiotic", "adaptation", "advantageous trait", "biotic", "coevolution", "convergent evolution", "distribution", "diverge", "ecosystem", "fitness", "gene", "gene frequency", "gene pool", "geographic isolation", "natural selection", "phenotypic variation", "population", "survival rate", "trait", "variation"],
+      "prohibitions": ["require students to calculate allele frequencies", "require student knowledge of Hardy-Weinberg or Chi-square"],
+      "requirements": [],
+      "excluded_templates": {},
+      "banned_terms": ["allele frequenc", "Hardy-Weinberg", "Hardy Weinberg", "chi-square", "chi square"]
     }
   }
 }

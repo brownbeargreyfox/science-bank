@@ -120,6 +120,7 @@ export default function GeneratePage() {
   const ready = standardId !== null && family !== null && qtyValid;
 
   const eocep = generationMode === "eocep";
+  const selectedStandard = standards.data?.find((standard) => standard.id === standardId);
   // EOCEP is entirely selected-response; keep the UI from offering choices the server will reject.
   const eocepAllowedTypes: QuestionType[] = ["multiple_choice"];
 
@@ -251,6 +252,11 @@ export default function GeneratePage() {
             </div>
           )}
           <ErrorNotice error={standards.error} />
+          {eocep && selectedStandard?.eocep_scope_note ? (
+            <p role="note" className="mt-3 text-sm text-muted">
+              EOCEP practice for {selectedStandard.code}: {selectedStandard.eocep_scope_note}
+            </p>
+          ) : null}
         </fieldset>
 
         <fieldset className="panel p-4 sm:p-5" disabled={standardId === null}>

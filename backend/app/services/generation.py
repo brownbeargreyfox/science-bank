@@ -64,6 +64,7 @@ def generate_for_request(db: Session, req: GenerateRequest, seed: str):
             doks=req.doks or None,
             question_types=question_types or None,
             template_keys=template_keys or None,
+            eocep=eocep,
         )
     except GenerationError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc
@@ -73,4 +74,7 @@ def generate_for_request(db: Session, req: GenerateRequest, seed: str):
     out["options"]["generation_mode"] = req.generation_mode
     if req.generation_mode == "eocep":
         out["eocep_constraints"] = std.eocep_constraints
+        scope_note = (std.eocep_constraints or {}).get("scope_note")
+        if scope_note:
+            out["options"]["eocep_scope_note"] = scope_note
     return std, family, out
