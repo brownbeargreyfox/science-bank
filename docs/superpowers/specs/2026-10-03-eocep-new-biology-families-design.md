@@ -2,7 +2,8 @@
 
 Date: 2026-10-03 (amended 2026-10-04)
 
-Status: Amended 2026-10-04 after a chat with Brandon that settled five decisions (listed below). Written specification
+Status: Amended 2026-10-04 after a chat with Brandon that settled five decisions (listed below; the version decision was
+settled while writing the plan). Written specification
 awaiting Brandon's review. The earlier version of this spec (commit `9f1b2d1`) excluded three B-LS1-1 templates instead of
 fixing them, had no content scan, no B-LS3-2 scope note, and no family code change; this amendment replaces it.
 
@@ -35,7 +36,7 @@ assessment.
 4. **B-LS1-1 gets a narrow, family-level "no strand ends" rendering in EOCEP mode.** The EOCEP rules bar `3'/5'` in items
    that measure B-LS1-1, and every sequence template prints strand ends today. Rather than drop those templates or alter
    Classroom items, the family renders without ends when it is told it is in EOCEP mode.
-5. **Reading order is unchanged by the new rendering**: classroom output stays byte-identical.
+5. **The family version stays 1.0.0** (see Generation). Classroom output is byte-identical for every seed.
 
 ## Source-derived constraints
 
@@ -130,8 +131,10 @@ The generation mode reaches the families as an optional render setting. The cont
   (mRNA codons)". Distractor rationales that say "from the 5′ end" are reworded ("from the first codon").
 - Each direction-dependent distractor (for example "reversed") is rechecked in the no-ends form; any that becomes
   ambiguous or that cues the key is replaced in EOCEP mode with a form that does not.
-- The family version becomes **1.1.0** and its golden digest in `tests/test_engine.py` is re-pinned in the same commit.
-  Classroom question content is unchanged (a test proves it); the version string is the only classroom difference.
+- The family version **stays 1.0.0**, and its golden digest in `tests/test_engine.py` does not change. The version feeds
+  every sub-seed, so a bump would change every Classroom item for every seed; no existing output changes here (EOCEP
+  output for this family has never been produced), so the version-bump rule is met without one. Provenance records the
+  generation mode, which distinguishes EOCEP items. (Brandon, 2026-10-04.)
 - Variants honour the parent's saved generation mode, so a variant of an EOCEP question is rendered without ends too.
 
 ## UI
@@ -158,12 +161,13 @@ New guards:
   student-facing text (stem, intro, stimulus title, captions, table cells, choices, rationales, explanation) for the
   standard's `banned_terms` (case-insensitive, whole-word where the term is a word). Each scan is proved by planting a
   banned word and watching the test fail, then restoring.
-- **B-LS1-1 EOCEP scan is the substantive one**: it must fail against 1.0.0 output (which prints `3′/5′`) and pass
-  against 1.1.0.
+- **B-LS1-1 EOCEP scan is the substantive one**: a positive control proves the scan finds `3′/5′` in the family's
+  Classroom output, and it passes on EOCEP output.
 - **Codon chart sufficiency for B-LS1-1.** In EOCEP mode every codon the student must read appears in the displayed
   table, since EOCEP students are not expected to recall codons.
-- **Classroom byte-identity for `dna-protein-synthesis`.** The same seeds, in Classroom mode, give the same items as 1.0.0
-  (a stored fixture of 1.0.0 output), apart from the version field.
+- **Classroom byte-identity for `dna-protein-synthesis`.** The existing golden digest of `generate_set(family, "golden", 12)`
+  is unchanged and still passes, and the same seed gives the same template keys, answer letters, choice counts and DOK
+  levels in Classroom and EOCEP mode (only the strand and caption text differ).
 - **Other families unchanged in EOCEP mode**: `mutation-effects` and `natural-selection-trend` give identical questions in
   Classroom and EOCEP mode for the same seed and the permitted templates.
 - **Scope note**: the B-LS3-2 EOCEP preview returns it and the saved provenance contains it; B-LS1-1 and B-LS4-4 have
