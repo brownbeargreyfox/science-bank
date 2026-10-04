@@ -3213,6 +3213,17 @@
             "title": "Domain Name",
             "type": "string"
           },
+          "eocep_scope_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eocep Scope Note"
+          },
           "families": {
             "items": {
               "$ref": "#/components/schemas/FamilyRef"
@@ -3358,6 +3369,17 @@
           "domain_name": {
             "title": "Domain Name",
             "type": "string"
+          },
+          "eocep_scope_note": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Eocep Scope Note"
           },
           "families": {
             "items": {

@@ -106,6 +106,7 @@ export default function GeneratePage() {
     (standardId === null ? (courses.data?.[0]?.id ?? null) : null);
 
   const standards = useStandards({ course_id: courseId, with_family_only: true }, courseId !== null);
+  const selectedStandard = standards.data?.find((s) => s.id === standardId) ?? null;
   const familyOptions = useMemo(
     () => (families.data ?? []).filter((f) => standardId !== null && f.bindings.some((b) => b.standard_ids.includes(standardId))),
     [families.data, standardId],
@@ -251,6 +252,11 @@ export default function GeneratePage() {
             </div>
           )}
           <ErrorNotice error={standards.error} />
+          {eocep && selectedStandard?.eocep_scope_note ? (
+            <p role="note" className="mt-3 text-sm text-muted">
+              EOCEP practice for {selectedStandard.code}: {selectedStandard.eocep_scope_note}
+            </p>
+          ) : null}
         </fieldset>
 
         <fieldset className="panel p-4 sm:p-5" disabled={standardId === null}>
