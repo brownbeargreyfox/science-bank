@@ -82,8 +82,8 @@ def table_label(codon: str) -> str:
     return AMINO_ACIDS[CODONS[codon]]
 
 
-def strand_text(seq: str, left: str, right: str) -> str:
-    return f"{left}′-{seq}-{right}′"
+def strand_text(seq: str, left: str, right: str, ends: bool = True) -> str:
+    return f"{left}′-{seq}-{right}′" if ends else seq
 
 
 def transcribe_candidates(gene: dict[str, Any]) -> list[tuple[str, str]]:
@@ -218,6 +218,11 @@ _PROTEIN_WHY = {
         "complementary mRNA."
     ),
 }
+_PROTEIN_WHY_EOCEP = {
+    **_PROTEIN_WHY,
+    "reversed": "The amino acids are in reverse order. Codons are read in order from the first codon, at the left end of the mRNA.",
+    "swapped": "Two amino acids are in the wrong order. Each codon is read in order from the first codon, at the left end of the mRNA.",
+}
 
 
 CATEGORY_TEXT = {
@@ -247,6 +252,7 @@ class DnaProteinSynthesis(QuestionFamily):
         "sequence, and explain how the order of nucleotides in a gene determines the protein."
     )
     stimulus_kind = "dna_protein_synthesis"
+    eocep_aware = True
     bindings = (Binding("SC", "biology-1", "B-LS1-1"),)
     templates = (
         TemplateSpec("transcribe_mrna", "Transcribe a template strand", 1, "multiple_choice", "evidence", 4),
@@ -276,7 +282,9 @@ class DnaProteinSynthesis(QuestionFamily):
             intro.append(_TABLE_RULE)
             tables.append(
                 {
-                    "caption": "Codon table (mRNA codons, read 5′ to 3′)",
+                    "caption": "Codon table (mRNA codons)"
+                    if params.get("eocep")
+                    else "Codon table (mRNA codons, read 5′ to 3′)",
                     "columns": [{"key": "codon", "label": "mRNA codon"}, {"key": "amino_acid", "label": "Amino acid"}],
                     "rows": params["codon_table"],
                 }
@@ -319,7 +327,8 @@ class DnaProteinSynthesis(QuestionFamily):
 
     def _q_transcribe_mrna(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
         g = params["genes"]["transcribe"]
-        correct = strand_text(g["mrna"], "5", "3")
+        ends = not params.get("eocep")
+        correct = strand_text(g["mrna"], "5", "3", ends)
         candidates = transcribe_candidates(g)
         # One wrong answer always starts with the correct AUG, so the start codon alone never gives the key away.
         forced = [c for c in candidates if c[0] == "later_codons_copied"]
@@ -330,12 +339,19 @@ class DnaProteinSynthesis(QuestionFamily):
                 True,
                 "Correct: transcription pairs each template base with its complement (A–U, T–A, G–C, C–G).",
             )
-        ] + [DraftChoice(strand_text(strand, "5", "3"), False, _TRANSCRIBE_WHY[kind]) for kind, strand in wrong]
-        return DraftQuestion(
-            stem=(
+        ] + [DraftChoice(strand_text(strand, "5", "3", ends), False, _TRANSCRIBE_WHY[kind]) for kind, strand in wrong]
+        if ends:
+            stem = (
                 f"The DNA template strand of {g['label']} is {strand_text(g['template'], '3', '5')}. Which mRNA, "
                 "written 5′ to 3′, is transcribed from this template strand?"
-            ),
+            )
+        else:
+            stem = (
+                f"The DNA template strand of {g['label']} is {g['template']}, read from left to right. Which mRNA, "
+                "written from left to right, is transcribed from this template strand?"
+            )
+        return DraftQuestion(
+            stem=stem,
             answer=correct,
             explanation=(
                 f"Each template base pairs with its complement (A–U, T–A, G–C, C–G), so {g['template']} is "
@@ -346,6 +362,7 @@ class DnaProteinSynthesis(QuestionFamily):
 
     def _q_translate_mrna(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
         g = params["genes"]["translate"]
+        why = _PROTEIN_WHY_EOCEP if params.get("eocep") else _PROTEIN_WHY
         options = protein_options(g)
         correct = sequence_text(g["protein"])
         choices = [
@@ -355,12 +372,11 @@ class DnaProteinSynthesis(QuestionFamily):
                 "Correct: the codons are read in order from the start codon, and each specifies the amino acid shown "
                 "in the table.",
             )
-        ] + [
-            DraftChoice(sequence_text(options[k]), False, _PROTEIN_WHY[k]) for k in ("reversed", "no_start", "swapped")
-        ]
+        ] + [DraftChoice(sequence_text(options[k]), False, why[k]) for k in ("reversed", "no_start", "swapped")]
+        mrna = f"{g['mrna']}, read from left to right" if params.get("eocep") else strand_text(g["mrna"], "5", "3")
         return DraftQuestion(
             stem=(
-                f"The mRNA transcribed from {g['label']} is {strand_text(g['mrna'], '5', '3')}. Translation starts at "
+                f"The mRNA transcribed from {g['label']} is {mrna}. Translation starts at "
                 "the start codon (AUG) and ends at a stop codon. Use the codon table to find the amino acid sequence "
                 "this mRNA codes for."
             ),
@@ -374,6 +390,7 @@ class DnaProteinSynthesis(QuestionFamily):
 
     def _q_dna_to_protein(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:
         g = params["genes"]["protein"]
+        why = _PROTEIN_WHY_EOCEP if params.get("eocep") else _PROTEIN_WHY
         options = protein_options(g)
         correct = sequence_text(g["protein"])
         choices = [
@@ -382,13 +399,13 @@ class DnaProteinSynthesis(QuestionFamily):
                 True,
                 "Correct: the template is transcribed into mRNA, and the mRNA codons are translated with the table.",
             )
-        ] + [
-            DraftChoice(sequence_text(options[k]), False, _PROTEIN_WHY[k])
-            for k in ("template_as_mrna", "reversed", "swapped")
-        ]
+        ] + [DraftChoice(sequence_text(options[k]), False, why[k]) for k in ("template_as_mrna", "reversed", "swapped")]
+        template = (
+            f"{g['template']}, read from left to right" if params.get("eocep") else strand_text(g["template"], "3", "5")
+        )
         return DraftQuestion(
             stem=(
-                f"The DNA template strand of {g['label']} is {strand_text(g['template'], '3', '5')}. The gene is "
+                f"The DNA template strand of {g['label']} is {template}. The gene is "
                 "transcribed into mRNA, and the mRNA is translated using the codon table shown. Which amino acid "
                 "sequence does this gene produce?"
             ),
