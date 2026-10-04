@@ -270,6 +270,72 @@ def test_eocep_mode_uses_imported_biology_1_constraints(client):
     assert denied_2.status_code == 422
 
 
+NEW_EOCEP = (
+    (
+        "B-LS1-1",
+        "dna-protein-synthesis",
+        {"transcribe_mrna", "translate_mrna", "dna_to_protein", "gene_activity_by_cell"},
+        None,
+        "explain_dna_to_protein",
+    ),
+    (
+        "B-LS3-2",
+        "mutation-effects",
+        {"identify_mutation_type", "new_protein_after_change", "effect_on_protein", "inheritance_of_mutation"},
+        "Covers the mutation part of this standard only; meiosis items are not yet available.",
+        "defend_claim_about_change",
+    ),
+    (
+        "B-LS4-4",
+        "natural-selection-trend",
+        {"compare_survival", "trait_trend", "effect_of_change", "explain_adaptation", "predict_new_change"},
+        None,
+        "explain_with_data",
+    ),
+)
+
+
+@pytest.mark.parametrize("code,family,allowed,note,constructed", NEW_EOCEP)
+def test_eocep_is_available_for_new_biology_families(client, code, family, allowed, note, constructed):
+    standard = _std(client, "biology-1", code)
+    assert standard["eocep_scope_note"] == note
+    response = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": standard["id"],
+            "family_key": family,
+            "quantity": len(allowed),
+            "generation_mode": "eocep",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["standard"]["eocep_scope_note"] == note
+    questions = [question for group in body["groups"] for question in group["questions"]]
+    assert {question["question_type"] for question in questions} == {"multiple_choice"}
+    assert {question["template_key"] for question in questions} == allowed
+    rejected = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": standard["id"],
+            "family_key": family,
+            "quantity": 1,
+            "generation_mode": "eocep",
+            "template_keys": [constructed],
+        },
+    )
+    assert rejected.status_code == 422
+
+
+def test_only_b_ls3_2_carries_eocep_scope_note(client):
+    noted = {
+        (standard["course_slug"], standard["code"])
+        for standard in client.get("/api/standards").json()
+        if standard["eocep_scope_note"]
+    }
+    assert noted == {("biology-1", "B-LS3-2")}
+
+
 def test_eocep_mode_excludes_constructed_response(client):
     standards = client.get("/api/standards").json()
     bio1 = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS3-3")

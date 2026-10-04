@@ -59,6 +59,7 @@ def standard_summary(std: Standard) -> StandardSummary:
         question_family_candidate=std.question_family_candidate,
         repeat_of_biology_1=std.repeat_of_biology_1,
         families=[FamilyRef(key=f.key, title=f.title, version=f.version) for f in families_for_standard(std)],
+        eocep_scope_note=(std.eocep_constraints or {}).get("scope_note"),
     )
 
 
