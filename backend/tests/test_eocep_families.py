@@ -50,7 +50,6 @@ def _shape(out: dict) -> list:
             (
                 question["template_key"],
                 question["dok"],
-                next((choice["label"] for choice in question["choices"] if choice["correct"]), None),
                 len(question["choices"]),
             )
             for question in group["questions"]
@@ -157,6 +156,15 @@ def test_dna_eocep_transcribe_key_pairs_the_strand_shown():
             assert sum(choice["text"] == expected for choice in question["choices"]) == 1
             checked += 1
     assert checked == len(SEEDS) * 4
+
+
+def test_dna_eocep_transcribe_never_offers_the_reverse_complement_as_a_wrong_answer():
+    family = FAMILIES["dna-protein-synthesis"]
+    for seed in SEEDS:
+        out = generate_set(family, seed, 4, template_keys=["transcribe_mrna"], eocep=True)
+        for question in (question for group in out["groups"] for question in group["questions"]):
+            correct = next(choice["text"] for choice in question["choices"] if choice["correct"])
+            assert all(choice["correct"] or choice["text"] != correct[::-1] for choice in question["choices"]), seed
 
 
 def test_dna_eocep_states_direction_in_words_and_not_primes():
