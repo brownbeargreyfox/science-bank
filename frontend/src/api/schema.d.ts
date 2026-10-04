@@ -1981,6 +1981,8 @@ export interface components {
             domain_code: string;
             /** Domain Name */
             domain_name: string;
+            /** Eocep Scope Note */
+            eocep_scope_note?: string | null;
             /** Families */
             families: components["schemas"]["FamilyRef"][];
             /** Id */
@@ -2026,6 +2028,8 @@ export interface components {
             domain_code: string;
             /** Domain Name */
             domain_name: string;
+            /** Eocep Scope Note */
+            eocep_scope_note?: string | null;
             /** Families */
             families: components["schemas"]["FamilyRef"][];
             /** Id */
