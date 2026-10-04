@@ -54,7 +54,10 @@ def _shape(out: dict) -> list:
             (
                 q["template_key"],
                 q["dok"],
-                next((c["label"] for c in q["choices"] if c["correct"]), None),
+                # EOCEP drops one distractor kind from transcribe items, so its answer letters may legitimately differ
+                None
+                if q["template_key"] == "transcribe_mrna"
+                else next(c["label"] for c in q["choices"] if c["correct"]),
                 len(q["choices"]),
             )
             for q in group["questions"]
@@ -173,6 +176,21 @@ def test_dna_eocep_transcribe_key_is_the_pairing_of_the_strand_shown():
             expected = "".join(TEMPLATE_PAIR[b] for b in template)
             assert [c["text"] for c in q["choices"] if c["correct"]] == [expected], seed
             assert sum(c["text"] == expected for c in q["choices"]) == 1
+            checked += 1
+    assert checked == len(SEEDS) * 4
+
+
+def test_dna_eocep_transcribe_never_offers_the_reverse_complement_as_a_wrong_answer():
+    # Without 3'/5' labels the reversed molecule is a defensible answer (the same mRNA written the other way round).
+    family = FAMILIES["dna-protein-synthesis"]
+    checked = 0
+    for seed in SEEDS:
+        out = generate_set(family, seed, 4, template_keys=["transcribe_mrna"], eocep=True)
+        for q in (q for g in out["groups"] for q in g["questions"]):
+            template = re.search(r"is ([ACGT]+), read from left to right", q["stem"]).group(1)
+            reverse_complement = "".join(TEMPLATE_PAIR[b] for b in template)[::-1]
+            assert reverse_complement not in [c["text"] for c in q["choices"]], (seed, template)
+            assert len(q["choices"]) == 4
             checked += 1
     assert checked == len(SEEDS) * 4
 

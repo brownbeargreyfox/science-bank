@@ -332,6 +332,9 @@ class DnaProteinSynthesis(QuestionFamily):
         ends = not params.get("eocep")
         correct = strand_text(g["mrna"], "5", "3", ends)
         candidates = transcribe_candidates(g)
+        if params.get("eocep"):
+            # Without 3'/5' labels the reversed molecule is the same mRNA written the other way round: not a wrong answer.
+            candidates = [c for c in candidates if c[0] != "reversed"]
         # One wrong answer always starts with the correct AUG, so the start codon alone never gives the key away.
         forced = [c for c in candidates if c[0] == "later_codons_copied"]
         wrong = forced + rng.sample([c for c in candidates if c[0] != "later_codons_copied"], 3 - len(forced))
