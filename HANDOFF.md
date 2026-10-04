@@ -1,6 +1,6 @@
 # Science Bank — Detailed Engineering Handoff
 
-Last updated: 2026-10-03
+Last updated: 2026-10-04
 
 ## Executive summary
 
@@ -295,9 +295,9 @@ in `backend/app/services/engine/`.
 | `chemical-system-stability` | Chemistry C-PS1-5 + C-PS1-7 | 1.0.0 | One magnesium + hydrochloric-acid shared stimulus: rate evidence and quantitative conservation. |
 | `quantitative-conservation` | Chemistry C-PS1-7 | 1.0.1 | Curated reactions, moles/particles/mass as evidence for conservation. |
 | `reaction-outcome` | Chemistry C-PS1-2 | 1.0.0 | Curated main-group/combustion reactions: bond type, electrons lost/gained/shared, product formula, same-family reactivity trends. Classroom-only. |
-| `dna-protein-synthesis` | Biology 1 B-LS1-1 | 1.0.0 | Template strand to mRNA, mRNA to amino acids with a displayed partial codon table, gene activity across two cell types, and a DOK 3 explanation. Classroom-only; no mutation-effect items (those belong to B-LS3-2, which can reuse `CODONS`/`translate`). |
-| `mutation-effects` | Biology 1 B-LS3-2 | 1.0.0 | One-nucleotide substitution, insertion, or deletion in a gene: identify it, find the protein from the changed gene with a displayed codon table, describe the effect (frameshift taught explicitly for indels), decide whether it can be inherited, and defend a claim. Classroom-only; meiosis and mutagen-dataset items are a later B-LS3-2 family. |
-| `natural-selection-trend` | Biology 1 B-LS4-4 | 1.0.0 | Six fictional cases (beetles, a lab bacterium, finches, marsh hares, minnows, desert shrubs): compare survival rates (with trap cases where counts mislead), read a trait trend across generations of 100 sampled individuals, the effect of an environmental change, explain adaptation as population-level change (not individuals changing because they need to), predict the direction of a reversal, and a DOK 3 data-based explanation. Classroom-only; no allele-frequency calculations. |
+| `dna-protein-synthesis` | Biology 1 B-LS1-1 | 1.0.0 | Template strand to mRNA, mRNA to amino acids with a displayed partial codon table, gene activity across two cell types, and a DOK 3 explanation. Classroom and EOCEP practice (EOCEP items show strands without 3′/5′ and say "read left to right"); no mutation-effect items (those belong to B-LS3-2, which can reuse `CODONS`/`translate`). |
+| `mutation-effects` | Biology 1 B-LS3-2 | 1.0.0 | One-nucleotide substitution, insertion, or deletion in a gene: identify it, find the protein from the changed gene with a displayed codon table, describe the effect (frameshift taught explicitly for indels), decide whether it can be inherited, and defend a claim. Classroom and EOCEP practice (EOCEP shows a note that only the mutation part of the standard is covered); meiosis and mutagen-dataset items are a later B-LS3-2 family. |
+| `natural-selection-trend` | Biology 1 B-LS4-4 | 1.0.0 | Six fictional cases (beetles, a lab bacterium, finches, marsh hares, minnows, desert shrubs): compare survival rates (with trap cases where counts mislead), read a trait trend across generations of 100 sampled individuals, the effect of an environmental change, explain adaptation as population-level change (not individuals changing because they need to), predict the direction of a reversal, and a DOK 3 data-based explanation. Classroom and EOCEP practice; no allele-frequency calculations. |
 
 Engine invariants are tested in `backend/tests/test_engine.py`:
 
@@ -415,9 +415,15 @@ EOCEP mode was completed for the currently EOCEP-eligible implemented Biology 1 
 |---|---|---|---|
 | B-LS2-1 | population-carrying-capacity | Assessment Specifications pp. 11–12 | No population-growth calculations, specific nutrient cycles, or multi-population relationships; use carrying-capacity/limiting-factor models. |
 | B-LS3-3 | trait-probability | Assessment Specifications pp. 15–16 | No constructed pedigrees/dihybrid crosses, specific disorders, Hardy-Weinberg, or chi-square; monohybrid ratios/probabilities are permitted. |
+| B-LS1-1 | dna-protein-synthesis | Assessment Specifications pp. 3–4 | No 3'/5', intron, exon, Okazaki fragment, initiation, elongation or termination; no codon wheel; codon chart supplied; no recall of codon meanings. EOCEP items print strands without ends. |
+| B-LS3-2 | mutation-effects | Assessment Specifications p. 15 | No meiosis phase names; no codon wheel. Family covers the mutation part only (shown as a note in EOCEP mode). |
+| B-LS4-4 | natural-selection-trend | Assessment Specifications p. 19 | No allele-frequency calculations, Hardy-Weinberg or chi-square. |
 
-Do not claim EOCEP support for other Biology 1 standards until their source constraints are
-structured, imported, and generator-specific enforcement/tests are added.
+Enforcement: each entry's `banned_terms` is scanned in `tests/test_eocep_families.py` over many
+seeds. The `allowed_terminology` lists are reference only (the source says terms "could be used").
+Do not claim EOCEP support for other Biology 1 standards until their constraints are imported and
+tested the same way. `eocep_constraints` is not stored in saved-question provenance; only
+`options.generation_mode` and, for B-LS3-2, `options.eocep_scope_note` are stored.
 
 ## Operations
 
@@ -600,18 +606,22 @@ State at the end of these sessions: `main` deployed as `0c47781` (the app image 
 registered; migration `0005`; 400 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
 Rollback images exist for every deploy (`science-bank-app:pre-*`).
 
+The unmerged `codex/eocep-constraints` branch adds EOCEP constraints and enforcement for B-LS1-1,
+B-LS3-2, and B-LS4-4. Its final isolated-database verification was 427 passed, zero skipped (one
+third-party deprecation warning); ruff, TypeScript, lint, and production build were clean.
+
 **Not verified in a real browser on production** (verified in the container and on scratch stacks only): the signed-in
 `/coverage` page, the Generate pages for B-LS1-1, B-LS3-2 and B-LS4-4, and how the two-series line chart renders for
-`natural-selection-trend`. Brandon should open each once.
+`natural-selection-trend`, and the EOCEP scope note on the Generate page (verified by type-check and build only).
+Brandon should open each once.
 
 ## Immediate recommended work
 
 See `docs/superpowers/plans/2026-10-03-codex-handoff-next-work.md` for the ranked list, the open decisions that need
 Brandon, and the deferred minor issues per feature. In short:
 
-1. **EOCEP constraints** for the new Biology 1 families (B-LS1-1, B-LS3-2, B-LS4-4) from the EOCEP Biology 1 Assessment
-   Specifications, so EOCEP practice mode can be offered for them (today it is rejected for every family except
-   B-LS2-1 and B-LS3-3). Treat the specification as item-writer constraints, not display text.
+1. **EOCEP constraints for B-LS1-1, B-LS3-2 and B-LS4-4**: built on branch `codex/eocep-constraints`, awaiting review,
+   merge and deploy by Brandon. See its spec and plan.
 2. **Biology 2 B-LS4-3** (statistics and distributions of traits), reusing the `natural-selection-trend` data patterns.
 3. **A second B-LS3-2 family**: meiosis and mutagen/replication-error dataset items, and frameshifts that also end the
    protein early (the current family excludes them by design).
