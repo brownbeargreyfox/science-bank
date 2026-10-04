@@ -49,7 +49,8 @@ membrane`, `peptide bond`, `polypeptide`, `protein synthesis`, `ribose`, `riboso
 `stop codon`, `thymine`, `transcription`, `translation`, `tRNA`, `uracil`, and `vesicle`. Its prohibitions state that an
 item may not require:
 
-- identifying specific cell types or proteins unless a description and function are supplied;
+- identifying specific cell types or proteins (if one is mentioned in the stimulus, a description and its function must be
+  provided);
 - protein structure beyond primary amino-acid sequence;
 - post-translational modification;
 - recall of which codons produce particular amino acids;
@@ -151,7 +152,8 @@ regenerated. No other UI change.
 Update the importer/idempotency expected EOCEP count from 2 to 5. Replace the three present API assertions that EOCEP
 is denied with tests that, for each standard:
 
-- receive 200 and return the persisted source constraints in an EOCEP preview;
+- receive 200 for an EOCEP preview (the response carries `options.generation_mode` and the standard's `eocep_scope_note`,
+  not the constraints themselves; the persisted constraints are checked by the import test);
 - generate only selected-response items when no template is requested, over a multi-item preview;
 - reject the constructed-response template with 422; and
 - keep Biology 2 and unlisted standards rejected.

@@ -84,6 +84,15 @@ def test_new_eocep_constraints_are_imported_as_the_source_states_them(db):
     ]
     assert dna["excluded_templates"] == {} and "scope_note" not in dna
     assert "A codon chart will be included in an item when needed as a reference." in dna["requirements"]
+    assert dna["prohibitions"][0] == (
+        "identify specific cell types/proteins (if one is mentioned in the stimulus, a description of the "
+        "cell type/protein and its function must be provided)"
+    )
+    assert (
+        "Students may be expected to show understanding of the role of differentiation in the functioning of "
+        "specialized systems of cells (i.e., the results of the process of differentiation). The process of "
+        "differentiation is more deeply explored in B-LS1-4."
+    ) in dna["requirements"]
 
     mutation = standards["B-LS3-2"].eocep_constraints
     assert mutation["source_pages"] == [15]
