@@ -64,6 +64,7 @@ def generate_for_request(db: Session, req: GenerateRequest, seed: str):
             doks=req.doks or None,
             question_types=question_types or None,
             template_keys=template_keys or None,
+            eocep=eocep,
         )
     except GenerationError as exc:
         raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc)) from exc

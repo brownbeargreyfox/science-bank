@@ -22,6 +22,8 @@ class QuestionFamily(ABC):
     stimulus_kind: str
     bindings: tuple[Binding, ...]
     templates: tuple[TemplateSpec, ...]
+    # True only for a family that renders differently in EOCEP practice mode; it then reads params["eocep"].
+    eocep_aware: bool = False
 
     @abstractmethod
     def build_scenario(self, rng: Rng) -> dict[str, Any]:
@@ -90,6 +92,7 @@ def generate_set(
     doks: list[int] | None = None,
     question_types: list[str] | None = None,
     template_keys: list[str] | None = None,
+    eocep: bool = False,
 ) -> dict[str, Any]:
     if not 1 <= quantity <= MAX_QUANTITY:
         raise GenerationError(f"quantity must be between 1 and {MAX_QUANTITY}")
@@ -103,6 +106,8 @@ def generate_set(
     while remaining > 0:
         base = (family.key, family.version, seed, group_index)
         params = family.build_scenario(Rng(*base, "scenario"))
+        if eocep and family.eocep_aware:
+            params = {**params, "eocep": True}
         take = min(remaining, len(eligible))
         chosen_keys = {t.key for t in Rng(*base, "select").sample(eligible, take)}
         chosen = [t for t in eligible if t.key in chosen_keys]
