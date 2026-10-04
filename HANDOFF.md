@@ -25,7 +25,16 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
-- Latest deploy: `c27219e` (2026-10-04; merge of `codex/eocep-constraints`, no migration; migration remains `0005`):
+- Latest deploy: `52e45c4` (2026-10-04; merge of PR #8, `chore/eocep-cleanup`, no migration; migration remains `0005`):
+  tests, docs and EOCEP data wording only. The first B-LS1-1 EOCEP prohibition now quotes the PDF (p. 4) and the
+  differentiation requirement is complete; no generated question changed. Verified live: `/readyz` 200 locally and
+  publicly, app container healthy, `alembic current` is `0005_results_and_variants`, nine families synced (versions
+  unchanged), and the database holds the new B-LS1-1 prohibition text. The importer's startup counter always reports
+  EOCEP constraints as "unchanged", so check the database, not the log, after a constraints-only change. Rollback:
+  image `science-bank-app:pre-eocep-cleanup-52e45c4`. Deferred and still open (each needs a family version bump):
+  `trait-probability` raises a GenerationError at seed `cmp-92` with quantity 40, and "so this is a insertion" in the
+  `mutation-effects` identify explanation.
+- Earlier deploy: `c27219e` (2026-10-04; merge of `codex/eocep-constraints`, no migration; migration remains `0005`):
   EOCEP constraints and generator enforcement for Biology 1 B-LS1-1, B-LS3-2, and B-LS4-4. B-LS1-1 EOCEP items omit
   3′/5′ strand-end labels and state their reading direction; B-LS3-2 displays its mutation-only scope note in the
   Generate page. Verified live: `/readyz` 200 locally and publicly, app container healthy, migration head
@@ -611,8 +620,8 @@ Lessons from four independent reviews (each flagged the same classes of defect; 
 - **The shared test database is shared across tests**: give each administration-recording test its own calendar year.
 - **Changing a deployed family's output requires a version bump and a golden-digest re-pin** in the same commit.
 
-State at the end of these sessions: `main` deployed as `c27219e` (the app image `science-bank-app:latest`); nine families
-registered; migration `0005`; 427 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
+State at the end of these sessions: `main` deployed as `52e45c4` (the app image `science-bank-app:latest`); nine families
+registered; migration `0005`; 429 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
 Rollback images exist for every deploy (`science-bank-app:pre-*`).
 
 The deployed EOCEP implementation covers B-LS1-1, B-LS3-2, and B-LS4-4. Its final isolated-database verification was
