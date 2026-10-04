@@ -25,6 +25,13 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
+- Latest deploy: `c27219e` (2026-10-04; merge of `codex/eocep-constraints`, no migration; migration remains `0005`):
+  EOCEP constraints and generator enforcement for Biology 1 B-LS1-1, B-LS3-2, and B-LS4-4. B-LS1-1 EOCEP items omit
+  3′/5′ strand-end labels and state their reading direction; B-LS3-2 displays its mutation-only scope note in the
+  Generate page. Verified live: `/readyz` 200 locally and publicly, app container healthy, migration head
+  `0005_results_and_variants`, and startup synced nine families. Not checked live: signed-in EOCEP generation for each
+  of the three standards or the B-LS3-2 scope note in the browser. Rollback: image
+  `science-bank-app:pre-eocep-c27219e`; no database data or schema changed.
 - Latest deploy: `0c47781` (2026-10-03; merge of `feat/natural-selection`, no migration; migration still `0005`): the
   `natural-selection-trend` family for Biology 1 B-LS4-4 (see "Implemented families"). Verified live: `/readyz` 200
   locally and publicly, startup log shows 9 families synced, the database lists `natural-selection-trend 1.0.0`,
@@ -602,13 +609,12 @@ Lessons from four independent reviews (each flagged the same classes of defect; 
 - **The shared test database is shared across tests**: give each administration-recording test its own calendar year.
 - **Changing a deployed family's output requires a version bump and a golden-digest re-pin** in the same commit.
 
-State at the end of these sessions: `main` deployed as `0c47781` (the app image `science-bank-app:latest`); nine families
-registered; migration `0005`; 400 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
+State at the end of these sessions: `main` deployed as `c27219e` (the app image `science-bank-app:latest`); nine families
+registered; migration `0005`; 427 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
 Rollback images exist for every deploy (`science-bank-app:pre-*`).
 
-The unmerged `codex/eocep-constraints` branch adds EOCEP constraints and enforcement for B-LS1-1,
-B-LS3-2, and B-LS4-4. Its final isolated-database verification was 427 passed, zero skipped (one
-third-party deprecation warning); ruff, TypeScript, lint, and production build were clean.
+The deployed EOCEP implementation covers B-LS1-1, B-LS3-2, and B-LS4-4. Its final isolated-database verification was
+427 passed, zero skipped (one third-party deprecation warning); ruff, TypeScript, lint, and production build were clean.
 
 **Not verified in a real browser on production** (verified in the container and on scratch stacks only): the signed-in
 `/coverage` page, the Generate pages for B-LS1-1, B-LS3-2 and B-LS4-4, and how the two-series line chart renders for
@@ -620,17 +626,15 @@ Brandon should open each once.
 See `docs/superpowers/plans/2026-10-03-codex-handoff-next-work.md` for the ranked list, the open decisions that need
 Brandon, and the deferred minor issues per feature. In short:
 
-1. **EOCEP constraints for B-LS1-1, B-LS3-2 and B-LS4-4**: built on branch `codex/eocep-constraints`, awaiting review,
-   merge and deploy by Brandon. See its spec and plan.
-2. **Biology 2 B-LS4-3** (statistics and distributions of traits), reusing the `natural-selection-trend` data patterns.
-3. **A second B-LS3-2 family**: meiosis and mutagen/replication-error dataset items, and frameshifts that also end the
+1. **Biology 2 B-LS4-3** (statistics and distributions of traits), reusing the `natural-selection-trend` data patterns.
+2. **A second B-LS3-2 family**: meiosis and mutagen/replication-error dataset items, and frameshifts that also end the
    protein early (the current family excludes them by design).
-4. **Word study aid for Biology 1** (Workstream C): blocked on Brandon choosing who drafts the first 10 to 15 glossary
+3. **Word study aid for Biology 1** (Workstream C): blocked on Brandon choosing who drafts the first 10 to 15 glossary
    terms. Bundle 5, "Changes in Populations Over Time", is the agreed pilot.
-5. Nina should use the current families in a real unit and record edits; revise templates only with a family version
+4. Nina should use the current families in a real unit and record edits; revise templates only with a family version
    bump and updated deterministic tests.
-6. Administration: Phase 2a operational visibility (Overview, Errors, Jobs, Audit), then Phase 2b content management,
+5. Administration: Phase 2a operational visibility (Overview, Errors, Jobs, Audit), then Phase 2b content management,
    then Phase 3 change requests; both reuse `policy.can_modify` and `audit_events`.
-7. Switch on the backups (`ops/backup/README.md`; key generation and timers are Brandon's steps) and add an Uptime
+6. Switch on the backups (`ops/backup/README.md`; key generation and timers are Brandon's steps) and add an Uptime
    Kuma `/readyz` monitor.
-8. If moving toward a public product, do identity and workspaces before opening registration to strangers.
+7. If moving toward a public product, do identity and workspaces before opening registration to strangers.
