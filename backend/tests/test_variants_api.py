@@ -246,6 +246,28 @@ def test_eocep_parent_produces_an_eocep_variant(anon, db):
     assert variant.current_version.question_type == "multiple_choice"
 
 
+def test_eocep_dna_parent_produces_a_variant_without_strand_ends(anon, db):
+    login_as(anon, "regular")
+    _, body = _generate(
+        anon,
+        "biology-1",
+        "B-LS1-1",
+        "dna-protein-synthesis",
+        seed="eocep-dna",
+        generation_mode="eocep",
+        quantity=1,
+        template_keys=["translate_mrna"],
+    )
+    parent_id = anon.post("/api/generate/save", json=body).json()["question_ids"][0]
+    candidate = candidates(anon, [parent_id])[0]["candidate"]
+    assert "left to right" in candidate["stem"] and "′" not in candidate["stem"]
+    vid, _ = make_variant(anon, parent_id)
+    db.expire_all()
+    variant = db.get(Question, vid)
+    assert variant.provenance["options"]["generation_mode"] == "eocep"
+    assert "′" not in variant.current_version.stem
+
+
 def test_audit_event_names_ids_and_counts_but_no_content(anon, db):
     qid = make_question(anon, "regular")
     vid, rec = make_variant(anon, qid)

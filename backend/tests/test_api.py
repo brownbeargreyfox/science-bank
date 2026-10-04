@@ -270,6 +270,112 @@ def test_eocep_mode_uses_imported_biology_1_constraints(client):
     assert denied_2.status_code == 422
 
 
+NEW_EOCEP = (
+    (
+        "B-LS1-1",
+        "dna-protein-synthesis",
+        {"transcribe_mrna", "translate_mrna", "dna_to_protein", "gene_activity_by_cell"},
+        None,
+        "explain_dna_to_protein",
+    ),
+    (
+        "B-LS3-2",
+        "mutation-effects",
+        {"identify_mutation_type", "new_protein_after_change", "effect_on_protein", "inheritance_of_mutation"},
+        "Covers the mutation part of this standard only; meiosis items are not yet available.",
+        "defend_claim_about_change",
+    ),
+    (
+        "B-LS4-4",
+        "natural-selection-trend",
+        {"compare_survival", "trait_trend", "effect_of_change", "explain_adaptation", "predict_new_change"},
+        None,
+        "explain_with_data",
+    ),
+)
+
+
+@pytest.mark.parametrize("code,family,allowed,note,constructed", NEW_EOCEP)
+def test_eocep_is_available_for_the_new_biology_families(client, code, family, allowed, note, constructed):
+    standard = _std(client, "biology-1", code)
+    assert standard["eocep_scope_note"] == note
+    response = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": standard["id"],
+            "family_key": family,
+            "quantity": len(allowed),
+            "generation_mode": "eocep",
+        },
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["options"]["generation_mode"] == "eocep"
+    assert body["standard"]["eocep_scope_note"] == note
+    questions = [q for group in body["groups"] for q in group["questions"]]
+    assert {q["question_type"] for q in questions} == {"multiple_choice"}
+    assert {q["template_key"] for q in questions} == allowed
+    rejected = client.post(
+        "/api/generate/preview",
+        json={
+            "standard_id": standard["id"],
+            "family_key": family,
+            "quantity": 1,
+            "generation_mode": "eocep",
+            "template_keys": [constructed],
+        },
+    )
+    assert rejected.status_code == 422 and constructed in rejected.json()["detail"]
+    classroom = client.post(
+        "/api/generate/preview",
+        json={"standard_id": standard["id"], "family_key": family, "quantity": 1, "template_keys": [constructed]},
+    )
+    assert classroom.status_code == 200
+
+
+def test_only_b_ls3_2_carries_an_eocep_scope_note(client):
+    noted = {(s["course_slug"], s["code"]) for s in client.get("/api/standards").json() if s["eocep_scope_note"]}
+    assert noted == {("biology-1", "B-LS3-2")}
+
+
+def test_eocep_dna_items_show_no_strand_ends_but_classroom_items_do(client):
+    standard = _std(client, "biology-1", "B-LS1-1")
+    base = {"standard_id": standard["id"], "family_key": "dna-protein-synthesis", "quantity": 3, "seed": "ends"}
+    keys = ["transcribe_mrna", "translate_mrna", "dna_to_protein"]
+    eocep = client.post(
+        "/api/generate/preview", json={**base, "generation_mode": "eocep", "template_keys": keys}
+    ).json()
+    classroom = client.post("/api/generate/preview", json={**base, "template_keys": keys}).json()
+    eocep_text = json.dumps(eocep["groups"], ensure_ascii=False)
+    classroom_text = json.dumps(classroom["groups"], ensure_ascii=False)
+    assert "′" not in eocep_text and "5′" in classroom_text and "3′" in classroom_text
+    assert [q["template_key"] for g in eocep["groups"] for q in g["questions"]] == [
+        q["template_key"] for g in classroom["groups"] for q in g["questions"]
+    ]
+
+
+def test_saved_eocep_question_records_its_mode_and_scope_note(client, db):
+    from app.models import Question
+
+    standard = _std(client, "biology-1", "B-LS3-2")
+    body = {
+        "standard_id": standard["id"],
+        "family_key": "mutation-effects",
+        "quantity": 1,
+        "seed": "saved-eocep",
+        "generation_mode": "eocep",
+    }
+    saved = client.post("/api/generate/save", json=body)
+    assert saved.status_code == 201, saved.text
+    question = db.get(Question, saved.json()["question_ids"][0])
+    assert question.provenance["options"]["generation_mode"] == "eocep"
+    assert question.provenance["options"]["eocep_scope_note"] == standard["eocep_scope_note"]
+    assert (
+        "eocep_scope_note"
+        not in client.post("/api/generate/preview", json={**body, "generation_mode": "classroom"}).json()["options"]
+    )
+
+
 def test_eocep_mode_excludes_constructed_response(client):
     standards = client.get("/api/standards").json()
     bio1 = next(s for s in standards if s["course_slug"] == "biology-1" and s["code"] == "B-LS3-3")

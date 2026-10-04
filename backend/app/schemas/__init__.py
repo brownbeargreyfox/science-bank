@@ -64,6 +64,7 @@ class StandardSummary(ORM):
     question_family_candidate: bool
     repeat_of_biology_1: bool
     families: list[FamilyRef]
+    eocep_scope_note: str | None = None
 
 
 class NamedText(BaseModel):
