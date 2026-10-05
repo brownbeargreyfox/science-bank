@@ -20,7 +20,7 @@ amendment fixes the design. The mapping from each finding to its resolution is t
 | C1: `interpret_fitness_rate` had two true choices in about half of items | A "variant with more survivors" distractor that is true when the favoured variant also started larger | Choices are claims with computed truth values; exactly one must be true (see "Claims and the one-true-choice rule"). The raw-count trap is carried by the data, not by a separate choice |
 | C2: `represent_distribution` had two true choices in about 23% of items | "Count read as percent" is exactly true when the total is 100; the spec asked for that distractor | Totals are never 100; the same one-true-choice rule catches the remaining coincidences |
 | I1: sibling items leaked each other's keys | The analyze item printed percentages that DOK 1 items ask for; the support key named the fitness winner | Analyze states a change in percentage points, not the two percentages; the support item states no rate direction; a full-set leak test |
-| I2: a calculation item showed the chart that plots its answer; the chart caption was false | Code deviated from this spec; the table held counts, not the plotted percentages | `calculate_proportion` shows a counts-only table and no chart; every table shown with a chart gets percentage columns, so the chart's text alternative holds the plotted values |
+| I2: a calculation item showed the chart that plots its answer; the chart caption was false | Items in one set share one stimulus, so a set with a chart item also shows the percentages; and the table held counts, not the plotted percentages | `calculate_proportion` asks for a **pooled** percentage over two named samples, a number no table, column or chart shows, so it stays a real calculation in every set; every table shown with a chart gets percentage columns, so the chart's text alternative holds the plotted values |
 | I3: 50/80 shown as 62% | Python `round()` is half-to-even | Percentages round half up (`Decimal`); stated on the stimulus |
 | I4: the support key was always the longest and said organisms "are heritable" | Hand-written asymmetric choices | Four parallel, concrete three-clause choices naming the trait, variants, condition and starting sizes; the key is never the unique longest or shortest; correct wording ("the trait is passed from parents to offspring") |
 | I5: the count-versus-proportion trap was never used | The draw forced a falling raw count but no item used it | The analyze item is built on an adjacent pair of samples where the favoured variant's count falls while its percentage rises |
@@ -87,8 +87,9 @@ chart series and choice list, so the favoured variant is not always first and no
 Four samples are drawn. The four totals are distinct values from 80 to 140 in steps of 5, **excluding 100**, in a random
 order. The table shows the sample time, the total sampled and the count for each variant; every row sums exactly to its
 total. Wherever a chart is shown, the table also has a "percent of sample" column per variant holding the plotted values,
-so the chart's text alternative is the table. A table shown without a chart (the `calculate_proportion` stimulus) has
-counts only.
+so the chart's text alternative is the table. A set with no chart item shows a counts-only table. Items in one generated
+set share one stimulus, so no item may rely on a value being absent from it: `calculate_proportion` asks for a pooled value
+that no stimulus ever shows.
 
 **Rounding.** Every displayed or keyed percentage is the exact `count / total * 100` rounded to a whole number **half up**
 (`Decimal`, `ROUND_HALF_UP`), and the stimulus says "Percentages are rounded to the nearest whole number; a half rounds up."
@@ -144,9 +145,13 @@ Single-standard family: bind only to `SC / biology-2 / B-LS4-3`; no template dec
   that variant's raw count read as a percent; the other variant's percentage for the named variant; and "the table does not
   show the total sampled". The raw-count claim is kept only when it is false for the draw (the one-true rule redraws
   otherwise). Chart reading never relies on colour alone.
-- **`calculate_proportion`** shows the **counts-only table and no chart**, and asks for the percentage of one named variant
-  at any of the four samples. Choices are the computed percentage (half up), the raw count, the other variant's percentage,
-  and a plausible arithmetic error (a fixed offset); all four values are distinct.
+- **`calculate_proportion`** asks for a **pooled** percentage: "What percentage of all the individuals sampled at sample
+  times i and j combined were [variant]?" (two distinct named samples; the question says to combine them). The key is
+  `(count_i + count_j) / (total_i + total_j) * 100` rounded half up. It is shown nowhere: the generator redraws the pair
+  whenever the keyed value equals any percentage displayed for that variant in a percent column. Choices: the pooled
+  percentage; the mean of the two samples' percentages (the classic error, kept only when it differs from the key); the
+  summed counts read as a percent; and the first sample's percentage alone. All four values are distinct. It stays within
+  the boundary (basic proportion arithmetic; no allele frequency).
 - **`analyze_distribution_shift`** shows the table (with percent columns) and the chart for the stored trap window
   `(i, i+1)` and asks which statement about the **favoured variant's share of the sample** is supported. Choices share one
   form, "[Variant]'s share of the sample [rose / fell / did not change] by about [d] percentage points from sample time i to
@@ -191,8 +196,11 @@ their own typed ground truth and `Decimal` half-up rounding; they never import t
 Over at least 200 seeds, at quantity 40 and as default six-item sets:
 
 - every table row totals exactly to its displayed total; totals are four distinct values in 80–140 (step 5), never 100;
-  percent columns and chart points equal independently recomputed values; a table shown without a chart has no percent
-  column; `calculate_proportion` stimuli contain no chart; every chart's table holds its plotted values;
+  percent columns and chart points equal independently recomputed values; a set with no chart item has a counts-only table;
+  every chart's table holds its plotted values;
+- **the pooled key of `calculate_proportion` is never displayed**: it equals no percent-column value for that variant, no
+  chart point, and appears in no other item's stem or choices; it is recomputed from the displayed counts of the two named
+  samples with half-up rounding; the four choice values are distinct; the mean-of-percentages distractor differs from the key;
 - **exactly one choice is true** for every multiple-choice template, evaluated against the displayed data by parsing each
   choice; this is the test that would have caught C1 and C2;
 - percentages that fall exactly on .5 round up (typed cases, e.g. 50/80 is 63%) and never appear as 62;
@@ -211,7 +219,7 @@ Over at least 200 seeds, at quantity 40 and as default six-item sets:
   misconception; wording-agreement checks for every case and both display orders;
 - no seed in a wide range raises `GenerationError` (the 422 a teacher would see);
 - planted mutations each make an appropriate test fail: a distractor that is true, a total of 100, a half-to-even
-  `round()`, a leaked key, a chart added to `calculate_proportion`, a banned term, a dropped percent column, and a changed
+  `round()`, a leaked key, a pooled key that equals a displayed percentage, a banned term, a dropped percent column, and a changed
   row total. Each guard that passes on first run is proved this way.
 
 Integration coverage adds catalog/citation checks, the normal engine determinism matrix, an API generation case and the
