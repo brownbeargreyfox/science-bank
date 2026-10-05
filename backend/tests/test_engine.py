@@ -32,6 +32,7 @@ GOLDEN = {
     "dna-protein-synthesis": "9f2f9a47a24ce709ee576bc919d84c5512020cf35a2993d03bae506109c80fca",
     "mutation-effects": "1d5b9a9ab23f50190c4035c0d4981d639efa9ce863c777119d41e45a0fb1dead",
     "natural-selection-trend": "50b86d0a1fa6f0a194571beb68954d007b1ec5e82211897224db7b7f3177dd3f",
+    "trait-distribution-shifts": "9b00fb5ac44f08d706e6312af8762fa88a767c1aa3e2683319c7318da22a15fd",
 }
 
 
@@ -109,7 +110,7 @@ def test_golden_snapshot(key):
 @pytest.mark.parametrize("key", sorted(FAMILIES))
 def test_template_citations_exist_in_scde_data(key):
     fam = FAMILIES[key]
-    files = {"biology-1": "biology-1.json", "chemistry": "chemistry.json"}
+    files = {"biology-1": "biology-1.json", "biology-2": "biology-2.json", "chemistry": "chemistry.json"}
     for b in fam.bindings:
         std = _load_standard(files[b.course_slug], b.code)
         assert std.get("question_family_candidate") is True
