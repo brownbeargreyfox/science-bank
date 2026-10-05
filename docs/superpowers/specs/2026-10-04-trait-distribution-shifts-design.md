@@ -22,7 +22,7 @@ amendment fixes the design. The mapping from each finding to its resolution is t
 | I1: sibling items leaked each other's keys | The analyze item printed percentages that DOK 1 items ask for; the support key named the fitness winner | Analyze states a change in percentage points, not the two percentages; the support item states no rate direction; a full-set leak test |
 | I2: a calculation item showed the chart that plots its answer; the chart caption was false | Code deviated from this spec; the table held counts, not the plotted percentages | `calculate_proportion` shows a counts-only table and no chart; every table shown with a chart gets percentage columns, so the chart's text alternative holds the plotted values |
 | I3: 50/80 shown as 62% | Python `round()` is half-to-even | Percentages round half up (`Decimal`); stated on the stimulus |
-| I4: the support key was always the longest and said organisms "are heritable" | Hand-written asymmetric choices | Four parallel three-clause choices; the key is never the unique longest or shortest; correct wording ("the trait is passed from parents to offspring") |
+| I4: the support key was always the longest and said organisms "are heritable" | Hand-written asymmetric choices | Four parallel, concrete three-clause choices naming the trait, variants, condition and starting sizes; the key is never the unique longest or shortest; correct wording ("the trait is passed from parents to offspring") |
 | I5: the count-versus-proportion trap was never used | The draw forced a falling raw count but no item used it | The analyze item is built on an adjacent pair of samples where the favoured variant's count falls while its percentage rises |
 
 ## Goal
@@ -160,13 +160,17 @@ Single-standard family: bind only to `SC / biology-2 / B-LS4-3`; no template dec
   be compared because the groups started with different numbers. Exactly one is true in every draw. Each rationale cites the
   displayed numbers and the computed rates.
 - **`support_selection_claim`** shows both data sources and asks which explanation is best supported for why the named
-  variant's share rose. Four parallel three-clause choices of similar length (each is "[heritability clause], [evidence
-  clause], so [conclusion]"): the key (the trait is passed from parents to offspring and survival and reproduction differed
-  between the variants under this condition, so the rise is evidence of natural selection); the need-based misconception
-  (individuals developed the trait because they needed it); evidence that contradicts the tables (survival and reproduction
-  did not differ between the variants); and the heritability contradiction (the trait is not passed on). **The key and
-  distractors state no numbers and do not say which variant had the higher rates**, so this item does not answer
-  `interpret_fitness_rate`. Wording says the trait is passed on, never that organisms "are heritable".
+  variant's share rose. The choices are **concrete**: each is a full sentence about this scenario that names the focal trait,
+  both variants, the stated condition and the displayed starting group sizes (the `started` numbers, which no item keys on),
+  in three parallel clauses of similar length ("[heritability clause], [evidence clause], so [conclusion]"). Key: the trait
+  is passed from parents to offspring, and under the stated condition the two groups (named, with their starting sizes)
+  differed in survival and reproduction, so the rise in the named variant's share is evidence of natural selection.
+  Distractors: the need-based misconception (individuals in the group developed the trait because they needed it under the
+  condition); evidence that contradicts the tables (the two groups, with their sizes, survived and reproduced at the same
+  rates); and the heritability contradiction (the trait is not passed from parents to offspring). **No choice states a
+  survival or offspring rate, a percentage, a points change, or which variant did better**, so this item does not answer
+  `interpret_fitness_rate`, `calculate_proportion` or `analyze_distribution_shift`; the displayed starting sizes may appear
+  because no item's key is a starting size. Wording says the trait is passed on, never that organisms "are heritable".
 - **`explain_shift_with_data`** shows both data sources and asks for a data-based explanation of the numerical change in the
   named anatomical, behavioral or physiological trait. Its computed four-point model and rubric require: (1) identify the
   trait type and the variant whose proportion changed; (2) cite two percentages from the table or graph; (3) cite the
@@ -194,7 +198,8 @@ Over at least 200 seeds, at quantity 40 and as default six-item sets:
 - percentages that fall exactly on .5 round up (typed cases, e.g. 50/80 is 63%) and never appear as 62;
 - the trap window exists and the analyze item uses it; both raw-count trap states occur for fitness (neither under 35%);
 - **no leak in full sets**: no item's keyed value (a percentage for a named variant at a named time, a points change, a
-  fitness winner) appears in another item's stem or choices, and the support item states no numbers and no winner;
+  fitness winner) appears in another item's stem or choices; the support item states no percentage, rate, points change or
+  winner, and every support choice names the trait, both variants, the condition and the starting sizes (concreteness test);
 - the key is never the unique longest or the unique shortest choice (text items), and choice lengths in the support item are
   within 20% of each other;
 - the favoured variant's display position, the case, the trait type and the key position all vary (no key position above
