@@ -92,7 +92,7 @@ set share one stimulus, so no item may rely on a value being absent from it: `ca
 that no stimulus ever shows.
 
 **Rounding.** Every displayed or keyed percentage is the exact `count / total * 100` rounded to a whole number **half up**
-(`Decimal`, `ROUND_HALF_UP`), and the stimulus says "Percentages are rounded to the nearest whole number; a half rounds up."
+(`Decimal`, `ROUND_HALF_UP`), and every stimulus that shows a distribution table (including one with only the calculation item) says "Percentages are rounded to the nearest whole number; a half rounds up."; the calculation stem also asks for "the nearest whole percent"
 The same function produces chart points, keys, rationales and the constructed-response answer.
 
 The underlying proportion follows the relative-fitness update pattern of the existing natural-selection family, with the
@@ -103,11 +103,12 @@ favoured variant rising every interval. Counts are rounded after each total is c
   in every interval; the other variant falls by the complement;
 - **a trap window exists:** at least one adjacent pair of samples `(i, i+1)` where the favoured variant's raw count falls
   while its percentage rises by at least 3 points. The window is stored and is the basis of `analyze_distribution_shift`;
-- no two percentages used by one item's choices are within 3 points of each other (so no pair of choices is ambiguous).
+- no two percentages used by one item's choices are within 3 points of each other, and none is 100 or more (implemented in
+  `represent_distribution` and `calculate_proportion`, which redraw otherwise).
 
 ### Fitness table
 
-A second table gives each variant's `started`, `survived` and `offspring from survivors` for one interval under the same
+A second table gives each variant's `started`, `survived` and `offspring produced` for one interval under the same
 condition. The larger starting group is 70–90 and the smaller 40–55, both multiples of 5; which variant is larger is drawn
 independently of which is favoured. The favoured variant has both a higher survival rate (`survived / started`, at least
 0.15 higher) and a higher offspring-per-starter rate (at least 0.20 higher). A `trap` flag records whether the favoured
@@ -158,7 +159,7 @@ Single-standard family: bind only to `SC / biology-2 / B-LS4-3`; no template dec
 - **`analyze_distribution_shift`** shows the table (with percent columns) and the chart for the stored trap window
   `(i, i+1)` and asks which statement about the **favoured variant's share of the sample** is supported. Choices share one
   form, "The share of [variant] in the sample [rose / fell / did not change] by about [d] percentage points from sample time i
-  to sample time i+1, and its count went from [x] to [y]" (the count facts are true in every choice): the key (the favoured
+  to sample time i+1, and the count of [variant] went from [x] to [y]" (the count facts are true in every choice): the key (the favoured
   variant rose by the true difference of the two rounded percentages, while its count fell); the raw-count trap (the
   favoured variant "fell" by the same amount); the other variant claimed to have risen by that amount; and no change (0
   points). It states a difference, never one of the two percentages alone.
@@ -167,17 +168,21 @@ Single-standard family: bind only to `SC / biology-2 / B-LS4-3`; no template dec
   whenever `trap` is set, because that variant then has more survivors); the two rates were the same; and the rates cannot
   be compared because the groups started with different numbers. Exactly one is true in every draw. Each rationale cites the
   displayed numbers and the computed rates.
-- **`support_selection_claim`** shows both data sources and asks which explanation is best supported for why the named
-  variant's share rose. The choices are **concrete**: each is a full sentence about this scenario that names the focal trait,
-  both variants, the stated condition and the displayed starting group sizes (the `started` numbers, which no item keys on),
-  in three parallel clauses of similar length ("[heritability clause], [evidence clause], so [conclusion]"). Key: the trait
-  is passed from parents to offspring, and under the stated condition the two groups (named, with their starting sizes)
-  differed in how well they survived and reproduced, so the rise in the named variant's share is evidence of natural selection.
-  Distractors: the need-based misconception (individuals in the group developed the trait because they needed it under the
-  condition); evidence that contradicts the tables (the two groups, with their sizes, survived and reproduced equally well); and the heritability contradiction (the trait is not passed from parents to offspring). **No choice states a
-  survival or offspring rate, a percentage, a points change, or which variant did better**, so this item does not answer
-  `interpret_fitness_rate`, `calculate_proportion` or `analyze_distribution_shift`; the displayed starting sizes may appear
-  because no item's key is a starting size. Wording says the trait is passed on, never that organisms "are heritable".
+- **`support_selection_claim`** shows both data sources and asks which explanation of **the change in the distribution** of the
+  focal trait is best supported by the data. Neither the stem nor any choice says which way the share moved or which variant
+  did better, so the item answers no sibling (analyze, interpret). The choices are **concrete**: each is a full sentence about
+  this scenario that names the focal trait, both variants, the stated condition and the displayed starting group sizes (the
+  `started` numbers, which no item keys on), in three parallel clauses of similar length joined with "and" and "so"
+  ("[heritability clause], and [place] [groups and evidence clause], so [conclusion]"). Key: the trait is passed from
+  parents to offspring, and under the stated condition the two groups (named, with their starting sizes) differed in how
+  well they survived and reproduced, so the change in the distribution is evidence of natural selection. Distractors differ
+  from the key in one or two clauses, drawn from a small set of patterns per item: the need-based misconception
+  (individuals changed their trait because they needed it); evidence that contradicts the tables (the groups survived and
+  reproduced equally well); and the heritability contradiction (the trait is not passed on). Every pattern includes the
+  need-based distractor, the key is never the only choice with its value in a clause, and across items the key is not
+  usually the per-clause majority. **No choice states a survival or offspring rate, a percentage, a points change, or a
+  direction**; the displayed starting sizes may appear because no item's key is a starting size. Wording says the trait is
+  passed on, never that organisms "are heritable".
 - **`explain_shift_with_data`** shows both data sources and asks for a data-based explanation of the numerical change in the
   named anatomical, behavioral or physiological trait. Its computed four-point model and rubric require: (1) identify the
   trait type and the variant whose proportion changed; (2) cite two percentages from the table or graph; (3) cite the

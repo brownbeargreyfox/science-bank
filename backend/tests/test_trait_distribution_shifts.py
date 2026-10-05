@@ -6,8 +6,10 @@ Every truth value below is recomputed from the DISPLAYED tables and the choice t
 
 import json
 import re
+from collections import Counter
 from decimal import ROUND_HALF_UP, Decimal
 from fractions import Fraction
+from itertools import combinations
 
 from app.services.engine.family import generate_set
 from app.services.families.registry import FAMILIES
@@ -171,7 +173,9 @@ def test_calculate_proportion_is_a_pooled_percentage_with_one_true_choice():
         group = full_set(seed)
         dist, _ = tables(group)
         item = items(group)["calculate_proportion"]
-        match = re.search(r"sample times (\d+) and (\d+) combined were (.+)\? Combine", item["stem"])
+        match = re.search(
+            r"sample times (\d+) and (\d+) combined were (.+), to the nearest whole percent\? Combine", item["stem"]
+        )
         t1, t2, noun = int(match.group(1)), int(match.group(2)), match.group(3)
         assert t1 < t2
         variant = by_label(dist)[noun]
@@ -188,7 +192,9 @@ def test_the_pooled_key_is_never_displayed():
         group = full_set(seed)
         dist, _ = tables(group)
         item = items(group)["calculate_proportion"]
-        match = re.search(r"sample times (\d+) and (\d+) combined were (.+)\? Combine", item["stem"])
+        match = re.search(
+            r"sample times (\d+) and (\d+) combined were (.+), to the nearest whole percent\? Combine", item["stem"]
+        )
         variant = by_label(dist)[match.group(3)]
         key = int(key_text(item).rstrip("%"))
         shown = {row[f"{variant}_pct"] for row in dist["rows"]}
@@ -210,14 +216,15 @@ def test_analyze_distribution_shift_uses_the_trap_window_with_one_true_choice():
             match = re.fullmatch(
                 r"The share of (.+) in the sample (rose by about (\d+) percentage points|fell by about (\d+) "
                 r"percentage points|did not change \(by about 0 percentage points\)) from sample time (\d+) to "
-                r"sample time (\d+), and its count went from (\d+) to (\d+)\.",
+                r"sample time (\d+), and the count of (.+) went from (\d+) to (\d+)\.",
                 choice["text"],
             )
             variant = labels[match.group(1)]
             t1, t2 = int(match.group(5)), int(match.group(6))
             assert t2 == t1 + 1
             r1, r2 = rows[t1], rows[t2]
-            assert (int(match.group(7)), int(match.group(8))) == (r1[variant], r2[variant])  # the count facts are true
+            assert labels[match.group(7)] == variant
+            assert (int(match.group(8)), int(match.group(9))) == (r1[variant], r2[variant])  # the count facts are true
             change = half_up(r2[variant], r2["total"]) - half_up(r1[variant], r1["total"])
             text = match.group(2)
             if text.startswith("rose"):
@@ -298,7 +305,7 @@ def test_support_selection_claim_has_one_supported_choice_and_is_concrete():
         key_len = len(supported[0])
         assert not (key_len == max(lengths) and lengths.count(key_len) == 1), seed
         assert not (key_len == min(lengths) and lengths.count(key_len) == 1), seed
-        assert sum("needed it" in t for t in texts) == 1
+        assert sum("needed it" in t for t in texts) >= 1
 
 
 # ---- no item answers another -------------------------------------------------------------------------
@@ -404,7 +411,7 @@ def test_scope_and_vocabulary_guard():
         for name, item in items(group).items():
             needy = [c["text"] for c in item["choices"] if re.search(r"\bneed", c["text"], re.IGNORECASE)]
             if name == "support_selection_claim":
-                assert len(needy) == 1
+                assert len(needy) >= 1
             else:
                 assert not needy, (seed, name)
 
@@ -424,3 +431,96 @@ def test_each_template_cites_a_distinct_observable_bullet_where_the_standard_has
         ("interpreting_data", 1),
         ("interpreting_data", 2),
     }
+
+
+# ---- review fixes: leaks, rounding, spacing, cues ---------------------------------------------------
+
+DIRECTION_WORDS = re.compile(
+    r"\b(rise|rises|rose|rising|increase|increased|fell|fall|falls|decrease|decreased|higher|lower)\b"
+)
+
+
+def test_only_the_analyze_and_interpret_items_state_a_direction_or_a_winner():
+    for seed in SEEDS:
+        for name, item in items(full_set(seed)).items():
+            if name in ("analyze_distribution_shift", "interpret_fitness_rate"):
+                continue
+            texts = [item["stem"]] + [c["text"] for c in item["choices"]]
+            assert not [t for t in texts if DIRECTION_WORDS.search(t.lower())], (seed, name)
+
+
+def test_a_calculate_only_set_states_the_rounding_rule_and_asks_for_a_whole_percent():
+    for seed in SEEDS[:80]:
+        group = generate_set(FAMILY, seed, 1, template_keys=["calculate_proportion"])["groups"][0]
+        assert "rounded to the nearest whole number; a half rounds up" in group["stimulus"]["intro"], seed
+        assert "to the nearest whole percent" in group["questions"][0]["stem"], seed
+
+
+def test_percentage_choices_are_at_least_3_points_apart_and_below_100():
+    for seed in SEEDS:
+        by = items(full_set(seed))
+        shown = []
+        for choice in by["represent_distribution"]["choices"]:
+            match = re.fullmatch(r"About (\d+)% of the sample had .+\.", choice["text"])
+            if match:
+                shown.append(int(match.group(1)))
+        assert len(shown) == 3 and max(shown) <= 99, (seed, shown)
+        assert all(abs(a - b) >= 3 for a, b in combinations(shown, 2)), (seed, shown)
+        calc = [int(c["text"].rstrip("%")) for c in by["calculate_proportion"]["choices"]]
+        assert all(abs(a - b) >= 3 for a, b in combinations(calc, 2)), (seed, calc)
+
+
+def _clauses(text):
+    heritage = (
+        "X"
+        if " is not passed from parents to offspring" in text
+        else "P"
+        if " is passed from parents to offspring" in text
+        else "N"
+    )
+    return heritage, "E" if "equally well" in text else "D"
+
+
+def test_support_key_is_neither_the_odd_one_out_nor_usually_the_per_clause_majority():
+    converge = total = 0
+    for seed in SEEDS:
+        item = items(full_set(seed))["support_selection_claim"]
+        texts = [c["text"] for c in item["choices"]]
+        key = _clauses(key_text(item))
+        assert not any(" but " in t for t in texts), seed
+        parts = [_clauses(t) for t in texts]
+        majority = []
+        for index in (0, 1):
+            counts = Counter(p[index] for p in parts)
+            assert counts[key[index]] >= 2, (seed, "the key is the only choice with its value in a clause")
+            top = counts.most_common()
+            majority.append(top[0][0] if len(top) == 1 or top[0][1] > top[1][1] else None)
+        total += 1
+        converge += tuple(majority) == key
+    assert converge / total <= 0.4, converge / total
+
+
+def test_no_other_item_states_the_pooled_percentage_or_the_analyze_points_change():
+    for seed in SEEDS:
+        by = items(full_set(seed))
+        pooled = key_text(by["calculate_proportion"])
+        points = re.search(r"by about (\d+) percentage points", key_text(by["analyze_distribution_shift"])).group(1)
+        for name, item in by.items():
+            texts = [item["stem"]] + [c["text"] for c in item["choices"]]
+            if name != "calculate_proportion":
+                assert not [t for t in texts if re.search(rf"(?<!\d){re.escape(pooled)}", t)], (seed, name, pooled)
+            if name != "analyze_distribution_shift":
+                assert not [t for t in texts if f"{points} percentage points" in t], (seed, name)
+
+
+def test_the_offspring_rationale_does_not_imply_a_number_of_possible_offspring():
+    for seed in SEEDS:
+        item = items(full_set(seed))["interpret_fitness_rate"]
+        for choice in item["choices"]:
+            assert " offspring were produced" not in choice["rationale"], (seed, choice["rationale"])
+            assert not re.search(r"\bIts rate\b", choice["rationale"]), (seed, choice["rationale"])
+
+
+def test_beak_case_does_not_say_beaks_eat():
+    for seed in SEEDS:
+        assert "Thin beaks eat" not in all_text(full_set(seed))

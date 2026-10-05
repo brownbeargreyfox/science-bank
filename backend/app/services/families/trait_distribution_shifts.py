@@ -6,9 +6,11 @@ that happens to be true redraws the item instead of reaching a student. Only bas
 family never calculates an allele frequency.
 """
 
+import re
 from dataclasses import dataclass
 from decimal import ROUND_HALF_UP, Decimal
 from fractions import Fraction
+from itertools import combinations
 from typing import Any
 
 from app.services.engine.core import Binding, DraftChoice, DraftQuestion, GenerationError, Rng, TemplateSpec
@@ -37,7 +39,7 @@ CASES: dict[str, dict[str, Any]] = {
         "trait": "beak thickness",
         "trait_type": "anatomical",
         "place": "on the island where most seeds are soft",
-        "intro": "Parents pass beak thickness to their offspring. Thin beaks eat soft seeds more easily than thick beaks do.",
+        "intro": "Parents pass beak thickness to their offspring. Finches with thin beaks eat soft seeds more easily than finches with thick beaks do.",
         "condition": "Most seeds on the island are soft.",
         "favored": "b",
         "variants": {
@@ -98,6 +100,17 @@ CASES: dict[str, dict[str, Any]] = {
         },
     },
 }
+
+
+# Distractor patterns for the support item (every one has a need-based distractor): (heritability clause, evidence clause); P = passed on, X = not passed on,
+# N = changed because it was needed, D = the groups differed, E = they did equally well. The key is (P, D). Every pattern
+# keeps the key from being the only choice with its value in either clause.
+SUPPORT_PATTERNS = (
+    (("P", "E"), ("N", "D"), ("X", "D")),
+    (("P", "E"), ("N", "D"), ("N", "E")),
+    (("P", "E"), ("N", "D"), ("X", "E")),
+    (("P", "E"), ("X", "D"), ("N", "E")),
+)
 
 
 def _other(variant: str) -> str:
@@ -175,13 +188,23 @@ def pooled_errors(
 
 
 def usable_errors(key: int, errors: list[tuple[int, str]]) -> list[tuple[int, str]]:
+    """Wrong answers that are distinct, below 100 (a larger percent would cue the key) and 3 or more points from the key."""
     seen: set[int] = {key}
     usable = []
     for value, why in errors:
-        if value not in seen and value <= 99:
+        if value not in seen and value <= 99 and abs(value - key) >= 3:
             seen.add(value)
             usable.append((value, why))
     return usable
+
+
+def spaced_triples(key: int, errors: list[tuple[int, str]]) -> list[tuple[tuple[int, str], ...]]:
+    """Every choice of three wrong answers that are also 3 or more points from each other."""
+    return [
+        triple
+        for triple in combinations(usable_errors(key, errors), 3)
+        if all(abs(a[0] - b[0]) >= 3 for a, b in combinations(triple, 2))
+    ]
 
 
 def choose_pooled(rng: Rng, rows: list[dict[str, int]]) -> dict[str, Any] | None:
@@ -189,7 +212,7 @@ def choose_pooled(rng: Rng, rows: list[dict[str, int]]) -> dict[str, Any] | None
     options = [(i, j, v) for i in range(4) for j in range(i + 1, 4) for v in ("a", "b")]
     for first, second, variant in rng.shuffled(options):
         key, errors = pooled_errors(rows, first, second, variant)
-        if key in {_pct(row[variant], row["total"]) for row in rows} or len(usable_errors(key, errors)) < 3:
+        if key in {_pct(row[variant], row["total"]) for row in rows} or not spaced_triples(key, errors):
             continue
         return {"first": first, "second": second, "variant": variant}
     return None
@@ -348,7 +371,7 @@ class TraitDistributionShifts(QuestionFamily):
                 for row in rows:
                     for v in ("a", "b"):
                         row[f"{v}_pct"] = _pct(row[v], row["total"])
-                intro.append(ROUNDING_NOTE)
+            intro.append(ROUNDING_NOTE)
             tables.append(
                 {"caption": f"Trait distribution in sampled {case['organism']}", "columns": columns, "rows": rows}
             )
@@ -425,9 +448,16 @@ class TraitDistributionShifts(QuestionFamily):
             ),
         ]
         pooled = params["pooled"]
-        hidden = f"About {pooled_errors(params['rows'], pooled['first'], pooled['second'], pooled['variant'])[0]}% of the sample had {labels[pooled['variant']]['noun']}."
-        if any(claim.text == hidden for claim in claims):
-            raise GenerationError("trait-distribution-shifts: represent choice would repeat the pooled answer")
+        pooled_key = pooled_errors(params["rows"], pooled["first"], pooled["second"], pooled["variant"])[0]
+        shown = [actual, row[variant], other]
+        if (
+            row[variant] > 99
+            or any(abs(a - b) < 3 for a, b in combinations(shown, 2))
+            or any(re.search(rf"(?<!\d){pooled_key}%", claim.text) for claim in claims)
+        ):
+            raise GenerationError(
+                "trait-distribution-shifts: represent choices too close, over 99, or repeat the pooled key"
+            )
         return self._mc(
             f"At sample time {row['time']}, which statement accurately represents the distribution?", claims
         )
@@ -438,7 +468,7 @@ class TraitDistributionShifts(QuestionFamily):
         r1, r2 = rows[first], rows[second]
         key, errors = pooled_errors(rows, first, second, variant)
         noun = labels[variant]["noun"]
-        chosen = rng.sample(usable_errors(key, errors), 3)
+        chosen = rng.choice(spaced_triples(key, errors))
         claims = [
             Claim(
                 f"{key}%",
@@ -448,7 +478,7 @@ class TraitDistributionShifts(QuestionFamily):
         ] + [Claim(f"{value}%", False, why) for value, why in chosen]
         return self._mc(
             f"What percentage of all the individuals sampled at sample times {r1['time']} and {r2['time']} "
-            f"combined were {noun}? Combine the counts from the two samples first.",
+            f"combined were {noun}, to the nearest whole percent? Combine the counts from the two samples first.",
             claims,
         )
 
@@ -477,7 +507,7 @@ class TraitDistributionShifts(QuestionFamily):
             )
             text = (
                 f"The share of {labels[variant]['noun']} in the sample {what} from sample time {r1['time']} "
-                f"to sample time {r2['time']}, and its count went from {r1[variant]} to {r2[variant]}."
+                f"to sample time {r2['time']}, and the count of {labels[variant]['noun']} went from {r1[variant]} to {r2[variant]}."
             )
             return Claim(text, holds, why)
 
@@ -533,13 +563,16 @@ class TraitDistributionShifts(QuestionFamily):
 
         def numbers(variant: str) -> str:
             row = rows[variant]
-            what = "survived" if measure == "survived" else "offspring were produced"
-            return f"{row[measure]} of {row['started']} {what} ({per[variant]} per 100 starters)"
+            if measure == "survived":
+                return f"{row['survived']} of {row['started']} survived ({per[variant]} per 100 starters)"
+            return (
+                f"{row['started']} started and produced {row['offspring']} offspring ({per[variant]} per 100 starters)"
+            )
 
         def lower_note(variant: str, rival: str) -> str:
             more = rows[variant][measure] > rows[rival][measure]
             lead = (
-                f"{labels[variant]['label']} had more ({rows[variant][measure]}) but started with more individuals. "
+                f"{labels[variant]['label']} had a larger count ({rows[variant][measure]}) but started with more individuals. "
                 if more
                 else ""
             )
@@ -554,7 +587,7 @@ class TraitDistributionShifts(QuestionFamily):
             Claim(
                 higher(other),
                 rate[other] > rate[favored],
-                f"Not supported. {lower_note(other, favored)} Its rate is lower.",
+                f"Not supported. {lower_note(other, favored)} Their rate is lower.",
             ),
             Claim(
                 f"The two variants had the same {word}."
@@ -589,31 +622,40 @@ class TraitDistributionShifts(QuestionFamily):
         survival_same = Fraction(rows[favored]["survived"], rows[favored]["started"]) == Fraction(
             rows[other]["survived"], rows[other]["started"]
         )
-        conclusion = f"the rise in the share of {fav_noun} is evidence of natural selection"
-        claims = [
-            Claim(
-                f"{trait.capitalize()} is passed from parents to offspring, and {case['place']}, {groups} differed in how well they survived and reproduced, so {conclusion}.",
-                not survival_same,
-                "Correct: the trait is inherited and the two groups survived and reproduced at different rates, so a change in the share of one variant can be evidence of natural selection.",
-            ),
-            Claim(
-                f"Individual {case['organism']} changed their {trait} because they needed it, and {case['place']}, {groups} differed in how well they survived and reproduced, so {conclusion}.",
-                False,
-                "Not supported. Individuals do not change a heritable trait because they need it; the share of a variant changes when its members survive and reproduce more.",
-            ),
-            Claim(
-                f"{trait.capitalize()} is passed from parents to offspring, but {case['place']}, {groups} survived and reproduced equally well, so {conclusion}.",
-                survival_same,
-                "Not supported. The survival table shows the two groups did not survive and reproduce at the same rates.",
-            ),
-            Claim(
-                f"{trait.capitalize()} is not passed from parents to offspring, and {case['place']}, {groups} differed in how well they survived and reproduced, so {conclusion}.",
-                False,
-                f"Not supported. The stimulus states that parents pass {trait} to their offspring, and selection acts only on heritable traits.",
-            ),
-        ]
+        conclusion = f"the change in the distribution of {trait} is evidence of natural selection"
+        heritage = {
+            "P": f"{trait.capitalize()} is passed from parents to offspring",
+            "X": f"{trait.capitalize()} is not passed from parents to offspring",
+            "N": f"Individual {case['organism']} changed their {trait} because they needed it",
+        }
+        evidence = {
+            "D": "differed in how well they survived and reproduced",
+            "E": "survived and reproduced equally well",
+        }
+        heritage_why = {
+            "X": f"The stimulus states that parents pass {trait} to their offspring, and selection acts only on heritable traits.",
+            "N": "Individuals do not change a heritable trait because they need it; the share of a variant changes when its members survive and reproduce more.",
+        }
+        evidence_why = "The survival table shows the two groups did not survive and reproduce at the same rates."
+
+        def claim(heritage_key: str, evidence_key: str) -> Claim:
+            text = f"{heritage[heritage_key]}, and {case['place']}, {groups} {evidence[evidence_key]}, so {conclusion}."
+            holds = heritage_key == "P" and (evidence_key == "D") == (not survival_same)
+            if holds:
+                why = "Correct: the trait is inherited and the two groups survived and reproduced at different rates, so a change in the share of one variant can be evidence of natural selection."
+            else:
+                reasons = []
+                if heritage_key != "P":
+                    reasons.append(heritage_why[heritage_key])
+                if evidence_key == "E":
+                    reasons.append(evidence_why)
+                why = "Not supported. " + " ".join(reasons)
+            return Claim(text, holds, why)
+
+        # The key differs from each distractor in one or two clauses, and the pattern varies, so no clause majority points to it.
+        claims = [claim("P", "D")] + [claim(h, e) for h, e in rng.choice(SUPPORT_PATTERNS)]
         return self._mc(
-            f"Which explanation for the rise in the share of {fav_noun} is best supported by the data?", claims
+            f"Which explanation of the change in the distribution of {trait} is best supported by the data?", claims
         )
 
     def _q_explain_shift_with_data(self, params: dict[str, Any], rng: Rng) -> DraftQuestion:

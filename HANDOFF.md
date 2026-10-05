@@ -386,7 +386,10 @@ one is true, a full-set leak test, a half-up rounding test with typed ground tru
 mutation. Then a fresh review, then Brandon's explicit yes to merge and again to deploy.
 
 Status (2026-10-05): the redo is built and tested on `feat/bls4-3-redo` (independent tests recompute truth from the displayed
-tables; 455 backend tests). Not merged, not deployed, and not yet reviewed by a fresh context.
+tables; 462 backend tests). A fresh-context review found six Important issues (a support-stem leak, a missing rounding
+note in calculate-only sets, an unimplemented 3-point spacing rule, a per-clause-majority cue in the support item, an
+over-100 distractor, and leak tests that could not fail); all are fixed with tests that failed first. Not merged, not
+deployed.
 
 ## Results tracking and linked variants
 
