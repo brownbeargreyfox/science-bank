@@ -5,7 +5,7 @@ Status: Proposal for Nina's input. Ordering is a recommendation, not a ranking s
 
 ## Where coverage stands
 
-38 standards are imported (Biology 1: 14, Biology 2: 12, Chemistry: 12). Nine families are live:
+38 standards are imported (Biology 1: 14, Biology 2: 12, Chemistry: 12). Ten families are live:
 
 | Family | Standard(s) |
 |---|---|
@@ -18,8 +18,9 @@ Status: Proposal for Nina's input. Ordering is a recommendation, not a ranking s
 | `dna-protein-synthesis` | Biology 1 B-LS1-1 (built 2026-10-02; Biology 1 only, classroom-only) |
 | `mutation-effects` | Biology 1 B-LS3-2 (built 2026-10-03; sequence-level mutation effects only; meiosis and mutagen data items still to do) |
 | `natural-selection-trend` | Biology 1 B-LS4-4 (built 2026-10-03; Biology 1 only, classroom-only) |
+| `trait-distribution-shifts` | Biology 2 B-LS4-3 (built 2026-10-04; classroom-only) |
 
-That is 8 standards with a family. Biology 2 has none. Every question in the bank comes from a family, so
+That is 9 standards with a family. Biology 2 has one. Every question in the bank comes from a family, so
 results tracking and variants (see `2026-09-29-results-and-variants-design.md`) only help standards that have
 one. This roadmap is the parallel track.
 
@@ -53,9 +54,9 @@ student sees, each template citing an SCDE observable-performance bullet, DOK fr
 ### Tier B — remaining Biology 1
 
 B-LS1-5 (photosynthesis), B-LS1-7 (cellular respiration), B-LS4-1 (evidence for evolution), B-LS4-2 (natural
-selection), B-LS4-4 (adaptation, flagged as a good candidate: gene-frequency change over generations) **(built as `natural-selection-trend`; Biology 2 B-LS4-3 still needs its own templates)**, B-LS4-5
-(extinction and speciation). `natural-selection-trend` from the existing catalog serves both B-LS4-4 and
-Biology 2 B-LS4-3.
+selection), B-LS4-4 (adaptation, flagged as a good candidate: gene-frequency change over generations) **(built as
+`natural-selection-trend`; Biology 2 B-LS4-3 is separately built as `trait-distribution-shifts`)**, B-LS4-5
+(extinction and speciation).
 
 ### Tier C — Biology 2 (reuse first)
 
@@ -64,7 +65,7 @@ Biology 2 B-LS4-3.
 | B-LS2-2 | Extends `population-carrying-capacity` to scale and resilience |
 | B-LS2-4 | Trophic energy transfer (flagged candidate) |
 | B-LS3-3 | Hardy-Weinberg on the `trait-probability` engine (flagged candidate) |
-| B-LS4-3 | Shares the natural-selection family with B-LS4-4 |
+| B-LS4-3 | **Built** as `trait-distribution-shifts`; its basic statistical and graphical boundary has its own templates |
 | B-LS1-1, B-LS3-2, B-LS4-1 | Already covered by Biology 1 families once built (repeat PEs); check that the Biology 2 boundary is not narrower |
 | B-LS2-3, B-LS2-6, B-LS2-8, B-LS3-1, B-LS4-6 | New scenario-style families; lowest priority |
 
