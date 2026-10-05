@@ -13,7 +13,6 @@ from app.services.families.protein_synthesis import DnaProteinSynthesis
 from app.services.families.quantitative_conservation import QuantitativeConservation
 from app.services.families.reaction_outcome import ReactionOutcome
 from app.services.families.reaction_rate import ReactionRate
-from app.services.families.trait_distribution_shifts import TraitDistributionShifts
 
 FAMILIES: dict[str, QuestionFamily] = {
     f.key: f
@@ -27,7 +26,6 @@ FAMILIES: dict[str, QuestionFamily] = {
         DnaProteinSynthesis(),
         MutationEffects(),
         NaturalSelectionTrend(),
-        TraitDistributionShifts(),
     )
 }
 
