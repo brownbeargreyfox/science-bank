@@ -148,18 +148,21 @@ Single-standard family: bind only to `SC / biology-2 / B-LS4-3`; no template dec
 - **`calculate_proportion`** asks for a **pooled** percentage: "What percentage of all the individuals sampled at sample
   times i and j combined were [variant]?" (two distinct named samples; the question says to combine them). The key is
   `(count_i + count_j) / (total_i + total_j) * 100` rounded half up. It is shown nowhere: the generator redraws the pair
-  whenever the keyed value equals any percentage displayed for that variant in a percent column. Choices: the pooled
-  percentage; the mean of the two samples' percentages (the classic error, kept only when it differs from the key); the
-  summed counts read as a percent; and the first sample's percentage alone. All four values are distinct. It stays within
-  the boundary (basic proportion arithmetic; no allele frequency).
+  whenever the keyed value equals any percentage displayed for that variant in a percent column. The pair and variant are
+  chosen when the scenario is drawn (and stored), so the scenario is redrawn if no hidden pooled value with enough wrong
+  answers exists, and `represent_distribution` never repeats the statement that equals the pooled key. Choices: the pooled
+  percentage and three wrong answers drawn from the classic errors: the mean of the two samples' percentages, the summed
+  counts read as a percent (only when 99 or less, since a percent above 100 would cue the key), either sample's percentage
+  alone, and the other variant's pooled percentage. All four values are distinct. It stays within the boundary (basic
+  proportion arithmetic; no allele frequency).
 - **`analyze_distribution_shift`** shows the table (with percent columns) and the chart for the stored trap window
   `(i, i+1)` and asks which statement about the **favoured variant's share of the sample** is supported. Choices share one
-  form, "[Variant]'s share of the sample [rose / fell / did not change] by about [d] percentage points from sample time i to
-  sample time i+1, [clause about its count]": the key (rose by the true difference of the two rounded percentages, while its
-  count fell); the raw-count trap (fell, "because its count fell"); the other variant claimed to have risen by the same
-  amount; and no change "because the total sampled changed". It states a difference, never one of the two percentages
-  alone.
-- **`interpret_fitness_rate`** shows the fitness table only and asks about **either survival rate or offspring per starter**
+  form, "The share of [variant] in the sample [rose / fell / did not change] by about [d] percentage points from sample time i
+  to sample time i+1, and its count went from [x] to [y]" (the count facts are true in every choice): the key (the favoured
+  variant rose by the true difference of the two rounded percentages, while its count fell); the raw-count trap (the
+  favoured variant "fell" by the same amount); the other variant claimed to have risen by that amount; and no change (0
+  points). It states a difference, never one of the two percentages alone.
+- **`interpret_fitness_rate`** shows the fitness table only (its stem calls it the survival and offspring table) and asks about **either survival rate or offspring per starter**
   (drawn). Choices: the favoured variant had the higher rate; the other variant had the higher rate (the raw-count trap
   whenever `trap` is set, because that variant then has more survivors); the two rates were the same; and the rates cannot
   be compared because the groups started with different numbers. Exactly one is true in every draw. Each rationale cites the
@@ -169,10 +172,9 @@ Single-standard family: bind only to `SC / biology-2 / B-LS4-3`; no template dec
   both variants, the stated condition and the displayed starting group sizes (the `started` numbers, which no item keys on),
   in three parallel clauses of similar length ("[heritability clause], [evidence clause], so [conclusion]"). Key: the trait
   is passed from parents to offspring, and under the stated condition the two groups (named, with their starting sizes)
-  differed in survival and reproduction, so the rise in the named variant's share is evidence of natural selection.
+  differed in how well they survived and reproduced, so the rise in the named variant's share is evidence of natural selection.
   Distractors: the need-based misconception (individuals in the group developed the trait because they needed it under the
-  condition); evidence that contradicts the tables (the two groups, with their sizes, survived and reproduced at the same
-  rates); and the heritability contradiction (the trait is not passed from parents to offspring). **No choice states a
+  condition); evidence that contradicts the tables (the two groups, with their sizes, survived and reproduced equally well); and the heritability contradiction (the trait is not passed from parents to offspring). **No choice states a
   survival or offspring rate, a percentage, a points change, or which variant did better**, so this item does not answer
   `interpret_fitness_rate`, `calculate_proportion` or `analyze_distribution_shift`; the displayed starting sizes may appear
   because no item's key is a starting size. Wording says the trait is passed on, never that organisms "are heritable".
