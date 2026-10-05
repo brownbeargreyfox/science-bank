@@ -385,6 +385,9 @@ Add a test that evaluates every choice's claim against the displayed data with i
 one is true, a full-set leak test, a half-up rounding test with typed ground truth, and prove each guard with a planted
 mutation. Then a fresh review, then Brandon's explicit yes to merge and again to deploy.
 
+Status (2026-10-05): the redo is built and tested on `feat/bls4-3-redo` (independent tests recompute truth from the displayed
+tables; 455 backend tests). Not merged, not deployed, and not yet reviewed by a fresh context.
+
 ## Results tracking and linked variants
 
 Design: `docs/superpowers/specs/2026-09-29-results-and-variants-design.md`. Plan:
@@ -695,8 +698,9 @@ Brandon should open each once.
 See `docs/superpowers/plans/2026-10-03-codex-handoff-next-work.md` for the ranked list, the open decisions that need
 Brandon, and the deferred minor issues per feature. In short:
 
-1. **Merge the revert PR for B-LS4-3, then redo Biology 2 B-LS4-3** (statistics and distributions of traits). The first build was
-   withdrawn; see "Withdrawn family" above for the defects and the conditions for bringing it back as 1.1.0.
+1. **Biology 2 B-LS4-3 redo: built on branch `feat/bls4-3-redo`, awaiting a fresh-context review, then Brandon's explicit yes to
+   merge and a separate yes to deploy.** It is `trait-distribution-shifts` 1.1.0. See "Withdrawn family" for why 1.0.0 was
+   pulled and `docs/superpowers/specs/2026-10-04-trait-distribution-shifts-design.md` for the design.
 2. **A second B-LS3-2 family**: meiosis and mutagen/replication-error dataset items, and frameshifts that also end the
    protein early (the current family excludes them by design).
 3. **Word study aid for Biology 1** (Workstream C): blocked on Brandon choosing who drafts the first 10 to 15 glossary
