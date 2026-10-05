@@ -447,7 +447,6 @@ def test_standards_browse_and_detail(client):
         ("biology-1", "B-LS3-2"),
         ("biology-1", "B-LS3-3"),
         ("biology-1", "B-LS4-4"),
-        ("biology-2", "B-LS4-3"),
         ("chemistry", "C-PS1-2"),
         ("chemistry", "C-PS1-5"),
         ("chemistry", "C-PS1-7"),
@@ -486,7 +485,6 @@ def _generate(client, course_slug, code, family, **kw):
         ("biology-1", "B-LS1-1", "dna-protein-synthesis"),
         ("biology-1", "B-LS3-2", "mutation-effects"),
         ("biology-1", "B-LS4-4", "natural-selection-trend"),
-        ("biology-2", "B-LS4-3", "trait-distribution-shifts"),
     ],
 )
 def test_preview_is_reproducible(client, course, code, family):
@@ -508,8 +506,6 @@ def test_family_must_match_exact_standard(client):
     _, body = _generate(client, "biology-2", "B-LS3-2", "mutation-effects")
     assert client.post("/api/generate/preview", json=body).status_code == 422
     _, body = _generate(client, "biology-2", "B-LS4-3", "natural-selection-trend")
-    assert client.post("/api/generate/preview", json=body).status_code == 422
-    _, body = _generate(client, "biology-1", "B-LS4-4", "trait-distribution-shifts")
     assert client.post("/api/generate/preview", json=body).status_code == 422
     _, body = _generate(client, "biology-1", "B-LS2-1", "population-carrying-capacity", doks=[4])
     assert client.post("/api/generate/preview", json=body).status_code == 422

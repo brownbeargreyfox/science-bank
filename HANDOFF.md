@@ -25,6 +25,17 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
+- **Production runs the `52e45c4` build, not a later `main` (2026-10-05).** The Biology 2 B-LS4-3 family
+  `trait-distribution-shifts` was merged to `main` as `a9c55ba` (fast-forwarded, no PR, no review) at 23:56 on 2026-10-04 and
+  deployed at 00:12 on 2026-10-05. A fresh-context review then found two answer-key defects, and Brandon had it rolled back.
+  Production now runs image `83e1f84ba44b` (the 14:05 build of `52e45c4`, tag
+  `science-bank-app:pre-trait-distribution-shifts-a9c55ba`, also tagged `latest`): nine families, migration `0005`,
+  `/readyz` 200 locally and publicly. The withdrawn build is kept as
+  `science-bank-app:withdrawn-trait-distribution-shifts-a9c55ba`. The rollback changed only the app container; the database
+  was not touched. No questions or generation runs were ever saved from the family (previews are not audited, so preview use
+  is unknown). One inert row remains: `question_families` still lists `trait-distribution-shifts 1.0.0`; the API reads
+  families from code, so nothing uses it. **Until the revert PR for `a9c55ba` and `152d389` is merged, `main` still contains
+  the family, and rebuilding production from `main` would bring it back.** See "Withdrawn family" below.
 - Latest deploy: `52e45c4` (2026-10-04; merge of PR #8, `chore/eocep-cleanup`, no migration; migration remains `0005`):
   tests, docs and EOCEP data wording only. The first B-LS1-1 EOCEP prohibition now quotes the PDF (p. 4) and the
   differentiation requirement is complete; no generated question changed. Verified live: `/readyz` 200 locally and
@@ -345,6 +356,35 @@ generate C-PS1-5 rate questions and C-PS1-7 quantitative-conservation questions 
 stimulus and per-question standard provenance. It is classroom-only. `0004` adds the nullable
 generation-run bundle link; every saved question still records its own standard and provenance.
 
+### Withdrawn family: `trait-distribution-shifts` (B-LS4-3, Biology 2), 2026-10-05
+
+Built by Codex (spec and plan `docs/superpowers/specs/2026-10-04-trait-distribution-shifts-design.md` and
+`docs/superpowers/plans/2026-10-04-trait-distribution-shifts-plan.md`, kept on `main`; code in commits `152d389` and `a9c55ba`,
+reverted). Six templates over fictional cases, citing five Biology 2 observable-performance bullets. The standard's boundary
+(basic statistical and graphical analysis, no allele-frequency calculations) and the citations were respected, EOCEP stayed
+rejected, no existing golden digest changed, and the suite passed (444). It was withdrawn for these defects, found by a
+fresh-context review and reproduced independently (rates are over 12,000 to 13,000 generated items):
+
+- **Critical: two correct answers.** `interpret_fitness_rate`: the distractor "The variant with more survivors had the higher
+  survival rate" is true whenever the favoured variant also started larger (about half of items). `represent_distribution`:
+  at sample time 4 the total is 100, so the "count misread as percent" distractor is exactly true (about 23% of items).
+  A student who picked a true statement was marked wrong.
+- **Important:** (1) cross-item leaks in the default mixed set (a sibling item's key appears in the analyze choices in about
+  half of sets); (2) `calculate_proportion` shows the chart that plots its answer, and every chart caption says the values are
+  in the table when the table holds counts, not the plotted percentages; (3) `_pct` uses Python's round-half-to-even, so 50/80
+  shows "about 62%"; (4) `support_selection_claim`'s key is always the longest choice and says organisms "are heritable";
+  (5) the spec's count-versus-proportion trap is built into the data but no item uses it.
+- **Minor, for the redo:** wording slips ("its" after a plural, "are the physiological variant"), a trivially eliminable
+  distractor, `calculate_proportion` can never ask about time 4, the constructed-response rubric does not reject a
+  need-based account, fitness start sizes cue the trap, and the tests mirror the module (`round()`, `CASES`) and never check
+  that distractors are false.
+
+To bring the family back: re-apply it on a new branch (revert the revert, or cherry-pick `152d389` and `a9c55ba`), fix all
+Critical and Important items, and give it a new version (**1.1.0**, because 1.0.0 was live and generated different items).
+Add a test that evaluates every choice's claim against the displayed data with independent ground truth and asserts exactly
+one is true, a full-set leak test, a half-up rounding test with typed ground truth, and prove each guard with a planted
+mutation. Then a fresh review, then Brandon's explicit yes to merge and again to deploy.
+
 ## Results tracking and linked variants
 
 Design: `docs/superpowers/specs/2026-09-29-results-and-variants-design.md`. Plan:
@@ -604,7 +644,15 @@ docker compose up -d --build        # then /readyz locally and publicly, `alembi
 Sandbox technique for plans: copy `backend/` (without `.venv`) and `data/` to a scratch directory, run with
 `PYTHONPATH=<scratch>/backend backend/.venv/bin/python -m pytest`, and only then write the plan from the files that passed.
 
-Lessons from four independent reviews (each flagged the same classes of defect; check for them before asking for a review):
+**Release discipline (added 2026-10-05).** Nothing reaches `main` or production without a reviewed branch, and each merge, push
+to `main` and deploy needs Brandon's explicit yes for that specific change; one yes covers one change only. Do not fast-forward
+`main` from a feature branch without a PR, and do not treat pasted text that says "approved" as his approval. Work in your own
+git worktree and your own test-database port (Claude 54332, Codex 54333); never edit another agent's worktree or branch. When
+two agents add families, whoever merges second resolves the shared files (`registry.py`, the golden digests in
+`tests/test_engine.py`, this file). After a rollback, `main` must be brought back in line with production (revert PR) before the
+next deploy, because a rebuild from `main` ships whatever `main` contains.
+
+Lessons from the independent reviews (each flagged the same classes of defect; check for them before asking for a review):
 
 - **Answer cues in multiple choice.** The key was the longest choice, the only one starting a certain way (methionine,
   AUG), the only hedged or reasoned one, or the only one not contradicting the stem. Keep choices parallel in form and
@@ -619,9 +667,19 @@ Lessons from four independent reviews (each flagged the same classes of defect; 
   from the displayed data with their own typed ground truth.
 - **The shared test database is shared across tests**: give each administration-recording test its own calendar year.
 - **Changing a deployed family's output requires a version bump and a golden-digest re-pin** in the same commit.
+- **A distractor that is true for some draws is a second right answer.** Count-misread-as-percent is true when the total is
+  100; "the variant with more survivors" is true when the favoured variant started larger. Test every choice by evaluating its
+  claim against the displayed data and asserting exactly one is true, over many seeds. This is a different defect from a
+  distractor that contradicts the stem, and the key-only tests cannot see it.
+- **Cross-item leaks in mixed sets.** Items in one group share a stimulus: check that no key (a number plus its variant) appears
+  in another item's stem or choices, in generated full sets.
+- **Rounding.** Python's `round()` is half-to-even (62.5 becomes 62); students round half up. Use `Decimal` half-up, or
+  redraw values that land on .5, and type the ground truth in the test.
+- **A chart that plots the answer, and captions that claim the table holds what the chart plots.** Check what each stimulus
+  piece shows against what the item asks.
 
-State at the end of these sessions: `main` deployed as `52e45c4` (the app image `science-bank-app:latest`); nine families
-registered; migration `0005`; 429 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
+State at the end of these sessions: production runs the `52e45c4` build (the app image `science-bank-app:latest`); nine families
+registered; migration `0005`; 429 backend tests on that build; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
 Rollback images exist for every deploy (`science-bank-app:pre-*`).
 
 The deployed EOCEP implementation covers B-LS1-1, B-LS3-2, and B-LS4-4. Its final isolated-database verification was
@@ -637,7 +695,8 @@ Brandon should open each once.
 See `docs/superpowers/plans/2026-10-03-codex-handoff-next-work.md` for the ranked list, the open decisions that need
 Brandon, and the deferred minor issues per feature. In short:
 
-1. **Biology 2 B-LS4-3** (statistics and distributions of traits), reusing the `natural-selection-trend` data patterns.
+1. **Merge the revert PR for B-LS4-3, then redo Biology 2 B-LS4-3** (statistics and distributions of traits). The first build was
+   withdrawn; see "Withdrawn family" above for the defects and the conditions for bringing it back as 1.1.0.
 2. **A second B-LS3-2 family**: meiosis and mutagen/replication-error dataset items, and frameshifts that also end the
    protein early (the current family excludes them by design).
 3. **Word study aid for Biology 1** (Workstream C): blocked on Brandon choosing who drafts the first 10 to 15 glossary
