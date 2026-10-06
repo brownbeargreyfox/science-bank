@@ -25,19 +25,18 @@ paths.
 - Repository: `/home/brandon/apps/science-bank`
 - Remote: `https://github.com/brownbeargreyfox/science-bank.git`
 - Working branch: `main` (PR #2 merged as `c24ead0`)
-- **Production runs the `52e45c4` build, not a later `main` (2026-10-05).** The Biology 2 B-LS4-3 family
-  `trait-distribution-shifts` was merged to `main` as `a9c55ba` (fast-forwarded, no PR, no review) at 23:56 on 2026-10-04 and
-  deployed at 00:12 on 2026-10-05. A fresh-context review then found two answer-key defects, and Brandon had it rolled back.
-  Production now runs image `83e1f84ba44b` (the 14:05 build of `52e45c4`, tag
-  `science-bank-app:pre-trait-distribution-shifts-a9c55ba`, also tagged `latest`): nine families, migration `0005`,
-  `/readyz` 200 locally and publicly. The withdrawn build is kept as
-  `science-bank-app:withdrawn-trait-distribution-shifts-a9c55ba`. The rollback changed only the app container; the database
-  was not touched. No questions or generation runs were ever saved from the family (previews are not audited, so preview use
-  is unknown). One inert row remains: `question_families` still lists `trait-distribution-shifts 1.0.0`; the API reads
-  families from code, so nothing uses it. PR #10 reverted the withdrawn 1.0.0 code, but the 1.1.0 redo is now on `main` (merged
-  2026-10-05) and is **not deployed**: production still runs the `52e45c4` build without the family. **A rebuild from `main`
-  now ships `trait-distribution-shifts` 1.1.0**, so rebuild only with Brandon's explicit yes to deploy it. The first deploy of
-  1.1.0 will update the `question_families` row from 1.0.0 to 1.1.0. See "Withdrawn family" below.
+- Latest deploy: `2c5915c` (2026-10-05; merge of PR #11, `feat/bls4-3-redo`, no migration; migration remains `0005`): the Biology 2
+  B-LS4-3 family `trait-distribution-shifts` **1.1.0**, the rebuild after 1.0.0 was withdrawn (see "Withdrawn family"). Verified
+  live: `/readyz` 200 locally and publicly, app container healthy (image `7fd481e1d2db`), `alembic current` is
+  `0005_results_and_variants`, the log shows ten families synced, the database lists `trait-distribution-shifts 1.1.0` (the row
+  moved from 1.0.0), and a six-item set generated inside the container has exactly one correct choice in every
+  multiple-choice item. Not checked live: a signed-in Generate page for B-LS4-3 in a browser, the two-series line chart in a
+  browser or in print, and no questions have been saved from the family. Rollback: image
+  `science-bank-app:pre-trait-distribution-shifts-v110-2c5915c` (the `52e45c4` build, nine families); nothing in the database changed
+  beyond the family row. The withdrawn 1.0.0 build is kept as `science-bank-app:withdrawn-trait-distribution-shifts-a9c55ba`. If
+  rolling back, remember `main` contains the family, so a rebuild from `main` ships it again. Earlier on 2026-10-05 production was
+  rolled back from 1.0.0 (deployed unreviewed at 00:12, withdrawn the same morning, reverted by PR #10); no questions or
+  generation runs were ever saved from it.
 - Latest deploy: `52e45c4` (2026-10-04; merge of PR #8, `chore/eocep-cleanup`, no migration; migration remains `0005`):
   tests, docs and EOCEP data wording only. The first B-LS1-1 EOCEP prohibition now quotes the PDF (p. 4) and the
   differentiation requirement is complete; no generated question changed. Verified live: `/readyz` 200 locally and
@@ -390,8 +389,8 @@ mutation. Then a fresh review, then Brandon's explicit yes to merge and again to
 Status (2026-10-05): the redo was built and tested on `feat/bls4-3-redo` (independent tests recompute truth from the displayed
 tables; 462 backend tests). A fresh-context review found six Important issues (a support-stem leak, a missing rounding
 note in calculate-only sets, an unimplemented 3-point spacing rule, a per-clause-majority cue in the support item, an
-over-100 distractor, and leak tests that could not fail); all are fixed with tests that failed first. Merged to `main`;
-not deployed.
+over-100 distractor, and leak tests that could not fail); all are fixed with tests that failed first. Merged to `main` and deployed
+(2026-10-05, `2c5915c`).
 
 ## Results tracking and linked variants
 
@@ -686,8 +685,8 @@ Lessons from the independent reviews (each flagged the same classes of defect; c
 - **A chart that plots the answer, and captions that claim the table holds what the chart plots.** Check what each stimulus
   piece shows against what the item asks.
 
-State at the end of these sessions: production runs the `52e45c4` build (the app image `science-bank-app:latest`); nine families
-registered; migration `0005`; 429 backend tests on that build; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
+State at the end of these sessions: `main` deployed as `2c5915c` (the app image `science-bank-app:latest`); ten families
+registered; migration `0005`; 462 backend tests; frontend `npx tsc -b`, `npm run lint` and `npm run build` clean.
 Rollback images exist for every deploy (`science-bank-app:pre-*`).
 
 The deployed EOCEP implementation covers B-LS1-1, B-LS3-2, and B-LS4-4. Its final isolated-database verification was
@@ -703,9 +702,9 @@ Brandon should open each once.
 See `docs/superpowers/plans/2026-10-03-codex-handoff-next-work.md` for the ranked list, the open decisions that need
 Brandon, and the deferred minor issues per feature. In short:
 
-1. **Deploy Biology 2 B-LS4-3 (`trait-distribution-shifts` 1.1.0) when Brandon says so, and look at it once in a browser.** It is
-   merged to `main` (2026-10-05) after a fresh-context review and one fix pass, but not deployed. See "Withdrawn family" for
-   why 1.0.0 was pulled and `docs/superpowers/specs/2026-10-04-trait-distribution-shifts-design.md` for the design.
+1. **Look once, signed in, at Biology 2 B-LS4-3 on production** (Generate, six-item set, the two-series chart and its print view),
+   then have Nina use it in a real unit. `trait-distribution-shifts` 1.1.0 was deployed 2026-10-05 as `2c5915c`; see "Withdrawn
+   family" for why 1.0.0 was pulled and `docs/superpowers/specs/2026-10-04-trait-distribution-shifts-design.md` for the design.
 2. **A second B-LS3-2 family**: meiosis and mutagen/replication-error dataset items, and frameshifts that also end the
    protein early (the current family excludes them by design).
 3. **Word study aid for Biology 1** (Workstream C): blocked on Brandon choosing who drafts the first 10 to 15 glossary
